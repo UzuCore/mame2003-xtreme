@@ -962,36 +962,46 @@ static INTERRUPT_GEN( cps1_interrupt )
 	/* *only* game to have that. */
 	cpu_set_irq_line(0, 2, HOLD_LINE);
 
-	if(sf2_playing_street_fighter == true && fadingMusic == true) {
-		const float prospectiveVolume = fadeMusicVolume - 0.0048f;
-
+	if(sf2_playing_street_fighter && fadingMusic  && fadeMusicVolume != 0.0f) {
+		
+   const float prospectiveVolume = fadeMusicVolume - 0.0048f;
 		// We need to convert the volume level to int for the mame2003 sample sound system.
-		const int volume = (int) (prospectiveVolume * 100);
 
-		if (prospectiveVolume <= 0.2f)
+		if (prospectiveVolume <= 0.0f)
 		{
 			fadingMusic = false;
-         
-			//sample_stop(0);
-			//sample_stop(1);
+//			sample_stop(0);
+//			sample_stop(1);
 		}
 		else
 		{
 			fadeMusicVolume = prospectiveVolume;
-
-			if(sample_playing(0) == 0 && sample_playing(1) == 1) { // Right channel only. Lets make it play in both speakers.
+         int volume = (int) (fadeMusicVolume * 100);
+			if(sample_playing(0) == 0 && sample_playing(1) == 1 && fadingMusic ) { // Right channel only. Lets make it play in both speakers.
 				sample_set_stereo_volume(1, volume, volume);
 			}
-			else if(sample_playing(0) == 1 && sample_playing(1) == 0) { // Left channel only. Lets make it play in both speakers.
+			else if(sample_playing(0) == 1 && sample_playing(1) == 0 && fadingMusic) { // Left channel only. Lets make it play in both speakers.
 				sample_set_stereo_volume(0, volume, volume);
 			}
-			else if(sample_playing(0) == 1 && sample_playing(1) == 1) { // Both left and right channels. Lets make them play in there respective speakers.
+			else if(sample_playing(0) == 1 && sample_playing(1) == 1 && fadingMusic) { // Both left and right channels. Lets make them play in there respective speakers.
 				sample_set_stereo_volume(0, volume, 0);
 				sample_set_stereo_volume(1, 0, volume);
+         }
+			else if(sample_playing(0) == 0 && sample_playing(1) == 1 && !fadingMusic ) { // Right channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(1, 100, 100);
 			}
-
+			else if(sample_playing(0) == 1 && sample_playing(1) == 0 && !fadingMusic) { // Left channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(0, 100, 100);
+			}
+			else if(sample_playing(0) == 1 && sample_playing(1) == 1 && !fadingMusic) { // Both left and right channels. Lets make them play in there respective speakers.
+				sample_set_stereo_volume(0, 100, 0);
+				sample_set_stereo_volume(1, 0, 100);
+         }         
 		}
 	}
+
+
+
 }
 
 /********************************************************************
