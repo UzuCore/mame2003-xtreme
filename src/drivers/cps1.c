@@ -968,12 +968,12 @@ static INTERRUPT_GEN( cps1_interrupt )
 		// We need to convert the volume level to int for the mame2003 sample sound system.
 		const int volume = (int) (prospectiveVolume * 100);
 
-		if (prospectiveVolume <= 0.0f)
+		if (prospectiveVolume <= 0.2f)
 		{
 			fadingMusic = false;
-
-			sample_stop(0);
-			sample_stop(1);
+         
+			//sample_stop(0);
+			//sample_stop(1);
 		}
 		else
 		{
@@ -4495,7 +4495,7 @@ static void cps1_irq_handler_mus(int irq)
 static struct YM2151interface ym2151_interface =
 {
 	1,  /* 1 chip */
-	3579580,    /* 3.579580 MHz ? */
+	3579545,    /* 3.579580 MHz ? */
 	{ YM3012_VOL(35,MIXER_PAN_LEFT,35,MIXER_PAN_RIGHT) },
 	{ cps1_irq_handler_mus }
 };
@@ -4534,10 +4534,10 @@ static MACHINE_DRIVER_START( cps1 )
 	MDRV_CPU_MEMORY(cps1_readmem,cps1_writemem)
 	MDRV_CPU_VBLANK_INT(cps1_interrupt,1)
 
-	MDRV_CPU_ADD_TAG("sound", Z80, 4000000)	/* 4 MHz ??? TODO: find real FRQ */
+	MDRV_CPU_ADD_TAG("sound", Z80, 3579545)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_MEMORY(sound_readmem,sound_writemem)
-
+   MDRV_INTERLEAVE(100)
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
 
@@ -4609,7 +4609,7 @@ static MACHINE_DRIVER_START( qsound )
 	MDRV_CPU_MODIFY("main")
 	MDRV_CPU_VBLANK_INT(cps1_qsound_interrupt,1)  /* ??? interrupts per frame */
 
-	MDRV_CPU_REPLACE("sound", Z80, 6000000)
+	MDRV_CPU_REPLACE("sound", Z80, 8000000)
 	MDRV_CPU_FLAGS(0)	/* can't use CPU_AUDIO_CPU, slammast requires the Z80 for protection */
 	MDRV_CPU_MEMORY(qsound_readmem,qsound_writemem)
 	MDRV_CPU_PERIODIC_INT(irq0_line_hold,250)	/* ?? */
