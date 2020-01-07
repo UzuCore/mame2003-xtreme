@@ -656,8 +656,6 @@ static WRITE16_HANDLER( cps1_sound_command_w )
 			}
 			case 0x1a:
 			{
-				int a = 0;
-
 				sample_stop(0);
 				sample_stop(1);
 
@@ -707,8 +705,6 @@ static WRITE16_HANDLER( cps1_sound_command_w )
 			}
 			case 0x1f:
 			{
-				int a = 0;
-
 				sample_stop(0);
 				sample_stop(1);
 
@@ -858,8 +854,6 @@ static WRITE16_HANDLER( cps1_sound_command_w )
 			case 0x8d:
 			{
 				// there's no stop music command after the ending music plays for some of them so we have to make sure that we're still not stuck in fading mode
-				int a = 0;
-
 				sample_stop(0);
 				sample_stop(1);
 
@@ -962,36 +956,46 @@ static INTERRUPT_GEN( cps1_interrupt )
 	/* *only* game to have that. */
 	cpu_set_irq_line(0, 2, HOLD_LINE);
 
-	if(sf2_playing_street_fighter == true && fadingMusic == true) {
-		const float prospectiveVolume = fadeMusicVolume - 0.0048f;
-
+	if(sf2_playing_street_fighter && fadingMusic  && fadeMusicVolume != 0.0f) {
+		
+   const float prospectiveVolume = fadeMusicVolume - 0.0048f;
 		// We need to convert the volume level to int for the mame2003 sample sound system.
-		const int volume = (int) (prospectiveVolume * 100);
 
 		if (prospectiveVolume <= 0.0f)
 		{
 			fadingMusic = false;
-
-			sample_stop(0);
-			sample_stop(1);
+//			sample_stop(0);
+//			sample_stop(1);
 		}
 		else
 		{
 			fadeMusicVolume = prospectiveVolume;
-
-			if(sample_playing(0) == 0 && sample_playing(1) == 1) { // Right channel only. Lets make it play in both speakers.
+			int volume = (int) (fadeMusicVolume * 100);
+			if(sample_playing(0) == 0 && sample_playing(1) == 1 && fadingMusic ) { // Right channel only. Lets make it play in both speakers.
 				sample_set_stereo_volume(1, volume, volume);
 			}
-			else if(sample_playing(0) == 1 && sample_playing(1) == 0) { // Left channel only. Lets make it play in both speakers.
+			else if(sample_playing(0) == 1 && sample_playing(1) == 0 && fadingMusic) { // Left channel only. Lets make it play in both speakers.
 				sample_set_stereo_volume(0, volume, volume);
 			}
-			else if(sample_playing(0) == 1 && sample_playing(1) == 1) { // Both left and right channels. Lets make them play in there respective speakers.
+			else if(sample_playing(0) == 1 && sample_playing(1) == 1 && fadingMusic) { // Both left and right channels. Lets make them play in there respective speakers.
 				sample_set_stereo_volume(0, volume, 0);
 				sample_set_stereo_volume(1, 0, volume);
+         }
+			else if(sample_playing(0) == 0 && sample_playing(1) == 1 && !fadingMusic ) { // Right channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(1, 100, 100);
 			}
-
+			else if(sample_playing(0) == 1 && sample_playing(1) == 0 && !fadingMusic) { // Left channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(0, 100, 100);
+			}
+			else if(sample_playing(0) == 1 && sample_playing(1) == 1 && !fadingMusic) { // Both left and right channels. Lets make them play in there respective speakers.
+				sample_set_stereo_volume(0, 100, 0);
+				sample_set_stereo_volume(1, 0, 100);
+			}
 		}
 	}
+
+
+
 }
 
 /********************************************************************
@@ -4495,7 +4499,7 @@ static void cps1_irq_handler_mus(int irq)
 static struct YM2151interface ym2151_interface =
 {
 	1,  /* 1 chip */
-	3579580,    /* 3.579580 MHz ? */
+	3579545,    /* 3.579580 MHz ? */
 	{ YM3012_VOL(35,MIXER_PAN_LEFT,35,MIXER_PAN_RIGHT) },
 	{ cps1_irq_handler_mus }
 };
@@ -4534,10 +4538,10 @@ static MACHINE_DRIVER_START( cps1 )
 	MDRV_CPU_MEMORY(cps1_readmem,cps1_writemem)
 	MDRV_CPU_VBLANK_INT(cps1_interrupt,1)
 
-	MDRV_CPU_ADD_TAG("sound", Z80, 4000000)	/* 4 MHz ??? TODO: find real FRQ */
+	MDRV_CPU_ADD_TAG("sound", Z80, 3579545)
 	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
 	MDRV_CPU_MEMORY(sound_readmem,sound_writemem)
-
+   MDRV_INTERLEAVE(100)
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
 
@@ -4609,7 +4613,7 @@ static MACHINE_DRIVER_START( qsound )
 	MDRV_CPU_MODIFY("main")
 	MDRV_CPU_VBLANK_INT(cps1_qsound_interrupt,1)  /* ??? interrupts per frame */
 
-	MDRV_CPU_REPLACE("sound", Z80, 6000000)
+	MDRV_CPU_REPLACE("sound", Z80, 8000000)
 	MDRV_CPU_FLAGS(0)	/* can't use CPU_AUDIO_CPU, slammast requires the Z80 for protection */
 	MDRV_CPU_MEMORY(qsound_readmem,qsound_writemem)
 	MDRV_CPU_PERIODIC_INT(irq0_line_hold,250)	/* ?? */
