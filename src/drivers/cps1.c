@@ -656,8 +656,6 @@ static WRITE16_HANDLER( cps1_sound_command_w )
 			}
 			case 0x1a:
 			{
-				int a = 0;
-
 				sample_stop(0);
 				sample_stop(1);
 
@@ -707,8 +705,6 @@ static WRITE16_HANDLER( cps1_sound_command_w )
 			}
 			case 0x1f:
 			{
-				int a = 0;
-
 				sample_stop(0);
 				sample_stop(1);
 
@@ -858,8 +854,6 @@ static WRITE16_HANDLER( cps1_sound_command_w )
 			case 0x8d:
 			{
 				// there's no stop music command after the ending music plays for some of them so we have to make sure that we're still not stuck in fading mode
-				int a = 0;
-
 				sample_stop(0);
 				sample_stop(1);
 
@@ -976,7 +970,7 @@ static INTERRUPT_GEN( cps1_interrupt )
 		else
 		{
 			fadeMusicVolume = prospectiveVolume;
-         int volume = (int) (fadeMusicVolume * 100);
+			int volume = (int) (fadeMusicVolume * 100);
 			if(sample_playing(0) == 0 && sample_playing(1) == 1 && fadingMusic ) { // Right channel only. Lets make it play in both speakers.
 				sample_set_stereo_volume(1, volume, volume);
 			}
@@ -996,7 +990,7 @@ static INTERRUPT_GEN( cps1_interrupt )
 			else if(sample_playing(0) == 1 && sample_playing(1) == 1 && !fadingMusic) { // Both left and right channels. Lets make them play in there respective speakers.
 				sample_set_stereo_volume(0, 100, 0);
 				sample_set_stereo_volume(1, 0, 100);
-         }         
+			}
 		}
 	}
 
