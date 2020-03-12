@@ -764,3 +764,30 @@ bool retro_load_game_special(unsigned game_type, const struct retro_game_info *i
 void retro_cheat_reset(void){}
 void retro_cheat_set(unsigned unused, bool unused1, const char* unused2){}
 void retro_set_controller_port_device(unsigned in_port, unsigned device){}
+
+void mapper(void)
+{
+// this will map z x n m keys to  retropad lr mame uses this key for rotary joysticks and sometimes with buttons.
+static char buffer[100];
+struct InputPort *entry;
+struct InputPort *in;
+
+if (Machine->input_ports)
+   in = Machine->input_ports;
+
+   while (in->type != IPT_END)
+   {
+   if (input_port_name(in) != 0 && seq_get_1(&in->seq) != CODE_NONE && (in->type & ~IPF_MASK) != IPT_UNKNOWN && (in->type & ~IPF_MASK) != IPT_OSD_RESERVED)
+      {
+         if (seq_get_1(&in->seq) != CODE_DEFAULT)
+         {
+            seq_name(input_port_seq(in),       buffer,sizeof(buffer) );
+            if (buffer[0] == 'z') seq_set_1(&in->seq, JOYCODE_1_BUTTON5);
+            if (buffer[0] == 'x') seq_set_1(&in->seq, JOYCODE_1_BUTTON6);
+            if (buffer[0] == 'n') seq_set_1(&in->seq, JOYCODE_2_BUTTON5);
+            if (buffer[0] == 'm') seq_set_1(&in->seq, JOYCODE_2_BUTTON6);
+         }
+      }
+      in++;
+    }
+}
