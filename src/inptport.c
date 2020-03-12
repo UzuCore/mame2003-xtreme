@@ -27,7 +27,7 @@ static int default_player;
 static int analog_player_port[MAX_INPUT_PORTS];
 #endif /* MAME_NET */
 
-
+extern void mapper(void);
 
 /***************************************************************************
 
@@ -1636,7 +1636,7 @@ int load_input_port_settings(void)
 getout:
 		config_close(cfg);
 	}
-
+ mapper();
 	/* All analog ports need initialization */
 	{
 		int i;
