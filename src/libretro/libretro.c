@@ -44,27 +44,27 @@ void retro_set_input_state(retro_input_state_t cb) { input_cb = cb; }
 void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
-      { "mame2003-frameskip", "Frameskip; 0|1|2|3|4|5" },
-      { "mame2003-dcs-speedhack",
+      { "mame2003-xtreme-frameskip", "Frameskip; 0|1|2|3|4|5" },
+      { "mame2003-xtreme-dcs-speedhack",
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
          "MK2/MK3 DCS Speedhack; disabled|enabled"
 #else
          "MK2/MK3 DCS Speedhack; enabled|disabled"
 #endif
       },
-      { "mame2003-skip_disclaimer", "Skip Disclaimer; enabled|disabled" },
-      { "mame2003-skip_warnings", "Skip Warnings; disabled|enabled" },
-      { "mame2003-samples", "Samples; enabled|disabled" },
-      { "mame2003-sample_rate", "Sample Rate (KHz); 48000|8000|11025|22050|44100" },
-      { "mame2003-cheats", "Cheats; disabled|enabled" },
-      { "mame2003-dialsharexy", "Share 2 player dial controls across one X/Y device; disabled|enabled" },
+      { "mame2003-xtreme-skip_disclaimer", "Skip Disclaimer; enabled|disabled" },
+      { "mame2003-xtreme-skip_warnings", "Skip Warnings; disabled|enabled" },
+      { "mame2003-xtreme-samples", "Samples; enabled|disabled" },
+      { "mame2003-xtreme-sample_rate", "Sample Rate (KHz); 48000|8000|11025|22050|44100" },
+      { "mame2003-xtreme-cheats", "Cheats; disabled|enabled" },
+      { "mame2003-xtreme-dialsharexy", "Share 2 player dial controls across one X/Y device; disabled|enabled" },
 #if defined(__IOS__)
-      { "mame2003-mouse_device", "Mouse Device; pointer|mouse|disabled" },
+      { "mame2003-xtreme-mouse_device", "Mouse Device; pointer|mouse|disabled" },
 #else
-      { "mame2003-mouse_device", "Mouse Device; mouse|pointer|disabled" },
+      { "mame2003-xtreme-mouse_device", "Mouse Device; mouse|pointer|disabled" },
 #endif
-      { "mame2003-rstick_to_btns", "Right Stick to Buttons; enabled|disabled" },
-      { "mame2003-option_tate_mode", "TATE Mode; disabled|enabled" },
+      { "mame2003-xtreme-rstick_to_btns", "Right Stick to Buttons; enabled|disabled" },
+      { "mame2003-xtreme-option_tate_mode", "TATE Mode; disabled|enabled" },
       { NULL, NULL },
    };
    environ_cb = cb;
@@ -165,7 +165,7 @@ unsigned retro_api_version(void)
 
 void retro_get_system_info(struct retro_system_info *info)
 {
-   info->library_name = "MAME 2003";
+   info->library_name = "MAME 2003-xtreme";
 #ifndef GIT_VERSION
 #define GIT_VERSION ""
 #endif
@@ -194,13 +194,13 @@ static void update_variables(void)
    struct retro_variable var;
 
    var.value = NULL;
-   var.key = "mame2003-frameskip";
+   var.key = "mame2003-xtreme-frameskip";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
       frameskip = atoi(var.value);
 
    var.value = NULL;
-   var.key = "mame2003-dcs-speedhack";
+   var.key = "mame2003-xtreme-dcs-speedhack";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -213,7 +213,7 @@ static void update_variables(void)
       activate_dcs_speedhack = 0;
 
    var.value = NULL;
-   var.key = "mame2003-skip_disclaimer";
+   var.key = "mame2003-xtreme-skip_disclaimer";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -226,7 +226,7 @@ static void update_variables(void)
       skip_disclaimer = 0;
 
    var.value = NULL;
-   var.key = "mame2003-skip_warnings";
+   var.key = "mame2003-xtreme-skip_warnings";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -239,7 +239,7 @@ static void update_variables(void)
       skip_warnings = 0;
 
    var.value = NULL;
-   var.key = "mame2003-samples";
+   var.key = "mame2003-xtreme-samples";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -252,7 +252,7 @@ static void update_variables(void)
       samples = 0;
 
    var.value = NULL;
-   var.key = "mame2003-sample_rate";
+   var.key = "mame2003-xtreme-sample_rate";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -262,7 +262,7 @@ static void update_variables(void)
       options.samplerate = 48000;
 
    var.value = NULL;
-   var.key = "mame2003-cheats";
+   var.key = "mame2003-xtreme-cheats";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -275,7 +275,7 @@ static void update_variables(void)
       cheats = 0;
 
    var.value = NULL;
-   var.key = "mame2003-dialsharexy";
+   var.key = "mame2003-xtreme-dialsharexy";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -288,7 +288,7 @@ static void update_variables(void)
       dial_share_xy = 0;
 
    var.value = NULL;
-   var.key = "mame2003-mouse_device";
+   var.key = "mame2003-xtreme-mouse_device";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -303,7 +303,7 @@ static void update_variables(void)
       mouse_device = 0;
 
    var.value = NULL;
-   var.key = "mame2003-rstick_to_btns";
+   var.key = "mame2003-xtreme-rstick_to_btns";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -316,7 +316,7 @@ static void update_variables(void)
       rstick_to_btns = 0;
 
    var.value = NULL;
-   var.key = "mame2003-option_tate_mode";
+   var.key = "mame2003-xtreme-option_tate_mode";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
