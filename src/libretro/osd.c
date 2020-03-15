@@ -22,7 +22,7 @@
 extern char* systemDir;
 extern char* saveDir;
 extern char* romDir;
-const char* parentDir = "mame2003"; /* groups mame dirs together to avoid conflicts in shared dirs */
+const char* parentDir = "mame2003-xtreme"; /* groups mame dirs together to avoid conflicts in shared dirs */
 #if defined(_WIN32)
 char slash = '\\';
 #else
