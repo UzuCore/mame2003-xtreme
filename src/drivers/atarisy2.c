@@ -129,7 +129,7 @@
 #include "slapstic.h"
 #include "atarisy2.h"
 
-
+static UINT16 *rombank1, *rombank2;
 
 /*************************************
  *
@@ -306,9 +306,7 @@ static WRITE16_HANDLER( bankselect_w )
 	bankselect[offset] = newword;
 
 	base = &memory_region(REGION_CPU1)[bankoffset[(newword >> 10) & 0x3f]];
-
-	cpu_setbank(1 + offset, base);
-	activecpu_set_reg(T11_BANK2 + offset, base - OP_RAM);
+	memcpy(offset ? rombank2 : rombank1, base, 0x2000);
 }
 
 
@@ -519,7 +517,8 @@ static MEMORY_WRITE16_START( main_writemem )
 	{ 0x1780, 0x1781, atarisy2_yscroll_w, &atarigen_yscroll },
 	{ 0x1800, 0x1801, watchdog_reset16_w },
 	{ 0x2000, 0x3fff, atarisy2_videoram_w },
-	{ 0x4000, 0x7fff, MWA16_ROM },
+	{ 0x4000, 0x5fff, MWA16_BANK1,&rombank1  },
+	{ 0x6000, 0x7fff, MWA16_BANK2,&rombank2 },
 	{ 0x8000, 0x81ff, atarisy2_slapstic_w, &atarisy2_slapstic },
 	{ 0x8200, 0xffff, MWA16_ROM },
 MEMORY_END
