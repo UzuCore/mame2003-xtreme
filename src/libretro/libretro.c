@@ -781,11 +781,23 @@ if (Machine->input_ports)
       {
          if (seq_get_1(&in->seq) != CODE_DEFAULT)
          {
-            seq_name(input_port_seq(in),       buffer,sizeof(buffer) );
+            //seq_name(input_port_seq(in),       buffer,sizeof(buffer) );
+            //map non default z n n m mappings in drivers to retropad l/r
             if (buffer[0] == 'z') seq_set_1(&in->seq, JOYCODE_1_BUTTON5);
             if (buffer[0] == 'x') seq_set_1(&in->seq, JOYCODE_1_BUTTON6);
             if (buffer[0] == 'n') seq_set_1(&in->seq, JOYCODE_2_BUTTON5);
             if (buffer[0] == 'm') seq_set_1(&in->seq, JOYCODE_2_BUTTON6);
+             //map non default pedal mappings in drivers to retropad l/r
+            if(strcmp(input_port_name(in), "P1 Pedal 1") == 0)  seq_set_1(&in->seq, JOYCODE_1_BUTTON6);
+            if(strcmp(input_port_name(in), "P1 Pedal 2") == 0)  seq_set_1(&in->seq, JOYCODE_1_BUTTON5);
+            if(strcmp(input_port_name(in), "P2 Pedal 1") == 0)  seq_set_1(&in->seq, JOYCODE_2_BUTTON6);
+            if(strcmp(input_port_name(in), "P2 Pedal 2") == 0)  seq_set_1(&in->seq, JOYCODE_2_BUTTON5);
+            if(strcmp(input_port_name(in), "P3 Pedal 1") == 0)  seq_set_1(&in->seq, JOYCODE_3_BUTTON6);
+            if(strcmp(input_port_name(in), "P3 Pedal 2") == 0)  seq_set_1(&in->seq, JOYCODE_3_BUTTON5);
+            //map polpos pos gear change to button1
+            if(strcmp(input_port_name(in), "Gear Change") == 0 && )  seq_set_1(&in->seq, JOYCODE_1_BUTTON1);
+	    
+             	
          }
       }
       in++;
