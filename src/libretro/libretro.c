@@ -777,7 +777,7 @@ if (Machine->input_ports)
 
    while (in->type != IPT_END)
    {
-   if (input_port_name(in) != 0 && seq_get_1(&in->seq) != CODE_NONE && (in->type & ~IPF_MASK) != IPT_UNKNOWN && (in->type & ~IPF_MASK) != IPT_OSD_RESERVED)
+      if (input_port_name(in) != 0 && seq_get_1(&in->seq) != CODE_NONE && (in->type & ~IPF_MASK) != IPT_UNKNOWN && (in->type & ~IPF_MASK) != IPT_OSD_RESERVED)
       {
          if (seq_get_1(&in->seq) != CODE_DEFAULT)
          {
@@ -795,9 +795,7 @@ if (Machine->input_ports)
             if(strcmp(input_port_name(in), "P3 Pedal 1") == 0)  seq_set_1(&in->seq, JOYCODE_3_BUTTON6);
             if(strcmp(input_port_name(in), "P3 Pedal 2") == 0)  seq_set_1(&in->seq, JOYCODE_3_BUTTON5);
             //map polpos pos gear change to button1
-            if(strcmp(input_port_name(in), "Gear Change") == 0 && )  seq_set_1(&in->seq, JOYCODE_1_BUTTON1);
-	    
-             	
+            if(strcmp(input_port_name(in), "Gear Change") == 0)  seq_set_1(&in->seq, JOYCODE_1_BUTTON1);
          }
       }
       in++;
