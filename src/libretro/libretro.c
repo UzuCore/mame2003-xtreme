@@ -793,7 +793,7 @@ if (Machine->input_ports)
       {
          if (seq_get_1(&in->seq) != CODE_DEFAULT)
          {
-            //seq_name(input_port_seq(in),       buffer,sizeof(buffer) );
+            seq_name(input_port_seq(in),       buffer,sizeof(buffer) );
             //map non default z n n m mappings in drivers to retropad l/r
             if (buffer[0] == 'z') seq_set_1(&in->seq, JOYCODE_1_BUTTON5);
             if (buffer[0] == 'x') seq_set_1(&in->seq, JOYCODE_1_BUTTON6);
