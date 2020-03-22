@@ -65,6 +65,7 @@ void retro_set_environment(retro_environment_t cb)
 #endif
       { "mame2003-xtreme-rstick_to_btns", "Right Stick to Buttons; enabled|disabled" },
       { "mame2003-xtreme-option_tate_mode", "TATE Mode; disabled|enabled" },
+      { "mame2003-xtreme-use_artwork", "Artwork; disabled|enabled" },
       { NULL, NULL },
    };
    environ_cb = cb;
@@ -571,7 +572,7 @@ bool retro_load_game(const struct retro_game_info *game)
         options.skip_warnings = skip_warnings;
         options.use_samples = samples;
         options.cheat = cheats;
-
+        options.use_artwork = ~0;
         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
         // Boot the emulator
