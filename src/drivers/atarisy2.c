@@ -129,7 +129,7 @@
 #include "slapstic.h"
 #include "atarisy2.h"
 
-
+static UINT16 *rombank1, *rombank2;
 
 /*************************************
  *
@@ -306,9 +306,7 @@ static WRITE16_HANDLER( bankselect_w )
 	bankselect[offset] = newword;
 
 	base = &memory_region(REGION_CPU1)[bankoffset[(newword >> 10) & 0x3f]];
-
-	cpu_setbank(1 + offset, base);
-	activecpu_set_reg(T11_BANK2 + offset, base - OP_RAM);
+	memcpy(offset ? rombank2 : rombank1, base, 0x2000);
 }
 
 
@@ -381,10 +379,90 @@ static READ_HANDLER( leta_r )
 {
     if (pedal_count == -1)   /* 720 */
 	{
+		const int pos_values[]={0x00,0x12,0x24,0x34,0x48,0x5a,0x6c,0x7c };	// 8 dpad directions
+		static int old_position = 0, old_angle = 90;
+		static int num_rotations = 0;
+		int current_angle = 0, current_position = 0;
+		int aj_x, aj_y, aj_delta = 0;
+		int dial_val;
+		int djoy_val;
+		
 		switch (offset & 3)
 		{
-			case 0: return readinputport(7) >> 8;
-			case 1: return readinputport(7) & 0xff;
+			case 0:
+				// return readinputport(7) >> 8; // ORIGINAL LINE
+				// <jake>
+				// dial_val = readinputport(8) & 0xff;
+				// </jake>
+				/* check spinner (original controller) */
+				if ( (dial_val = readinputport(8) & 0xff) )
+				{											// once dial is used, you almost need to restart
+					return dial_val;						// mame to not use dial!!!
+				}
+				if ( (djoy_val = readinputport(15)) )
+				{
+					return (djoy_val == 1) ? 0xff : 0;		// returns 0 if djoy_val <> 1
+				}
+
+				aj_x = (readinputport(13) & 0xff) - 128;
+				aj_y = (readinputport(14) & 0xff) - 128;
+				if ( aj_x || aj_y )
+					current_angle = atan2(aj_x,aj_y) * 360 / (2*M_PI);	// dang radians!
+				else													// 0 degrees is straight up
+					current_angle = old_angle;
+
+				/* original controller had two gaps 10 degrees apart, each 2.5 degrees wide */
+				if ( ((current_angle > -6)&&(current_angle < 6)) && ((current_angle < -2)||(current_angle > 2)) )
+					return 0xff;
+				// else
+				return 0;
+			case 1:
+				/* check original controller (spinner) */
+				if ( (dial_val = readinputport(7) & 0xff) )
+				{											// once dial is used, you almost need to restart
+					return dial_val;						// mame to not use dial!!!
+				}
+				/* if no spinner data, check 8way controller */
+				if ( (djoy_val = readinputport(15)) )
+				{
+					switch (djoy_val)						// not sure if this will "360"
+					{
+						case 0x01: return pos_values[0];
+						case 0x03: return pos_values[1];
+						case 0x02: return pos_values[2];
+						case 0x06: return pos_values[3];
+						case 0x04: return pos_values[4];
+						case 0x0c: return pos_values[5];
+						case 0x08: return pos_values[6];
+						case 0x09: return pos_values[7];
+					}
+				}
+				/* if no spinner or 8way data, check analog joystick */
+				aj_x = (readinputport(13) & 0xff) - 128;
+				aj_y = (readinputport(14) & 0xff) - 128;
+				if ( aj_x || aj_y )
+					current_angle = atan2(aj_x,aj_y) * 360 / (2*M_PI);	// dang radians!
+				else													// 0 degrees is straight up
+					current_angle = old_angle;
+				
+				// need this to figure the "straight up number"
+				// since 144 == once rotation, and input values range from 0 to 256
+				if (current_angle > 90 && old_angle < -90)
+					num_rotations--;
+				else if (current_angle < -90 && old_angle > 90)
+					num_rotations++;
+				
+				aj_delta = current_angle * 144/360;			/* convert from degrees to one game rotation */
+				current_position = ((144 * num_rotations) + aj_delta) & 0xff;
+											/* part before "+" figures the "straight up number" */
+		 									/* part after "+" adds/subs the angle from zero then masks */
+				if (old_position != current_position)
+				{
+					old_position = current_position;
+					old_angle = current_angle;
+				}
+
+				return current_position;
 			case 2: return 0xff;
 			case 3: return 0xff;
 		}
@@ -519,7 +597,8 @@ static MEMORY_WRITE16_START( main_writemem )
 	{ 0x1780, 0x1781, atarisy2_yscroll_w, &atarigen_yscroll },
 	{ 0x1800, 0x1801, watchdog_reset16_w },
 	{ 0x2000, 0x3fff, atarisy2_videoram_w },
-	{ 0x4000, 0x7fff, MWA16_ROM },
+	{ 0x4000, 0x5fff, MWA16_BANK1,&rombank1  },
+	{ 0x6000, 0x7fff, MWA16_BANK2,&rombank2 },
 	{ 0x8000, 0x81ff, atarisy2_slapstic_w, &atarisy2_slapstic },
 	{ 0x8200, 0xffff, MWA16_ROM },
 MEMORY_END
