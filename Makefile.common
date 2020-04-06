@@ -247,6 +247,7 @@ SOUNDS+=SP0250@
 SOUNDS+=SCSP@
 SOUNDS+=YMF271@
 SOUNDS+=PSXSPU@
+SOUNDS+=ICS2115@
 
 SOURCES_C += $(CORE_DIR)/drivers/pacman.c \
 				 $(CORE_DIR)/machine/mspacman.c \
@@ -2593,6 +2594,13 @@ else
 SOUNDDEFS += -DHAS_YMF271=0
 endif
 
+SOUND=$(strip $(findstring ICS2115@,$(SOUNDS)))
+ifneq ($(SOUND),)
+SOUNDDEFS += -DHAS_ICS2115=1
+SOURCES_C += $(CORE_DIR)/sound/ics2115.c
+else
+SOUNDDEFS += -DHAS_ICS2115=0
+endif
 ifeq ($(STATIC_LINKING),1)
 else
 SOURCES_C += $(CORE_DIR)/../deps/zlib/adler32.c \
