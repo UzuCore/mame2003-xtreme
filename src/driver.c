@@ -5209,12 +5209,26 @@ Other Sun games
 	DRIVER( orlegend )	/* (c) 1997 */
 	DRIVER( orlegnde )	/* (c) 1997 */
 	DRIVER( orlegndc )	/* (c) 1997 */
+	DRIVER( olds )      /* (c) 1998 */
+	DRIVER( olds103t )  /* (c) 1998 */
 	DRIVER( dragwld2 )	/* (c) 1997 */
+	DRIVER( killbld )	/* (c) 1998 */
 	DRIVER( kov )		/* (c) 1999 */
 	DRIVER( kovplus )	/* (c) 1999 */
 	DRIVER( kov115 )	/* (c) 1999 */
 	DRIVER( kovsh )		/* (c) 1999 */
 	DRIVER( photoy2k )	/* (c) 1999 */
+	DRIVER( puzlstar )  /* (c) 1999 */
+	
+	/* Cave PGM System Games */
+	DRIVER( ket )
+	DRIVER( keta )
+	DRIVER( ketb )
+	DRIVER( ddp3 )
+	DRIVER( ddp3a )
+	DRIVER( ddp3b )
+	DRIVER( ddp3blk )
+	DRIVER( espgal )
 
 	/* RamTek games */
 	DRIVER( hitme )		/* [1976 Ramtek] */

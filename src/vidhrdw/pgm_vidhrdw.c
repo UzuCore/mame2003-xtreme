@@ -6,7 +6,7 @@
 extern data16_t *pgm_mainram, *pgm_bg_videoram, *pgm_tx_videoram, *pgm_videoregs, *pgm_rowscrollram;
 static struct tilemap *pgm_tx_tilemap, *pgm_bg_tilemap;
 static UINT16 *sprite_bitmap;
-static data16_t *pgm_spritebufferram; // buffered spriteram
+static data16_t *pgm_spritebufferram; /* buffered spriteram*/
 
 extern data8_t *pgm_sprite_a_region;   /* = memory_region       ( REGION_GFX4 ); */
 extern size_t	pgm_sprite_a_region_allocate;
@@ -32,7 +32,7 @@ static void pgm_drawsprite(int wide, int high, int xpos, int ypos, int palt, int
 	aoffset = (bdata[(boffset+3) & bdatasize] << 24) | (bdata[(boffset+2) & bdatasize] << 16) | (bdata[(boffset+1) & bdatasize] << 8) | (bdata[(boffset+0) & bdatasize] << 0);
 	aoffset = aoffset >> 2; aoffset *= 3;
 
-// 	if(aoffset)	logerror ("aoffset %08x boffset %08x\n",aoffset,boffset);
+/* 	if(aoffset)	logerror ("aoffset %08x boffset %08x\n",aoffset,boffset);*/
 
 	boffset += 4; /* because the first dword is the a data offset */
 	if (!(flip & 0x02)) { /* NO Y FLIP */
@@ -173,7 +173,8 @@ static void pgm_drawsprites(int priority)
 	   wwww wwwh hhhh hhhh
 	*/
 
-	const UINT16 *finish = pgm_spritebufferram+0xa00;
+	/* const UINT16 *finish = pgm_spritebufferram+0xa00; */
+	const UINT16 *finish = pgm_spritebufferram+(0xa00/2);
 	int y;
 
 	/* clear the sprite bitmap */
@@ -184,12 +185,12 @@ static void pgm_drawsprites(int priority)
 	{
 		int xpos = pgm_sprite_source[0] & 0x07ff;
 		int ypos = pgm_sprite_source[1] & 0x03ff;
-//		int xzom = (pgm_sprite_source[0] & 0xf800) >> 11;
-//		int yzom = (pgm_sprite_source[1] & 0xf800) >> 11;
+/*		int xzom = (pgm_sprite_source[0] & 0xf800) >> 11;*/
+/*		int yzom = (pgm_sprite_source[1] & 0xf800) >> 11;*/
 		int palt = (pgm_sprite_source[2] & 0x1f00) >> 8;
 		int flip = (pgm_sprite_source[2] & 0x6000) >> 13;
 		int boff = ((pgm_sprite_source[2] & 0x007f) << 16) | (pgm_sprite_source[3] & 0xffff);
-		int wide = (pgm_sprite_source[4] & 0xfe00) >> 9;
+		int wide = (pgm_sprite_source[4] & 0x7e00) >> 9;/* Killing Blade*/
 		int high = pgm_sprite_source[4] & 0x01ff;
 		int pri = (pgm_sprite_source[2] & 0x0080) >>  7;
 
@@ -235,7 +236,7 @@ static void get_pgm_tx_tilemap_tile_info(int tile_index)
 	p = palette
 	f = flip
 */
-	int tileno,colour,flipyx; //,game;
+	int tileno,colour,flipyx; /*,game;*/
 
 	tileno = pgm_tx_videoram[tile_index *2] & 0xffff;
 	colour = (pgm_tx_videoram[tile_index*2+1] & 0x3e) >> 1;
@@ -280,9 +281,11 @@ VIDEO_START( pgm )
 	pgm_tx_tilemap= tilemap_create(get_pgm_tx_tilemap_tile_info,tilemap_scan_rows,TILEMAP_TRANSPARENT, 8, 8,64,32);
 	tilemap_set_transparent_pen(pgm_tx_tilemap,15);
 
-	pgm_bg_tilemap = tilemap_create(get_pgm_bg_tilemap_tile_info,tilemap_scan_rows,TILEMAP_TRANSPARENT, 32, 32,64,64);
+/*	pgm_bg_tilemap = tilemap_create(get_pgm_bg_tilemap_tile_info,tilemap_scan_rows,TILEMAP_TRANSPARENT, 32, 32,64,64); */
+	pgm_bg_tilemap = tilemap_create(get_pgm_bg_tilemap_tile_info,tilemap_scan_rows,TILEMAP_TRANSPARENT, 32, 32,64,16);
 	tilemap_set_transparent_pen(pgm_bg_tilemap,31);
-	tilemap_set_scroll_rows(pgm_bg_tilemap,64*32);
+/*	tilemap_set_scroll_rows(pgm_bg_tilemap,64*32); */
+	tilemap_set_scroll_rows(pgm_bg_tilemap,16*32);
 
 	pgm_spritebufferram = auto_malloc (0xa00);
 
@@ -311,8 +314,9 @@ VIDEO_UPDATE( pgm )
 	tilemap_set_scrolly(pgm_bg_tilemap,0, pgm_videoregs[0x2000/2]);
 
 	for (y = 0; y < 224; y++)
-		tilemap_set_scrollx(pgm_bg_tilemap,(y+pgm_videoregs[0x2000/2])&0x7ff, pgm_videoregs[0x3000/2]+pgm_rowscrollram[y]);
-
+		/*tilemap_set_scrollx(pgm_bg_tilemap,(y+pgm_videoregs[0x2000/2])&0x7ff, pgm_videoregs[0x3000/2]+pgm_rowscrollram[y]); */
+        tilemap_set_scrollx(pgm_bg_tilemap,(y+pgm_videoregs[0x2000/2])&0x1ff, pgm_videoregs[0x3000/2]+pgm_rowscrollram[y]);
+	
 	tilemap_draw(bitmap,cliprect,pgm_bg_tilemap,0,0);
 
 	pgm_drawsprites(0);
@@ -321,7 +325,7 @@ VIDEO_UPDATE( pgm )
 		draw_scanline16(bitmap, 0, y, 448, &sprite_bitmap[y * (448+32+32)+32], Machine->pens, 0x400);
 
 	tilemap_set_scrolly(pgm_tx_tilemap,0, pgm_videoregs[0x5000/2]);
-	tilemap_set_scrollx(pgm_tx_tilemap,0, pgm_videoregs[0x6000/2]); // Check
+	tilemap_set_scrollx(pgm_tx_tilemap,0, pgm_videoregs[0x6000/2]); /* Check*/
 	tilemap_draw(bitmap,cliprect,pgm_tx_tilemap,0,0);
 }
 

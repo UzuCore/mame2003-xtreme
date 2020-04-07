@@ -179,6 +179,9 @@ struct MachineSound
 #if (HAS_YMF271)
 #include "sound/ymf271.h"
 #endif
+#if (HAS_ICS2115)
+#include "sound/ics2115.h"
+#endif
 
 #ifdef MESS
 #if (HAS_BEEP)
@@ -385,6 +388,10 @@ enum
 #if (HAS_YMF271)
 	SOUND_YMF271,
 #endif
+#if (HAS_ICS2115)
+	SOUND_ICS2115,
+#endif
+
 
 #ifdef MESS
 #if (HAS_BEEP)
