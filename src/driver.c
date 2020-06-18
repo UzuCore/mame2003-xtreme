@@ -2481,6 +2481,12 @@ V-V                           TP-027
 	DRIVER( sftmj )		/* (c) 1995 Capcom/Incredible Technologies */
 	DRIVER( shufshot )	/* (c) Strata/Incredible Technologies */
 	DRIVER( sshot137 )	/* (c) Strata/Incredible Technologies */
+	DRIVER( gt3d )      /* (c) 1995 Incredible Technologies */
+	DRIVER( gt97 )      /* (c) 1997 Incredible Technologies */
+	DRIVER( gt98 )      /* (c) 1998 Incredible Technologies */
+	DRIVER( gt99 )      /* (c) 1999 Incredible Technologies */
+	DRIVER( gt2k )      /* (c) 2000 Incredible Technologies */
+	DRIVER( gtclassc )  /* (c) 2001 Incredible Technologies */
 
 	/* Leland games */
 	DRIVER( cerberus )	/* (c) 1985 Cinematronics */
@@ -4917,6 +4923,13 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( myangel2 )	/* (c) 1997 Namco */
 	DRIVER( pzlbowl )	/* (c) 1999 Nihon System / Moss */
 	DRIVER( penbros )	/* (c) 2000 Subsino */
+	DRIVER( deerhunt  ) /* (c) 2000 American Sammy */
+	DRIVER( deerhunta ) /* (c) 2000 American Sammy */
+	DRIVER( deerhuntb ) /* (c) 2000 American Sammy */
+	DRIVER( turkhunt )  /* (c) 2001 American Sammy */
+	DRIVER( wschamp )   /* (c) 2001 American Sammy */
+	DRIVER( wschampa )  /* (c) 2001 American Sammy */
+	DRIVER( trophyh )   /* (c) 2002 American Sammy */
 
 	/* SSV System (Seta, Sammy, Visco) games */
 	DRIVER( srmp4 )		/* (c) 1993 Seta */
@@ -5209,12 +5222,26 @@ Other Sun games
 	DRIVER( orlegend )	/* (c) 1997 */
 	DRIVER( orlegnde )	/* (c) 1997 */
 	DRIVER( orlegndc )	/* (c) 1997 */
+	DRIVER( olds )      /* (c) 1998 */
+	DRIVER( olds103t )  /* (c) 1998 */
 	DRIVER( dragwld2 )	/* (c) 1997 */
+	DRIVER( killbld )	/* (c) 1998 */
 	DRIVER( kov )		/* (c) 1999 */
 	DRIVER( kovplus )	/* (c) 1999 */
 	DRIVER( kov115 )	/* (c) 1999 */
 	DRIVER( kovsh )		/* (c) 1999 */
 	DRIVER( photoy2k )	/* (c) 1999 */
+	DRIVER( puzlstar )  /* (c) 1999 */
+	
+	/* Cave PGM System Games */
+	DRIVER( ket )
+	DRIVER( keta )
+	DRIVER( ketb )
+	DRIVER( ddp3 )
+	DRIVER( ddp3a )
+	DRIVER( ddp3b )
+	DRIVER( ddp3blk )
+	DRIVER( espgal )
 
 	/* RamTek games */
 	DRIVER( hitme )		/* [1976 Ramtek] */
