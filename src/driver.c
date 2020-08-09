@@ -2481,6 +2481,12 @@ V-V                           TP-027
 	DRIVER( sftmj )		/* (c) 1995 Capcom/Incredible Technologies */
 	DRIVER( shufshot )	/* (c) Strata/Incredible Technologies */
 	DRIVER( sshot137 )	/* (c) Strata/Incredible Technologies */
+	DRIVER( gt3d )      /* (c) 1995 Incredible Technologies */
+	DRIVER( gt97 )      /* (c) 1997 Incredible Technologies */
+	DRIVER( gt98 )      /* (c) 1998 Incredible Technologies */
+	DRIVER( gt99 )      /* (c) 1999 Incredible Technologies */
+	DRIVER( gt2k )      /* (c) 2000 Incredible Technologies */
+	DRIVER( gtclassc )  /* (c) 2001 Incredible Technologies */
 
 	/* Leland games */
 	DRIVER( cerberus )	/* (c) 1985 Cinematronics */
@@ -4917,6 +4923,13 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	DRIVER( myangel2 )	/* (c) 1997 Namco */
 	DRIVER( pzlbowl )	/* (c) 1999 Nihon System / Moss */
 	DRIVER( penbros )	/* (c) 2000 Subsino */
+	DRIVER( deerhunt  ) /* (c) 2000 American Sammy */
+	DRIVER( deerhunta ) /* (c) 2000 American Sammy */
+	DRIVER( deerhuntb ) /* (c) 2000 American Sammy */
+	DRIVER( turkhunt )  /* (c) 2001 American Sammy */
+	DRIVER( wschamp )   /* (c) 2001 American Sammy */
+	DRIVER( wschampa )  /* (c) 2001 American Sammy */
+	DRIVER( trophyh )   /* (c) 2002 American Sammy */
 
 	/* SSV System (Seta, Sammy, Visco) games */
 	DRIVER( srmp4 )		/* (c) 1993 Seta */
