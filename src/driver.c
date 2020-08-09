@@ -5243,6 +5243,9 @@ Other Sun games
 	DRIVER( ddp3blk )
 	DRIVER( espgal )
 
+	/* Sega Model 1 Hardware */	
+	DRIVER( vf )
+	
 	/* RamTek games */
 	DRIVER( hitme )		/* [1976 Ramtek] */
 	DRIVER( mblkjack )	/* [197? Mirco] */
