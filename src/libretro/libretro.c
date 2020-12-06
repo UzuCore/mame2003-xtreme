@@ -47,6 +47,8 @@ bool retro_audio_buff_active        = false;
 unsigned retro_audio_buff_occupancy = 0;
 bool retro_audio_buff_underrun      = false;
 
+int frameskip;
+int frameskip_init_status            = 0;
 static void retro_audio_buff_status_cb(
       bool active, unsigned occupancy, bool underrun_likely)
 {
@@ -57,7 +59,7 @@ static void retro_audio_buff_status_cb(
 
 static void retro_set_audio_buff_status_cb(void)
 {
-   if (1) //just leave is set as always on automatic for now add core options if you want more choice
+   if (frameskip) 
    {
       struct retro_audio_buffer_status_callback buf_status_cb;
 
@@ -71,18 +73,21 @@ static void retro_set_audio_buff_status_cb(void)
          retro_audio_buff_active    = false;
          retro_audio_buff_occupancy = 0;
          retro_audio_buff_underrun  = false;
+         frameskip_init_status = -1;
       }
-      else            log_cb(RETRO_LOG_INFO, "Frameskip Enabled\n");
+      else
+      log_cb(RETRO_LOG_INFO, "Frameskip Enabled\n");
    }
    else
       environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK,
             NULL);
+	if (frameskip_init_status != -1)   frameskip_init_status = frameskip;	
 }
 
 void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
-      { "mame2003-xtreme-frameskip", "Frameskip; 0|1|2|3|4|5" },
+      { "mame2003-xtreme-frameskip", "Auto Frameskip; enabled|disabled" },
       { "mame2003-xtreme-dcs-speedhack",
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
          "MK2/MK3 DCS Speedhack; disabled|enabled"
@@ -219,7 +224,6 @@ void retro_get_system_info(struct retro_system_info *info)
 
 int sample_rate;
 
-int frameskip;
 int gotFrame;
 unsigned skip_disclaimer = 0;
 unsigned skip_warnings = 0;
@@ -239,7 +243,14 @@ static void update_variables(void)
    var.key = "mame2003-xtreme-frameskip";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
-      frameskip = atoi(var.value);
+   {
+      if(strcmp(var.value, "enabled") == 0)
+	      frameskip = 1;
+	  else
+	  frameskip = 0;
+   if (frameskip_init_status !=- 1 && frameskip != frameskip_init_status)
+      retro_set_audio_buff_status_cb();
+   }  
 
    var.value = NULL;
    var.key = "mame2003-xtreme-dcs-speedhack";
@@ -415,8 +426,7 @@ void retro_init (void)
       log_cb = log.log;
    else
       log_cb = NULL;
-
-   retro_set_audio_buff_status_cb();
+   
 #ifdef LOG_PERFORMANCE
    environ_cb(RETRO_ENVIRONMENT_GET_PERF_INTERFACE, &perf_cb);
 #endif
