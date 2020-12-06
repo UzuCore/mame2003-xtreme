@@ -372,24 +372,20 @@ static void frame_convert(struct mame_display *display)
 }
 
 
-const int frameskip_table[12][12] =
-   { { 0,0,0,0,0,0,0,0,0,0,0,0 },
-     { 0,0,0,0,0,0,0,0,0,0,0,1 },
-     { 0,0,0,0,0,1,0,0,0,0,0,1 },
-     { 0,0,0,1,0,0,0,1,0,0,0,1 },
-     { 0,0,1,0,0,1,0,0,1,0,0,1 },
-     { 0,1,0,0,1,0,1,0,0,1,0,1 },
-     { 0,1,0,1,0,1,0,1,0,1,0,1 },
-     { 0,1,0,1,1,0,1,0,1,1,0,1 },
-     { 0,1,1,0,1,1,0,1,1,0,1,1 },
-     { 0,1,1,1,0,1,1,1,0,1,1,1 },
-     { 0,1,1,1,1,1,0,1,1,1,1,1 },
-     { 0,1,1,1,1,1,1,1,1,1,1,1 } };
+extern bool retro_audio_buff_underrun;
+extern bool retro_audio_buff_active;
+unsigned retro_audio_buff_occupancy; // not used atm unless you add frameskip core options 
 
 int osd_skip_this_frame(void)
 {
-   static unsigned frameskip_counter = 0;
-   return frameskip_table[frameskip][frameskip_counter++ % 12];
+	static unsigned frameskip_counter = 0;
+    if ( retro_audio_buff_active && retro_audio_buff_underrun )
+    {
+		frameskip_counter ++;
+		if (frameskip_counter < 30) { frameskip_counter = 0; return 0; }
+		return 1;
+    }
+	return 0;
 }
 
 void osd_update_video_and_audio(struct mame_display *display)
