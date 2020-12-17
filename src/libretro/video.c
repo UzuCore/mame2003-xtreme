@@ -372,24 +372,32 @@ static void frame_convert(struct mame_display *display)
 }
 
 
-const int frameskip_table[12][12] =
-   { { 0,0,0,0,0,0,0,0,0,0,0,0 },
-     { 0,0,0,0,0,0,0,0,0,0,0,1 },
-     { 0,0,0,0,0,1,0,0,0,0,0,1 },
-     { 0,0,0,1,0,0,0,1,0,0,0,1 },
-     { 0,0,1,0,0,1,0,0,1,0,0,1 },
-     { 0,1,0,0,1,0,1,0,0,1,0,1 },
-     { 0,1,0,1,0,1,0,1,0,1,0,1 },
-     { 0,1,0,1,1,0,1,0,1,1,0,1 },
-     { 0,1,1,0,1,1,0,1,1,0,1,1 },
-     { 0,1,1,1,0,1,1,1,0,1,1,1 },
-     { 0,1,1,1,1,1,0,1,1,1,1,1 },
-     { 0,1,1,1,1,1,1,1,1,1,1,1 } };
+extern bool retro_audio_buff_underrun;
+extern bool retro_audio_buff_active;
+extern unsigned retro_audio_buff_occupancy;
+extern void (*pause_action)(void);
 
 int osd_skip_this_frame(void)
 {
-   static unsigned frameskip_counter = 0;
-   return frameskip_table[frameskip][frameskip_counter++ % 12];
+	static unsigned frameskip_counter = 0;
+	
+	if (pause_action)  return 0 ;  // dont skip pause action hack (rendering mame info screens or you wont see them and not know to press a key)
+	
+	if ( retro_audio_buff_active && retro_audio_buff_underrun && frameskip == 1) // only doing autoframeskip for now
+	{
+		frameskip_counter ++;
+		if (frameskip_counter < 30) 
+		{ 
+			return 1;
+		}
+        else
+        { 
+			frameskip_counter = 0;
+			return 0;
+        }
+   }
+	return 0;
+ 
 }
 
 void osd_update_video_and_audio(struct mame_display *display)

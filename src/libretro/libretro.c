@@ -17,6 +17,7 @@ int stricmp(const char *string1, const char *string2)
 
 void mame_frame(void);
 void mame_done(void);
+static void retro_set_audio_buff_status_cb(void);
 
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
 unsigned activate_dcs_speedhack = 1;
@@ -41,10 +42,52 @@ void retro_set_audio_sample(retro_audio_sample_t cb) { }
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_cb = cb; }
 void retro_set_input_poll(retro_input_poll_t cb) { poll_cb = cb; }
 void retro_set_input_state(retro_input_state_t cb) { input_cb = cb; }
+
+bool retro_audio_buff_active        = false;
+unsigned retro_audio_buff_occupancy = 0;
+bool retro_audio_buff_underrun      = false;
+
+int frameskip;
+int frameskip_init_status            = 0;
+static void retro_audio_buff_status_cb(
+      bool active, unsigned occupancy, bool underrun_likely)
+{
+   retro_audio_buff_active    = active;
+   retro_audio_buff_occupancy = occupancy;
+   retro_audio_buff_underrun  = underrun_likely;
+}
+
+static void retro_set_audio_buff_status_cb(void)
+{
+   if (frameskip) 
+   {
+      struct retro_audio_buffer_status_callback buf_status_cb;
+
+      buf_status_cb.callback = retro_audio_buff_status_cb;
+      if (!environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK,
+            &buf_status_cb))
+      {
+         if (log_cb)
+            log_cb(RETRO_LOG_WARN, "Frameskip disabled - frontend does not support audio buffer status monitoring.\n");
+
+         retro_audio_buff_active    = false;
+         retro_audio_buff_occupancy = 0;
+         retro_audio_buff_underrun  = false;
+         frameskip_init_status = -1;
+      }
+      else
+      log_cb(RETRO_LOG_INFO, "Frameskip Enabled\n");
+   }
+   else
+      environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK,
+            NULL);
+	if (frameskip_init_status != -1)   frameskip_init_status = frameskip;	
+}
+
 void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
-      { "mame2003-xtreme-frameskip", "Frameskip; 0|1|2|3|4|5" },
+      { "mame2003-xtreme-frameskip", "Auto Frameskip; enabled|disabled" },
       { "mame2003-xtreme-dcs-speedhack",
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
          "MK2/MK3 DCS Speedhack; disabled|enabled"
@@ -159,6 +202,9 @@ char *systemDir;
 char *romDir;
 char *saveDir;
 
+
+
+
 unsigned retro_api_version(void)
 {
    return RETRO_API_VERSION;
@@ -178,7 +224,6 @@ void retro_get_system_info(struct retro_system_info *info)
 
 int sample_rate;
 
-int frameskip;
 int gotFrame;
 unsigned skip_disclaimer = 0;
 unsigned skip_warnings = 0;
@@ -198,7 +243,14 @@ static void update_variables(void)
    var.key = "mame2003-xtreme-frameskip";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
-      frameskip = atoi(var.value);
+   {
+      if(strcmp(var.value, "enabled") == 0)
+	      frameskip = 1;
+	  else
+	  frameskip = 0;
+   if (frameskip_init_status !=- 1 && frameskip != frameskip_init_status)
+      retro_set_audio_buff_status_cb();
+   }  
 
    var.value = NULL;
    var.key = "mame2003-xtreme-dcs-speedhack";
@@ -374,7 +426,7 @@ void retro_init (void)
       log_cb = log.log;
    else
       log_cb = NULL;
-
+   
 #ifdef LOG_PERFORMANCE
    environ_cb(RETRO_ENVIRONMENT_GET_PERF_INTERFACE, &perf_cb);
 #endif
