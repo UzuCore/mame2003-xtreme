@@ -67,7 +67,7 @@ void mame2003_video_get_geometry(struct retro_game_geometry *geom)
 void mame2003_video_update_visible_area(struct mame_display *display)
 {
    struct retro_game_geometry geom = { 0 };
-   
+
    struct rectangle visible_area = display->game_visible_area;
    vis_width = visible_area.max_x - visible_area.min_x + 1;
    vis_height = visible_area.max_y - visible_area.min_y + 1;
@@ -83,7 +83,7 @@ void mame2003_video_update_visible_area(struct mame_display *display)
    set_ui_visarea(
       visible_area.min_x, visible_area.min_y,
       visible_area.max_x, visible_area.max_y);
-   
+
    /* Notify libretro of the change */
    mame2003_video_get_geometry(&geom);
    environ_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &geom);
@@ -294,7 +294,7 @@ static void frame_convert(struct mame_display *display)
    int x0 = visible_area.min_x, y0 = visible_area.min_y;
    int x1 = visible_area.max_x, y1 = visible_area.max_y;
    int w = x1 - x0 + 1, h = y1 - y0 + 1;
- 
+
    signed pitch = display->game_bitmap->rowpixels;
    char *input = (char*)display->game_bitmap->base;
    char *output = (char*)video_buffer;
@@ -322,7 +322,7 @@ static void frame_convert(struct mame_display *display)
             in += skip;\
          }\
       }
-   
+
    /* A much less optimized pixel conversion loop macro, with XY swap */
    #define CONVERT_SWAP(CONVERT_FUNC, TYPE_IN, TYPE_OUT, FLIP_X, FLIP_Y)\
       {\
@@ -377,27 +377,70 @@ extern bool retro_audio_buff_active;
 extern unsigned retro_audio_buff_occupancy;
 extern void (*pause_action)(void);
 
+const int frameskip_table[12][12] =
+{    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 },
+     { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1 },
+     { 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1 },
+     { 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1 },
+     { 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1 },
+     { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 },
+     { 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1 },
+     { 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1 },
+     { 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1 },
+     { 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1 },
+     { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+
+unsigned frameskip_counter = 0;
 int osd_skip_this_frame(void)
 {
-	static unsigned frameskip_counter = 0;
-	
-	if (pause_action)  return 0 ;  // dont skip pause action hack (rendering mame info screens or you wont see them and not know to press a key)
-	
-	if ( retro_audio_buff_active && retro_audio_buff_underrun && frameskip == 1) // only doing autoframeskip for now
+
+	static unsigned auto_frameskip_counter = 0;
+
+	bool skip_frame;
+
+	if (pause_action)  return 0;  // dont skip pause action hack (rendering mame info screens or you wont see them and not know to press a key)
+
+//auto frame skip options
+	if(frameskip >0 && frameskip >= 6)
 	{
-		frameskip_counter ++;
-		if (frameskip_counter < 30) 
-		{ 
-			return 1;
+		if ( retro_audio_buff_active)
+		{
+			switch ( frameskip)
+			{
+				case 6: /* auto */
+					skip_frame = retro_audio_buff_underrun;
+				break;
+				case 7: /* aggressive */
+					skip_frame = (retro_audio_buff_occupancy < 33);
+				break;
+				case 8: /* max */
+					skip_frame = (retro_audio_buff_occupancy < 50);
+				break;
+				default:
+					skip_frame = false;
+				break;
+			}
+
+			if (skip_frame)
+			{
+				if(auto_frameskip_counter < 30)
+				{
+					auto_frameskip_counter++;;
+				}
+				else
+				{
+					auto_frameskip_counter = 0;// control will return 0 at the end
+					skip_frame=0;
+				}
+			}
 		}
-        else
-        { 
-			frameskip_counter = 0;
-			return 0;
-        }
-   }
-	return 0;
- 
+	}
+	else //manual frameskip includes disabled check
+	{
+		skip_frame = frameskip_table[frameskip][frameskip_counter % 12];
+	}
+	return skip_frame;
 }
 
 void osd_update_video_and_audio(struct mame_display *display)
@@ -405,7 +448,7 @@ void osd_update_video_and_audio(struct mame_display *display)
    RETRO_PERFORMANCE_INIT(perf_cb, update_video_and_audio);
    RETRO_PERFORMANCE_START(perf_cb, update_video_and_audio);
 
-   if(display->changed_flags & 
+   if(display->changed_flags &
       ( GAME_BITMAP_CHANGED | GAME_PALETTE_CHANGED
       | GAME_VISIBLE_AREA_CHANGED | VECTOR_PIXELS_CHANGED))
    {
@@ -466,7 +509,7 @@ void osd_update_video_and_audio(struct mame_display *display)
       }
       prev_led_state = display->led_state;
    }
-   
+
    gotFrame = 1;
 
    RETRO_PERFORMANCE_STOP(perf_cb, update_video_and_audio);
