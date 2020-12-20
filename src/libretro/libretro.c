@@ -37,6 +37,8 @@ retro_environment_t environ_cb = NULL;
 unsigned long lastled = 0;
 retro_set_led_state_t led_state_cb = NULL;
 
+struct retro_audio_buffer_status_callback buf_status_cb;
+
 void retro_set_video_refresh(retro_video_refresh_t cb) { video_cb = cb; }
 void retro_set_audio_sample(retro_audio_sample_t cb) { }
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb) { audio_batch_cb = cb; }
@@ -46,48 +48,50 @@ void retro_set_input_state(retro_input_state_t cb) { input_cb = cb; }
 bool retro_audio_buff_active        = false;
 unsigned retro_audio_buff_occupancy = 0;
 bool retro_audio_buff_underrun      = false;
-
 int frameskip;
-int frameskip_init_status            = 0;
-static void retro_audio_buff_status_cb(
-      bool active, unsigned occupancy, bool underrun_likely)
+
+static struct retro_message frontend_message;
+
+void frontend_message_cb(const char *message_string, unsigned frames_to_display)
+{
+	frontend_message.msg = message_string;
+	frontend_message.frames = frames_to_display;
+	environ_cb(RETRO_ENVIRONMENT_SET_MESSAGE, &frontend_message);
+}
+
+static void retro_audio_buff_status_cb(bool active, unsigned occupancy, bool underrun_likely)
 {
    retro_audio_buff_active    = active;
    retro_audio_buff_occupancy = occupancy;
    retro_audio_buff_underrun  = underrun_likely;
 }
 
-static void retro_set_audio_buff_status_cb(void)
+void retro_set_audio_buff_status_cb(void)
 {
-   if (frameskip) 
-   {
-      struct retro_audio_buffer_status_callback buf_status_cb;
-
-      buf_status_cb.callback = retro_audio_buff_status_cb;
+  if (frameskip >0 && frameskip >= 6)
+  {
       if (!environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK,
             &buf_status_cb))
       {
          if (log_cb)
             log_cb(RETRO_LOG_WARN, "Frameskip disabled - frontend does not support audio buffer status monitoring.\n");
-
+			frontend_message_cb("Frameskip disabled - frontend does not support audio buffer status monitoring.\n", 240);
          retro_audio_buff_active    = false;
          retro_audio_buff_occupancy = 0;
          retro_audio_buff_underrun  = false;
-         frameskip_init_status = -1;
       }
       else
       log_cb(RETRO_LOG_INFO, "Frameskip Enabled\n");
-   }
+  }
    else
-      environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK,
-            NULL);
-	if (frameskip_init_status != -1)   frameskip_init_status = frameskip;	
+      environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK,NULL);
+
 }
 
 void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
-      { "mame2003-xtreme-frameskip", "Auto Frameskip; enabled|disabled" },
+      { "mame2003-xtreme-frameskip", "Frameskip; disabled|1|2|3|4|5|auto|auto_aggressive|auto_max" },
       { "mame2003-xtreme-dcs-speedhack",
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
          "MK2/MK3 DCS Speedhack; disabled|enabled"
@@ -148,8 +152,8 @@ static int getDriverIndex(const char* aPath)
     memset(driverName, 0, sizeof(driverName));
     strncpy(driverName, last ? last + 1 : path, sizeof(driverName) - 1);
     free(path);
-    
-    // Remove extension    
+
+    // Remove extension
     firstDot = strchr(driverName, '.');
 
     if(firstDot)
@@ -160,13 +164,13 @@ static int getDriverIndex(const char* aPath)
     {
        if(strcmp(driverName, drivers[i]->name) == 0)
        {
-          options.romset_filename_noext = strdup(driverName);         
+          options.romset_filename_noext = strdup(driverName);
           if (log_cb)
              log_cb(RETRO_LOG_INFO, "Found game: %s [%s].\n", driverName, drivers[i]->name);
           return i;
        }
     }
-    
+
     return -1;
 }
 
@@ -175,7 +179,7 @@ static char* peelPathItem(char* aPath)
     char* last = strrchr(aPath, PATH_SEPARATOR);
     if(last)
        *last = 0;
-    
+
     return aPath;
 }
 
@@ -218,7 +222,7 @@ void retro_get_system_info(struct retro_system_info *info)
 #endif
    info->library_version = "0.78" GIT_VERSION;
    info->valid_extensions = "zip";
-   info->need_fullpath = true;   
+   info->need_fullpath = true;
    info->block_extract = true;
 }
 
@@ -238,19 +242,40 @@ static void update_variables(void)
 {
    struct retro_led_interface ledintf;
    struct retro_variable var;
-
+	int prev_frameskip_type;
    var.value = NULL;
    var.key = "mame2003-xtreme-frameskip";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
-      if(strcmp(var.value, "enabled") == 0)
-	      frameskip = 1;
-	  else
-	  frameskip = 0;
-   if (frameskip_init_status !=- 1 && frameskip != frameskip_init_status)
-      retro_set_audio_buff_status_cb();
-   }  
+				prev_frameskip_type = frameskip;
+
+   				if (strcmp(var.value, "1") == 0)
+					frameskip = 1;
+
+				else if (strcmp(var.value, "2") == 0)
+					frameskip = 2;
+
+				else if (strcmp(var.value, "3") == 0)
+					frameskip = 3;
+
+				else if (strcmp(var.value, "4") == 0)
+					frameskip = 4;
+
+				else if (strcmp(var.value, "5") == 0)
+					frameskip = 5;
+
+				else if (strcmp(var.value, "auto") == 0)
+					frameskip = 6;
+				else if (strcmp(var.value, "auto_aggressive") == 0)
+					frameskip = 7;
+				else if(strcmp(var.value, "auto_max") == 0)
+					frameskip = 8;
+				else
+					frameskip = 0;
+
+			 if (frameskip != prev_frameskip_type)	retro_set_audio_buff_status_cb();
+   }
 
    var.value = NULL;
    var.key = "mame2003-xtreme-dcs-speedhack";
@@ -388,7 +413,7 @@ static void update_variables(void)
    {
       if(strcmp(var.value, "enabled") == 0)
          options.use_artwork = ~0;
-      else 
+      else
          options.use_artwork = 0;
    }
    else
@@ -407,7 +432,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
   if ( Machine->drv->frames_per_second * 1000 < options.samplerate)
     info->timing.sample_rate = 22050;
 
-  else 
+  else
     info->timing.sample_rate = options.samplerate;
 }
 
@@ -426,7 +451,7 @@ void retro_init (void)
       log_cb = log.log;
    else
       log_cb = NULL;
-   
+
 #ifdef LOG_PERFORMANCE
    environ_cb(RETRO_ENVIRONMENT_GET_PERF_INTERFACE, &perf_cb);
 #endif
@@ -463,7 +488,7 @@ int16_t get_pointer_delta(int16_t coord, int16_t *prev_coord)
          *prev_coord = coord;
       }
    }
-   
+
    return delta;
 }
 
@@ -486,7 +511,7 @@ void retro_run (void)
       retroKeyState[thisInput->code] = input_cb(0, RETRO_DEVICE_KEYBOARD, 0, thisInput->code);
       thisInput ++;
    }
-   
+
    for (i = 0; i < 4; i ++)
    {
       unsigned int offset = (i * 18);
@@ -496,7 +521,7 @@ void retro_run (void)
       analogjoy[i][1] = input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_Y);
       analogjoy[i][2] = input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_X);
       analogjoy[i][3] = input_cb(i, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_RIGHT, RETRO_DEVICE_ID_ANALOG_Y);
-      
+
       /* Joystick */
       if (rstick_to_btns)
       {
@@ -531,7 +556,7 @@ void retro_run (void)
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_R2 + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_L3 + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_L3);
       retroJsState[ RETRO_DEVICE_ID_JOYPAD_R3 + offset] = input_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R3);
-      
+
       if (mouse_device)
       {
          if (mouse_device == RETRO_DEVICE_MOUSE)
@@ -568,7 +593,7 @@ bool retro_load_game(const struct retro_game_info *game)
 
     // Find game index
     driverIndex = getDriverIndex(game->path);
-    
+
     if(driverIndex)
     {
         #define describe_buttons(INDEX) \
@@ -598,7 +623,7 @@ bool retro_load_game(const struct retro_game_info *game)
             };
 
         fallbackDir = strdup(game->path);
-        
+
         /* Get system directory from frontend */
         environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY,&systemDir);
         if (systemDir == NULL || systemDir[0] == '\0')
@@ -607,7 +632,7 @@ bool retro_load_game(const struct retro_game_info *game)
             systemDir = normalizePath(fallbackDir);
             systemDir = peelPathItem(systemDir);
         }
-        
+
         /* Get save directory from frontend */
         environ_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY,&saveDir);
         if (saveDir == NULL || saveDir[0] == '\0')
@@ -621,11 +646,11 @@ bool retro_load_game(const struct retro_game_info *game)
         romDir = normalizePath(fallbackDir);
         romDir = peelPathItem(romDir);
 
-    
-        
-    
+
+
+
         // Set all options before starting the game
-        options.vector_resolution_multiplier = 2; 
+        options.vector_resolution_multiplier = 2;
         options.antialias = 1; // 1 or 0
         options.beam = 2; //use 2.f  if using a decimal point 1|1.2|1.4|1.6|1.8|2|2.5|3|4|5|6|7|8|9|10|11|12 only works with antialas on
         options.translucency = 1; //integer: 1 to enable translucency on vectors
@@ -650,7 +675,7 @@ bool retro_load_game(const struct retro_game_info *game)
 void retro_unload_game(void)
 {
     mame_done();
-    
+
     free(fallbackDir);
     systemDir = 0;
 }
@@ -658,7 +683,7 @@ void retro_unload_game(void)
 size_t retro_serialize_size(void)
 {
     extern size_t state_get_dump_size(void);
-    
+
     return state_get_dump_size();
 }
 
@@ -695,7 +720,7 @@ bool retro_serialize(void *data, size_t size)
 
 		/* finish and close */
 		state_save_save_finish();
-		
+
 		return true;
 	}
 
@@ -732,7 +757,7 @@ bool retro_unserialize(const void * data, size_t size)
         /* finish and close */
         state_save_load_finish();
 
-        
+
         return true;
 	}
 
@@ -753,7 +778,7 @@ int osd_start_audio_stream(int stereo)
 
     else
       Machine->sample_rate = options.samplerate;
-  
+
   delta_samples = 0.0f;
   usestereo = stereo ? 1 : 0;
 
@@ -765,7 +790,7 @@ int osd_start_audio_stream(int stereo)
 
   samples_buffer = (short *) calloc(samples_per_frame+16, 2 + usestereo * 2);
   if (!usestereo) conversion_buffer = (short *) calloc(samples_per_frame+16, 4);
-  
+
   return samples_per_frame;
 }
 
@@ -786,19 +811,19 @@ int osd_update_audio_stream(INT16 *buffer)
 				conversion_buffer[j++] = samples_buffer[i];
 		        }
          		audio_batch_cb(conversion_buffer,samples_per_frame);
-		}	
-		
-			
+		}
+
+
 		//process next frame
-			
+
 		if ( samples_per_frame  != orig_samples_per_frame ) samples_per_frame = orig_samples_per_frame;
-		
+
 		// dont drop any sample frames some games like mk will drift with time
 
 		delta_samples += (Machine->sample_rate / Machine->drv->frames_per_second) - orig_samples_per_frame;
 		if ( delta_samples >= 1.0f )
 		{
-		
+
 			int integer_delta = (int)delta_samples;
 			if (integer_delta <= 16 )
                         {
@@ -806,7 +831,7 @@ int osd_update_audio_stream(INT16 *buffer)
 				samples_per_frame += integer_delta;
 			}
 			else if(integer_delta >= 16) log_cb(RETRO_LOG_INFO, "sound: Delta not added to samples_per_frame too large integer_delta:%d\n", integer_delta);
-			else log_cb(RETRO_LOG_DEBUG,"sound(delta) no contitions met\n");	
+			else log_cb(RETRO_LOG_DEBUG,"sound(delta) no contitions met\n");
 			delta_samples -= integer_delta;
 
 		}
