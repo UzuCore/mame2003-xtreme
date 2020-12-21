@@ -548,7 +548,6 @@ void pause_action_start_emulator(void)
  	if(!nvram_file)
  		log_cb(RETRO_LOG_INFO, LOGPRE "First run: NVRAM handler found for %s but no existing NVRAM file found.\n", Machine->gamedrv->name);
     
-	log_cb(RETRO_LOG_INFO, LOGPRE "boostrap=%s  \n", Machine->gamedrv->bootstrap);
 	if(!nvram_file && (Machine->gamedrv->bootstrap != NULL))
 	{
 		if(1/*options.nvram_bootstrap*/)
