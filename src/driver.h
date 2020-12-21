@@ -427,6 +427,8 @@ struct GameDriver
 #endif
 
 	UINT32 flags;	/* orientation and other flags; see defines below */
+	const struct ControlInfo *ctrl_dat;
+	const struct bin2cFILE *bootstrap;
 };
 
 
@@ -501,6 +503,46 @@ const struct GameDriver driver_##NAME =		\
 	(MONITOR)|(FLAGS)						\
 };
 
+#define GAMEC(YEAR, NAME, PARENT, MACHINE, INPUT, INIT, MONITOR, COMPANY, FULLNAME, CTRL_INFO, BOOTSTRAP)  \
+extern const struct GameDriver driver_##PARENT;  \
+const struct GameDriver driver_##NAME =          \
+{                       \
+  __FILE__,             \
+  &driver_##PARENT,     \
+  #NAME,                \
+  system_bios_0,        \
+  FULLNAME,             \
+  #YEAR,                \
+  COMPANY,              \
+  construct_##MACHINE,  \
+  input_ports_##INPUT,  \
+  init_##INIT,          \
+  rom_##NAME,           \
+  MONITOR,              \
+  CTRL_INFO,            \
+  BOOTSTRAP             \
+};
+
+#define GAMECX(YEAR, NAME, PARENT, MACHINE, INPUT, INIT, MONITOR, COMPANY, FULLNAME, FLAGS, CTRL_INFO, BOOTSTRAP)  \
+extern const struct GameDriver driver_##PARENT;   \
+const struct GameDriver driver_##NAME =           \
+{                       \
+  __FILE__,             \
+  &driver_##PARENT,     \
+  #NAME,                \
+  system_bios_0,        \
+  FULLNAME,             \
+  #YEAR,                \
+  COMPANY,              \
+  construct_##MACHINE,  \
+  input_ports_##INPUT,  \
+  init_##INIT,          \
+  rom_##NAME,           \
+  (MONITOR)|(FLAGS),    \
+  CTRL_INFO,            \
+  BOOTSTRAP             \
+};
+
 #define GAMEB(YEAR,NAME,PARENT,BIOS,MACHINE,INPUT,INIT,MONITOR,COMPANY,FULLNAME)	\
 extern const struct GameDriver driver_##PARENT;	\
 const struct GameDriver driver_##NAME =		\
@@ -536,6 +578,7 @@ const struct GameDriver driver_##NAME =		\
 	rom_##NAME,								\
 	(MONITOR)|(FLAGS)						\
 };
+
 
 /* monitor parameters to be used with the GAME() macro */
 #define	ROT0	0
