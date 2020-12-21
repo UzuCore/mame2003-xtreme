@@ -545,11 +545,26 @@ void pause_action_start_emulator(void)
     if (Machine->drv->nvram_handler)
     {
         mame_file *nvram_file = mame_fopen(Machine->gamedrv->name, 0, FILETYPE_NVRAM, 0);
-        (*Machine->drv->nvram_handler)(nvram_file, 0);
-        if (nvram_file)
-            mame_fclose(nvram_file);
-    }
+ 	if(!nvram_file)
+ 		log_cb(RETRO_LOG_INFO, LOGPRE "First run: NVRAM handler found for %s but no existing NVRAM file found.\n", Machine->gamedrv->name);
+    
+	if(!nvram_file && (Machine->gamedrv->bootstrap != NULL))
+	{
+		if(1/*options.nvram_bootstrap*/)
+		{
+   	  	   log_cb(RETRO_LOG_INFO, LOGPRE "Spwaning NVRAM bootstrap as the initial NVRAM image.\n");			nvram_file = spawn_bootstrap_nvram(Machine->gamedrv->bootstrap->data, Machine->gamedrv->bootstrap->length);
+	 		}
+	else
+		log_cb(RETRO_LOG_INFO, LOGPRE "NVRAM bootstrap available, but disabled via core option.\n");
+ 	}
+ 	else
+ 	log_cb(RETRO_LOG_INFO, LOGPRE "Delegating population of initial NVRAM to emulated system.\n");
 
+ 	(*Machine->drv->nvram_handler)(nvram_file, 0);
+	if (nvram_file)
+	mame_fclose(nvram_file);
+      
+}
     /* run the emulation! */
     cpu_run();
 

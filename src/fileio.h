@@ -55,6 +55,12 @@ enum
 
 typedef struct _mame_file mame_file;
 
+struct bin2cFILE {
+  const unsigned int length;
+  const unsigned char data[];
+};
+
+
 int mame_faccess(const char *filename, int filetype);
 mame_file *mame_fopen(const char *gamename, const char *filename, int filetype, int openforwrite);
 mame_file *mame_fopen_rom(const char *gamename, const char *filename, const char* exphash);
