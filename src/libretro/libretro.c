@@ -68,7 +68,7 @@ static void retro_audio_buff_status_cb(bool active, unsigned occupancy, bool und
 
 void retro_set_audio_buff_status_cb(void)
 {
-  if (frameskip >0 && frameskip >= 6)
+  if (frameskip >0 && frameskip >= 12)
   {
       if (!environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK,
             &buf_status_cb))
@@ -91,7 +91,7 @@ void retro_set_audio_buff_status_cb(void)
 void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
-      { "mame2003-xtreme-frameskip", "Frameskip; disabled|1|2|3|4|5|auto|auto_aggressive|auto_max" },
+      { "mame2003-xtreme-frameskip", "Frameskip; disabled|1|2|3|4|5|6|7|8|9|10|11|auto|auto_aggressive|auto_max" },
       { "mame2003-xtreme-dcs-speedhack",
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
          "MK2/MK3 DCS Speedhack; disabled|enabled"
@@ -265,12 +265,30 @@ static void update_variables(void)
 				else if (strcmp(var.value, "5") == 0)
 					frameskip = 5;
 
-				else if (strcmp(var.value, "auto") == 0)
+				else if (strcmp(var.value, "6") == 0)
 					frameskip = 6;
-				else if (strcmp(var.value, "auto_aggressive") == 0)
+
+				else if (strcmp(var.value, "7") == 0)
 					frameskip = 7;
-				else if(strcmp(var.value, "auto_max") == 0)
+
+				else if (strcmp(var.value, "8") == 0)
 					frameskip = 8;
+
+				else if (strcmp(var.value, "9") == 0)
+					frameskip = 9;
+					
+				else if (strcmp(var.value, "10") == 0)
+					frameskip = 10;
+
+				else if (strcmp(var.value, "11") == 0)
+					frameskip = 11;
+
+				else if (strcmp(var.value, "auto") == 0)
+					frameskip = 12;
+				else if (strcmp(var.value, "auto_aggressive") == 0)
+					frameskip = 13;
+				else if(strcmp(var.value, "auto_max") == 0)
+					frameskip = 14;
 				else
 					frameskip = 0;
 

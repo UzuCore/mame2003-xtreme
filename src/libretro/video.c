@@ -402,7 +402,7 @@ int osd_skip_this_frame(void)
 	if (pause_action)  return 0;  // dont skip pause action hack (rendering mame info screens or you wont see them and not know to press a key)
 
 //auto frame skip options
-	if(frameskip >0 && frameskip >= 6)
+	if(frameskip >0 && frameskip >= 12)
 	{
 		if ( retro_audio_buff_active)
 		{
@@ -511,7 +511,7 @@ void osd_update_video_and_audio(struct mame_display *display)
    }
 
    gotFrame = 1;
-
+   frameskip_counter++;
    RETRO_PERFORMANCE_STOP(perf_cb, update_video_and_audio);
 }
 
