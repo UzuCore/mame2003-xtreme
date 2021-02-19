@@ -2,7 +2,7 @@ DEBUG=0
 DEBUGGER=0
 SPLIT_UP_LINK=0
 CORE_DIR := src
-TARGET_NAME := mame2003-xtreme
+TARGET_NAME := km_mame2003_xtreme
 
 GIT_VERSION ?= " $(shell git rev-parse --short HEAD || echo unknown)"
 ifneq ($(GIT_VERSION)," unknown")
