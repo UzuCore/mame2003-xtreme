@@ -92,7 +92,7 @@ void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
       { "mame2003-xtreme-frameskip", "Frameskip; disabled|1|2|3|4|5|6|7|8|9|10|11|auto|auto_aggressive|auto_max" },
-      { "mame2003-xtreme-oc", "cpu clock; 100|25|30|35|40|45|50|55|60|65|70|75|80|95|90|95|105|110|115|120" },
+      { "mame2003-xtreme-oc", "cpu clock; 100|25|30|35|40|45|50|55|60|65|70|75|80|85|90|95|105|110|115|120|125" },
       { "mame2003-xtreme-dcs-speedhack",
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
          "MK2/MK3 DCS Speedhack; disabled|enabled"
