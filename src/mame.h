@@ -227,7 +227,7 @@ struct GameOptions
 	int		debug_width;	/* requested width of debugger bitmap */
 	int		debug_height;	/* requested height of debugger bitmap */
 	int		debug_depth;	/* requested depth of debugger bitmap */
-
+	double oc;
 	#ifdef MESS
 	UINT32 ram;
 	struct ImageFile image_files[MAX_IMAGES];
@@ -237,6 +237,7 @@ struct GameOptions
 
 	int		min_width;		/* minimum width for the display */
 	int		min_height;		/* minimum height for the display */
+
 	#endif
 };
 

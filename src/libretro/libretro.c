@@ -92,6 +92,7 @@ void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
       { "mame2003-xtreme-frameskip", "Frameskip; disabled|1|2|3|4|5|6|7|8|9|10|11|auto|auto_aggressive|auto_max" },
+      { "mame2003-xtreme-oc", "cpu clock; 100|25|30|35|40|45|50|55|60|65|70|75|80|95|90|95|105|110|115|120" },
       { "mame2003-xtreme-dcs-speedhack",
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
          "MK2/MK3 DCS Speedhack; disabled|enabled"
@@ -240,6 +241,7 @@ static void update_variables(void)
    struct retro_led_interface ledintf;
    struct retro_variable var;
 	int prev_frameskip_type;
+
    var.value = NULL;
    var.key = "mame2003-xtreme-frameskip";
 
@@ -291,6 +293,14 @@ static void update_variables(void)
 
 			 if (frameskip != prev_frameskip_type)	retro_set_audio_buff_status_cb();
    }
+
+   var.value = NULL;
+   var.key = "mame2003-xtreme-oc";
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
+   {	
+      options.oc = (double) atoi(var.value) / 100;
+    	
+   }	
 
    var.value = NULL;
    var.key = "mame2003-xtreme-dcs-speedhack";
@@ -576,7 +586,14 @@ void retro_run (void)
          retroJsState[17 + offset] = 0;
       }
    }
-
+ if (options.oc) 
+ {
+	if (cpunum_get_clockscale(0) != options.oc) 
+	{	printf("changing cpu - clockscale from %lf to%lf\n",cpunum_get_clockscale(0),options.oc);
+		cpunum_set_clockscale(0, options.oc);
+	}	
+ }
+ 
    mame_frame();
 }
 
