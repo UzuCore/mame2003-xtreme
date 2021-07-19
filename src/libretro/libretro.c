@@ -229,10 +229,7 @@ void retro_get_system_info(struct retro_system_info *info)
 int sample_rate;
 
 int gotFrame;
-unsigned skip_disclaimer = 0;
-unsigned skip_warnings = 0;
-unsigned samples = 0;
-unsigned cheats = 0;
+
 unsigned dial_share_xy = 0;
 unsigned mouse_device = 0;
 unsigned rstick_to_btns = 0;
@@ -305,21 +302,17 @@ static void update_variables(void)
       else
          activate_dcs_speedhack = 0;
    }
-   else
-      activate_dcs_speedhack = 0;
-
+   
    var.value = NULL;
    var.key = "mame2003-xtreme-skip_disclaimer";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
       if(strcmp(var.value, "enabled") == 0)
-         skip_disclaimer = 1;
+         options.skip_disclaimer = 1;
       else
-         skip_disclaimer = 0;
+         options.skip_disclaimer = 0;
    }
-   else
-      skip_disclaimer = 0;
 
    var.value = NULL;
    var.key = "mame2003-xtreme-skip_warnings";
@@ -327,12 +320,10 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
       if(strcmp(var.value, "enabled") == 0)
-         skip_warnings = 1;
+         options.skip_warnings = 1;
       else
-         skip_warnings = 0;
+         options.skip_warnings = 0;
    }
-   else
-      skip_warnings = 0;
 
    var.value = NULL;
    var.key = "mame2003-xtreme-samples";
@@ -340,12 +331,10 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
       if(strcmp(var.value, "enabled") == 0)
-         samples = 1;
+         options.use_samples = 1;
       else
-         samples = 0;
+         options.use_samples = 0;
    }
-   else
-      samples = 0;
 
    var.value = NULL;
    var.key = "mame2003-xtreme-sample_rate";
@@ -363,13 +352,11 @@ static void update_variables(void)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
       if(strcmp(var.value, "enabled") == 0)
-         cheats = 1;
+         options.cheat = 1;
       else
-         cheats = 0;
+         options.cheat = 0;
    }
-   else
-      cheats = 0;
-
+   
    var.value = NULL;
    var.key = "mame2003-xtreme-dialsharexy";
 
@@ -380,8 +367,6 @@ static void update_variables(void)
       else
          dial_share_xy = 0;
    }
-   else
-      dial_share_xy = 0;
 
    var.value = NULL;
    var.key = "mame2003-xtreme-mouse_device";
@@ -395,8 +380,6 @@ static void update_variables(void)
       else
          mouse_device = 0;
    }
-   else
-      mouse_device = 0;
 
    var.value = NULL;
    var.key = "mame2003-xtreme-rstick_to_btns";
@@ -408,8 +391,6 @@ static void update_variables(void)
       else
          rstick_to_btns = 0;
    }
-   else
-      rstick_to_btns = 0;
 
    var.value = NULL;
    var.key = "mame2003-xtreme-option_tate_mode";
@@ -421,8 +402,6 @@ static void update_variables(void)
       else
          option_tate_mode = 0;
    }
-   else
-      option_tate_mode = 0;
 
    var.value = NULL;
    var.key = "mame2003-xtreme-use_artwork";
@@ -434,8 +413,6 @@ static void update_variables(void)
       else
          options.use_artwork = 0;
    }
-   else
-      options.use_artwork = ~0;
 
    ledintf.set_led_state = NULL;
 
@@ -675,10 +652,6 @@ bool retro_load_game(const struct retro_game_info *game)
         options.vector_intensity = 1.5f; // 0.5|1.5|1|2|2.5|3
         options.vector_flicker = (int)(2.55 * 1.5f); // |0.5|1|1.5|2|2.5|3
 
-        options.skip_disclaimer = skip_disclaimer;
-        options.skip_warnings = skip_warnings;
-        options.use_samples = samples;
-        options.cheat = cheats;
         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
         // Boot the emulator
