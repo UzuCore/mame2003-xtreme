@@ -23,7 +23,7 @@
 
 
 /* constants */
-#define MASTER_CLOCK	50000000
+#define MASTER_CLOCK	6100000
 
 
 /* local variables */
