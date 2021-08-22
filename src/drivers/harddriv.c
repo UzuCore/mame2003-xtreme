@@ -1059,7 +1059,7 @@ static MACHINE_DRIVER_START( driver_msp )
 	MDRV_IMPORT_FROM(driver_nomsp)
 
 	/* basic machine hardware */
-	MDRV_CPU_ADD_TAG("msp", TMS34010, 50000000/TMS34010_CLOCK_DIVIDER)
+	MDRV_CPU_ADD_TAG("msp", TMS34010, 6100000/TMS34010_CLOCK_DIVIDER)
 	MDRV_CPU_MEMORY(driver_readmem_msp,driver_writemem_msp)
 	MDRV_CPU_CONFIG(msp_config)
 
@@ -1092,7 +1092,7 @@ static MACHINE_DRIVER_START( multisync_msp )
 	MDRV_IMPORT_FROM(multisync_nomsp)
 
 	/* basic machine hardware */
-	MDRV_CPU_ADD_TAG("msp", TMS34010, 50000000/TMS34010_CLOCK_DIVIDER)
+	MDRV_CPU_ADD_TAG("msp", TMS34010, 6100000/TMS34010_CLOCK_DIVIDER)
 	MDRV_CPU_MEMORY(multisync_readmem_msp,multisync_writemem_msp)
 	MDRV_CPU_CONFIG(msp_config)
 MACHINE_DRIVER_END

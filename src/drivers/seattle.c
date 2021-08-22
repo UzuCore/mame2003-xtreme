@@ -41,8 +41,8 @@
 #include "vidhrdw/voodoo.h"
 
 
-#define TIMER_CLOCK			TIME_IN_HZ(50000000)
-#define DMA_SECS_PER_BYTE	TIME_IN_HZ(50000000)
+#define TIMER_CLOCK			TIME_IN_HZ(6100000)
+#define DMA_SECS_PER_BYTE	TIME_IN_HZ(6100000)
 
 
 #define LOG_TIMERS			(0)

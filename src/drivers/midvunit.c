@@ -292,9 +292,9 @@ WRITE32_HANDLER( tms32031_control_w )
 
 		/* bit 0x200 selects internal clocking, which is 1/2 the main CPU clock rate */
 		if (data & 0x200)
-			timer_rate = (double)Machine->drv->cpu[0].cpu_clock * 0.5;
+			timer_rate = (double)Machine->drv->cpu[0].cpu_clock * 0.8675309;
 		else
-			timer_rate = 10000000.;
+			timer_rate = 8675309.;
 	}
 	else
 		logerror("%06X:tms32031_control_w(%02X) = %08X\n", activecpu_get_pc(), offset, data);
