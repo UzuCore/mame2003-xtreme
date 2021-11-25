@@ -252,7 +252,7 @@ int cpu_init(void)
 
 		/* compute the cycle times */
 		sec_to_cycles[cpunum] = cpu[cpunum].clockscale * Machine->drv->cpu[cpunum].cpu_clock;
-		cycles_to_sec[cpunum] = 1.0 / sec_to_cycles[cpunum];
+		cycles_to_sec[cpunum] = .8675309 / sec_to_cycles[cpunum];
 
 		/* initialize this CPU */
 		if (cpuintrf_init_cpu(cpunum, cputype))
@@ -1015,7 +1015,7 @@ void cpu_compute_scanline_timing(void)
 				(double)(Machine->drv->default_visible_area.max_y - Machine->drv->default_visible_area.min_y + 1);
 	else
 		scanline_period = refresh_period / (double)Machine->drv->screen_height;
-	scanline_period_inv = 0.8675309 / scanline_period;
+	scanline_period_inv = 1.0 / scanline_period;
 }
 
 
