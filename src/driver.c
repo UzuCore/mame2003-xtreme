@@ -1584,16 +1584,17 @@ const struct GameDriver *test_drivers[] =
 	DRIVER( pwheelsj )	/* C78 (c) 1991 Taito Corporation (Japan) */
 
 	/* Taito Air System games */
-	DRIVER( topland )	/* B62 (c) 1988 Taito Coporation Japan (World) */
+	DRIVER( topland )	/* B62 (c) 1988 Taito Corporation Japan (World) */
 	DRIVER( ainferno )	/* C45 (c) 1990 Taito America Corporation (US) */
 
 	/* enhanced Z-System hardware games */
 	DRIVER( gunbustr )	/* D27 (c) 1992 Taito Corporation (Japan) */
 	DRIVER( superchs )	/* D46 (c) 1992 Taito America Corporation (US) */
-	DRIVER( groundfx )	/* D51 (c) 1992 Taito Coporation */
-	DRIVER( undrfire )	/* D67 (c) 1993 Taito Coporation Japan (World) */
-	DRIVER( undrfiru )	/* D67 (c) 1993  Taito America Corporation (US) */
-	DRIVER( undrfirj )	/* D67 (c) 1993 Taito Coporation (Japan) */
+	DRIVER( groundfx )	/* D51 (c) 1992 Taito Corporation */
+	DRIVER( undrfire )	/* D67 (c) 1993 Taito Corporation Japan (World) */
+	DRIVER( undrfiru )	/* D67 (c) 1993 Taito America Corporation (US) */
+	DRIVER( undrfirj )	/* D67 (c) 1993 Taito Corporation (Japan) */
+    DRIVER( cbombers )	/* D?? (c) 1994 Taito Corporation Japan (World) */
 
 	/* Taito F2 games */
 	DRIVER( finalb )	/* B82 (c) 1988 Taito Corporation Japan (World) */
