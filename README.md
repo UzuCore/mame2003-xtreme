@@ -1,5 +1,5 @@
 # mame2003-xtreme
-MAME as it was in 2003, using the libretro API. Suitable for lower-end devices that would struggle to run current versions of MAME (later versions of MAME are increasingly accurate, thus can perform worse).
+MAME as it was in 2003, with a 2K22 touch up! Suitable for lower-spec devices that would struggle to run current versions of MAME (later versions of MAME are increasingly accurate, thus can perform worse).
 
 ## ROMset compatibility with MAME 2003 Xtreme
 **The MAME 2003 Xtreme core accepts MAME 0.78 ROMsets.** Each version of an arcade emulator must be used with ROMs that have the same exact version number. For example, MAME 0.37b5 ROMsets are required by the MAME 2000 emulator, but MAME 0.37b5 sets will not work correctly with the MAME 2003 or MAME 2010 emulator cores. Those cores require MAME 0.78 and MAME 0.139 ROM sets, respectively.
@@ -41,7 +41,10 @@ MAME 2003 Xtreme also supports one or two spinners/dials via the "Share 2 player
 ```
 
 ### Core options
-* **Frameskip** (0-11; Aggressive, etc)
+* **TurboBoost** (0-20; Automatic, Aggressive, etc)
+  Smart FrameSkip, which exploits timing in such a way to better help games, such as KI, Carnevil, Virtua Fighter, etc!
+* **Reverse OverClock** (1-200; 84 Default)
+  Reverse CPU Scaling helps with lower spec hardwares, such as the Mini Classics, RetroPie 2, 3, etc!
 * **DCS Speedhack** (enabled/disabled)
   Speedhack for the Midway sound hardware used in Mortal Kombat 2, 3 and others. Improves performance in these games.
 * **Skip Disclaimer** (enabled/disabled)

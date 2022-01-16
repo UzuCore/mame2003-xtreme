@@ -103,7 +103,7 @@ void retro_set_environment(retro_environment_t cb)
       { "mame2003-xtreme-skip_disclaimer", "Skip Disclaimer; enabled|disabled" },
       { "mame2003-xtreme-skip_warnings", "Skip Warnings; enabled|disabled" },
       { "mame2003-xtreme-samples", "Samples; enabled|disabled" },
-      { "mame2003-xtreme-sample_rate", "Sample Rate (KHz); 8000|11025|18500|22050|30000|44100|48000" },
+      { "mame2003-xtreme-sample_rate", "Sample Rate (KHz); 48000|8000|11025|18500|22050|30000|44100" },
       { "mame2003-xtreme-cheats", "Cheats; enabled|disabled" },
       { "mame2003-xtreme-dialsharexy", "Share 2 player dial controls across one X/Y device; disabled|enabled" },
 #if defined(__IOS__)
@@ -221,7 +221,7 @@ void retro_get_system_info(struct retro_system_info *info)
 #ifndef GIT_VERSION
 #define GIT_VERSION ""
 #endif
-   info->library_version = "0.78" GIT_VERSION;
+   info->library_version = "2K22" GIT_VERSION;
    info->valid_extensions = "zip";
    info->need_fullpath = true;
    info->block_extract = true;
