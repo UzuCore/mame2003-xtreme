@@ -159,6 +159,34 @@ else ifeq ($(platform), rpi3)
    CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
    CPU_ARCH := arm
    ARM = 1
+else ifeq ($(platform), rpi3_64)
+   TARGET = $(TARGET_NAME)_libretro.so
+   fpic = -fPIC
+   CFLAGS += $(fpic)
+   LDFLAGS += $(fpic) -shared -Wl,--version-script=link.T
+   PLATCFLAGS += -mcpu=cortex-a53 -mtune=cortex-a53
+   PLATCFLAGS += -fomit-frame-pointer -ffast-math
+   CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
+   CPU_ARCH := arm64
+else ifeq ($(platform), rpi4)
+   TARGET = $(TARGET_NAME)_libretro.so
+   fpic = -fPIC
+   CFLAGS += $(fpic)
+   LDFLAGS += $(fpic) -shared -Wl,--version-script=link.T
+   PLATCFLAGS += -marm -mcpu=cortex-a72 -mfpu=neon-fp-armv8 -mfloat-abi=hard
+   PLATCFLAGS += -fomit-frame-pointer -ffast-math
+   CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
+   CPU_ARCH := arm
+   ARM = 1
+else ifeq ($(platform), rpi4_64)
+   TARGET = $(TARGET_NAME)_libretro.so
+   fpic = -fPIC
+   CFLAGS += $(fpic)
+   LDFLAGS += $(fpic) -shared -Wl,--version-script=link.T
+   PLATCFLAGS += -mcpu=cortex-a72 -mtune=cortex-a72
+   PLATCFLAGS += -fomit-frame-pointer -ffast-math
+   CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
+   CPU_ARCH := arm64
 
 # Amlogic S905/S905X/S912 (AMLGXBB/AMLGXL/AMLGXM) e.g. Khadas VIM1/2 / S905X2 (AMLG12A) & S922X/A311D (AMLG12B) e.g. Khadas VIM3 - 32-bit userspace
 
@@ -195,8 +223,6 @@ endif
 	LDFLAGS += -static-libgcc -static-libstdc++
 	endif
 #######################################
-   
-   
    
 else ifeq ($(platform), android-armv7)
    TARGET = $(TARGET_NAME)_libretro_android.so
