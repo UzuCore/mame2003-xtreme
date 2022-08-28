@@ -41,6 +41,53 @@ Boulderdash use the same graphics chips but are different pcbs.
 #include "cpu/h6280/h6280.h"
 #include "dec0.h"
 
+bool	robocop_playing = false;
+bool	robocop_start = false;
+bool	robocop_diddy = false;
+bool	robocop_title_diddy = false;
+bool	robocop_title = false;
+bool	robocop_lastwave = false;
+int		robocop_start_counter = 0;
+
+const char *const robocop_sample_set_names[] =
+{
+	"*robocop",
+	
+	"intro-01",
+	"intro-02",
+	"title-01",
+	"title-02",
+	"opening-01",
+	"opening-02",
+	"main-01",
+	"main-02",
+	"crfield-01",
+	"crfield-02",	
+	"lstbattle-01",
+	"lstbattle02",
+	"boss-01",
+	"boss-02",
+	"bigboss01",
+	"bigboss-02",	
+	"bonus-01",
+	"bonus-02", 
+	"clear-01",
+	"clear-02",
+	"over-01",
+	"over-02",
+	"entry-01",
+	"entry-02",	
+	0
+};
+
+static struct Samplesinterface robocop_samples_set =
+{
+	2,	// 2 channels
+	100, // volume
+	robocop_sample_set_names
+};
+
+
 data16_t *dec0_ram;
 data8_t *robocop_shared_ram;
 
@@ -59,11 +106,196 @@ static WRITE16_HANDLER( dec0_control_w )
 			break;
 
 		case 4: /* 6502 sound cpu */
-			if (ACCESSING_LSB)
-			{
+			if(robocop_playing == true) {
+		        int a = 0;
+		        int o_max_samples = 16;
+		        int sa_left = 0;
+		        int sa_right = 1;
+		        bool sa_loop = 1; // --> 1 == loop, 0 == do not loop.
+                bool sa_play_sample = false;
+		        bool sa_play_original = false;
+		        bool robocop_do_nothing = false;
+		        bool robocop_stop_samples = false;
+		        bool robocop_play_default = false;
+		
+		       if(robocop_start == true) {
+			       sa_play_sample = true;
+			       sa_left = 0;
+			       sa_right = 1;
+			       robocop_start = false;
+			       robocop_diddy = true;
+			       robocop_lastwave = false;
+		        }
+			
+		         switch (data) {	
+				   // Leval start
+			       case 0x30:
+			           robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 0;
+				       sa_right = 1;			
+				       break;				
+			       // Title
+			       case 0x31:
+			           robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 2;
+				       sa_right = 3;			
+				       break;				
+			       // opening
+			       case 0x32:
+				       robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 4;
+				       sa_right = 5;			
+				       break;
+			       //  Main theme
+			       case 0x33:
+                       robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 6;
+				       sa_right = 7;	
+                       break;				
+			       // Crime Field BGM 2
+			       case 0x35:
+		               robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 8;
+				       sa_right = 9;				
+				       break;
+			        // Last battle BGM 3
+			       case 0x37:
+                       robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 10;
+				       sa_right = 11;			
+				       break;
+			       // Boss 1
+			       case 0x38:
+                       robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 12;
+				       sa_right = 13;							
+				       break;
+                   //  Last theme. Boss2
+			       case 0x39:
+                       robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 14;
+				       sa_right = 15;			
+				       break;			
+			       // Bonus shoot
+			       case 0x3A:
+		               robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 16;
+				       sa_right = 17;			
+				       break;	
+                   // Stage Clear
+			       case 0x3B:
+		               robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 18;
+				       sa_right = 19;			
+				       break;						   
+			       // Game Over
+			       case 0x3C:	
+			           robocop_diddy = false;
+				       robocop_title_diddy = false;
+				       robocop_lastwave = false;
+				       sa_play_sample = true;
+				       sa_left = 20;
+				       sa_right = 21;			
+				       break;
+			       // Name entry
+			      case 0x3D:
+                  if(robocop_lastwave == false) {
+					  robocop_diddy = false;
+					  robocop_title_diddy = false;
+					  robocop_lastwave = true;
+					  sa_play_sample = true;
+					  sa_left = 22;
+					  sa_right = 23;				
+			      }
+				  else
+					  robocop_do_nothing = true;
+				  break;    
+                  default:
+				  soundlatch_w(0,data & 0xff);
+				  cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+			 break;
+		}
+
+		if(sa_play_sample == true) {
+			a = 0;
+
+			for(a = 0; a <= o_max_samples; a++) {
+				sample_stop(a);
+			}
+
+			sample_start(0, sa_left, sa_loop);
+			sample_start(1, sa_right, sa_loop);
+			
+			// Determine how we should mix these samples together.
+			if(sample_playing(0) == 0 && sample_playing(1) == 1) { // Right channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(1, 100, 100);
+			}
+			else if(sample_playing(0) == 1 && sample_playing(1) == 0) { // Left channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(0, 100, 100);
+			}
+			else if(sample_playing(0) == 1 && sample_playing(1) == 1) { // Both left and right channels. Lets make them play in there respective speakers.
+				sample_set_stereo_volume(0, 100, 0);
+				sample_set_stereo_volume(1, 0, 100);
+			}
+			else if(sample_playing(0) == 0 && sample_playing(1) == 0 && robocop_do_nothing == false) { // No sample playing, revert to the default sound.
+				sa_play_original = false;
 				soundlatch_w(0,data & 0xff);
 				cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
 			}
+
+			if(sa_play_original == true)
+				soundlatch_w(0,data & 0xff);
+			    cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+			}
+            else if(robocop_do_nothing == true) {
+			// --> Do nothing.
+		}
+		else if(robocop_stop_samples == true) {
+			a = 0;
+
+			for(a = 0; a <= o_max_samples; a++) {
+				sample_stop(a);
+			}
+		    
+            // Now play the default sound.
+			soundlatch_w(0,data & 0xff);
+			cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+		}
+		else if(robocop_play_default == true) {
+			soundlatch_w(0,data & 0xff);
+			cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+
+		}	
 			break;
 
 		case 6: /* Intel 8751 microcontroller - Bad Dudes, Heavy Barrel, Birdy Try only */
@@ -74,7 +306,7 @@ static WRITE16_HANDLER( dec0_control_w )
 			break;
 
 		case 0xa: /* Mix Psel(?). */
- 			logerror("CPU #0 PC %06x: warning - write %02x to unmapped memory address %06x\n",activecpu_get_pc(),data,0x30c010+(offset<<1));
+ 			log_cb(RETRO_LOG_DEBUG, LOGPRE "CPU #0 PC %06x: warning - write %02x to unmapped memory address %06x\n",activecpu_get_pc(),data,0x30c010+(offset<<1));
 			break;
 
 		case 0xc: /* Cblk - coin blockout.  Seems to be unused by the games */
@@ -82,12 +314,13 @@ static WRITE16_HANDLER( dec0_control_w )
 
 		case 0xe: /* Reset Intel 8751? - not sure, all the games write here at startup */
 			dec0_i8751_reset();
- 			logerror("CPU #0 PC %06x: warning - write %02x to unmapped memory address %06x\n",activecpu_get_pc(),data,0x30c010+(offset<<1));
+ 			log_cb(RETRO_LOG_DEBUG, LOGPRE "CPU #0 PC %06x: warning - write %02x to unmapped memory address %06x\n",activecpu_get_pc(),data,0x30c010+(offset<<1));
 			break;
 
 		default:
-			logerror("CPU #0 PC %06x: warning - write %02x to unmapped memory address %06x\n",activecpu_get_pc(),data,0x30c010+(offset<<1));
+			log_cb(RETRO_LOG_DEBUG, LOGPRE "CPU #0 PC %06x: warning - write %02x to unmapped memory address %06x\n",activecpu_get_pc(),data,0x30c010+(offset<<1));
 			break;
+		;}
 	}
 }
 
@@ -320,6 +553,7 @@ static MEMORY_WRITE_START( dec0_s_writemem )
 	{ 0x0000, 0x05ff, MWA_RAM },
 	{ 0x0800, 0x0801, YM2203_w },
 	{ 0x1000, 0x1001, YM3812_w },
+	{ 0x3000, 0x3000, soundlatch_w },
 	{ 0x3800, 0x3800, OKIM6295_data_0_w },
 	{ 0x8000, 0xffff, MWA_ROM },
 MEMORY_END
@@ -723,6 +957,58 @@ INPUT_PORTS_START( midres )
 	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
 
 	PORT_START	/* player 1 12-way rotary control - converted in controls_r() */
+	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 25, 10, 0, 0, KEYCODE_Z, KEYCODE_X, 0, 0 )
+
+	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
+	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE | IPF_PLAYER2, 25, 10, 0, 0, KEYCODE_N, KEYCODE_M, 0, 0 )
+INPUT_PORTS_END
+
+INPUT_PORTS_START( midresbj )
+	DEC0_PLAYER1_CONTROL
+	DEC0_PLAYER2_CONTROL
+	DEC0_MACHINE_CONTROL
+
+
+	PORT_START	/* Dip switch bank 1 */
+	DEC0_COIN_SETTING
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unused ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Demo_Sounds ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40, 0x40, DEF_STR( Flip_Screen ) )
+	PORT_DIPSETTING(    0x40, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unused ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	/* Dip switch bank 2 */
+	PORT_DIPNAME( 0x03, 0x03, DEF_STR( Lives ) )
+	PORT_DIPSETTING(    0x03, "3" )
+	PORT_DIPSETTING(    0x02, "4" )
+	PORT_DIPSETTING(    0x01, "5" )
+	PORT_BITX( 0,       0x00, IPT_DIPSWITCH_SETTING | IPF_CHEAT, "Infinite", IP_KEY_NONE, IP_JOY_NONE )
+	PORT_DIPNAME( 0x0c, 0x0c, DEF_STR( Difficulty ) )
+	PORT_DIPSETTING(    0x08, "Easy" )
+	PORT_DIPSETTING(    0x0c, "Normal" )
+	PORT_DIPSETTING(    0x04, "Hard" )
+	PORT_DIPSETTING(    0x00, "Hardest" )
+	PORT_DIPNAME( 0x10, 0x10, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x10, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x20, 0x20, DEF_STR( Unknown ) )
+	PORT_DIPSETTING(    0x20, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+	PORT_DIPNAME( 0x40, 0x00, "Allow Continue" )
+	PORT_DIPSETTING(    0x40, DEF_STR( No ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( Yes ) )
+	PORT_DIPNAME( 0x80, 0x80, DEF_STR( Unused ) )
+	PORT_DIPSETTING(    0x80, DEF_STR( Off ) )
+	PORT_DIPSETTING(    0x00, DEF_STR( On ) )
+
+	PORT_START	/* player 1 12-way rotary control - converted in controls_r() */
 	PORT_ANALOGX( 0xff, 0x00, IPT_DIAL | IPF_REVERSE, 25, 10, 0, 0, KEYCODE_Z, KEYCODE_X, IP_JOY_NONE, IP_JOY_NONE )
 
 	PORT_START	/* player 2 12-way rotary control - converted in controls_r() */
@@ -998,6 +1284,9 @@ static MACHINE_DRIVER_START( robocop )
 	MDRV_SOUND_ADD(YM2203, ym2203_interface)
 	MDRV_SOUND_ADD(YM3812, ym3812_interface)
 	MDRV_SOUND_ADD(OKIM6295, okim6295_interface)
+	MDRV_SOUND_ADD(SAMPLES, robocop_samples_set)
+	robocop_playing = true;
+	robocop_start = 0;
 MACHINE_DRIVER_END
 
 static MACHINE_DRIVER_START( robocopb )
@@ -1121,6 +1410,36 @@ static MACHINE_DRIVER_START( midres )
 	/* sound hardware */
 	MDRV_SOUND_ADD(YM2203, ym2203_interface)
 	MDRV_SOUND_ADD(YM3812, ym3812b_interface)
+	MDRV_SOUND_ADD(OKIM6295, okim6295_interface)
+MACHINE_DRIVER_END
+
+static MACHINE_DRIVER_START( midresbj )
+
+	/* basic machine hardware */
+	MDRV_CPU_ADD(M68000, 12000000)
+	MDRV_CPU_MEMORY(midres_readmem,midres_writemem)
+	MDRV_CPU_VBLANK_INT(irq6_line_hold,1)/* VBL */
+
+	MDRV_CPU_ADD(M6502, 1500000)
+	MDRV_CPU_FLAGS(CPU_AUDIO_CPU)
+	MDRV_CPU_MEMORY(dec0_s_readmem,dec0_s_writemem)
+
+	MDRV_FRAMES_PER_SECOND(57.41)
+	MDRV_VBLANK_DURATION(529) /* 57.41 Hz, 529us Vblank */
+
+	/* video hardware */
+	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER)
+	MDRV_SCREEN_SIZE(32*8, 32*8)
+	MDRV_VISIBLE_AREA(0*8, 32*8-1, 1*8, 31*8-1)
+	MDRV_GFXDECODE(midres_gfxdecodeinfo)
+	MDRV_PALETTE_LENGTH(1024)
+
+	MDRV_VIDEO_START(dec0_nodma)
+	MDRV_VIDEO_UPDATE(midres)
+
+	/* sound hardware */
+	MDRV_SOUND_ADD(YM2203, ym2203_interface)
+	MDRV_SOUND_ADD(YM3812, ym3812_interface)
 	MDRV_SOUND_ADD(OKIM6295, okim6295_interface)
 MACHINE_DRIVER_END
 
@@ -1877,7 +2196,7 @@ ROM_START( secretab )
 	ROM_REGION( 0x80000, REGION_GFX4, ROMREGION_DISPOSE ) /* sprites */
 
 	ROM_REGION( 0x20000, REGION_SOUND1, 0 )	/* ADPCM samples */
-	ROM_LOAD( "sa_02.bin",      0x00000, 0x10000,CRC(439eb5a9) SHA1(8d6baad8a1e89279ef0a378941d3d9b49a606864) ) // both halves identical
+	ROM_LOAD( "sa_02.bin",      0x00000, 0x10000,CRC(439eb5a9) SHA1(8d6baad8a1e89279ef0a378941d3d9b49a606864) ) /* both halves identical*/
 
 	ROM_REGION( 0x10000, REGION_USER1, 0 )	/* Other Roms, work out what they're equivalent to and the correct decodes */
 	ROM_LOAD( "sa_07.bin",      0x00000, 0x10000,CRC(6ad2e575) SHA1(b6b159cb36e222fe62fc10271602226f027440e4) )
@@ -2015,6 +2334,51 @@ ROM_START( midresj )
 	ROM_LOAD( "7114.prm",          0x0000, 0x0100, CRC(eb539ffb) SHA1(6a8c9112f289f63e8c88320c9df698b559632c3d) )	/* Priority (not used) */
 ROM_END
 
+ROM_START( midresbj )
+	ROM_REGION( 0x80000, REGION_CPU1, 0 ) /* 68000 code */
+	ROM_LOAD16_BYTE( "14",         0x00000, 0x10000, CRC(6b3bc886) SHA1(998ef6ae89565148bcb8909f21acbec378ed5f4f) )
+	ROM_LOAD16_BYTE( "11",         0x00001, 0x10000, CRC(9b6faab3) SHA1(b60e41972f52df910bfa09accd5fde7d858b55bf) )
+	ROM_LOAD16_BYTE( "13",         0x20000, 0x10000, CRC(d1bb2cd6) SHA1(6d4afd8dd8c4c3e90de199358da27108286637e2) )
+	ROM_LOAD16_BYTE( "10",         0x20001, 0x10000, CRC(42ccdd0d) SHA1(ef17cc984a8d57e9c52877f4e9b78e9976f99033) )
+	ROM_LOAD16_BYTE( "12",         0x40000, 0x10000, CRC(258b10b2) SHA1(f0849801ab2c72bc6e929b230d0c6d41823f18ae) )
+	ROM_LOAD16_BYTE( "9",          0x40001, 0x10000, CRC(dd6985d5) SHA1(bd58a1da2c5152464d7660f5b931d6257cb87c4e) )
+
+	ROM_REGION( 0x10000, REGION_CPU2, 0 )    /* 6502 sound */
+	ROM_LOAD( "15",         0x0000, 0x10000, CRC(99d47166) SHA1(a9a1adfe47be8dd3e4d6f8c783447e09be1747b2) )
+
+	
+	ROM_REGION( 0x20000,  REGION_GFX1, ROMREGION_DISPOSE ) /* chars */
+	ROM_LOAD( "23",             0x08000, 0x08000, CRC(d75aba06) SHA1(cb3b969db3dd8e0c5c3729482f7461cde3a961f3) )
+	ROM_CONTINUE(                   0x00000, 0x08000 )  /* the two halves are swapped */
+	ROM_LOAD( "24",             0x18000, 0x08000, CRC(8f5bbb79) SHA1(cb10f68787606111ba5e9967bf0b0cd21269a902) )
+	ROM_CONTINUE(                   0x10000, 0x08000 )
+
+	ROM_REGION( 0x80000,  REGION_GFX2, ROMREGION_DISPOSE ) /* tiles */
+	ROM_LOAD( "19",             0x00000, 0x20000, CRC(fd9ba1bd) SHA1(a105a4335eeed19662c89ab0f90485f1029cf03f) )
+	ROM_LOAD( "18",             0x20000, 0x20000, CRC(a936c03c) SHA1(293e69874ce9b2dfb1d605c9f988fa736b12bbcf) )
+	ROM_LOAD( "20",             0x40000, 0x20000, CRC(4d8e3cf1) SHA1(db804a608f6ba9ce4cedfec2581bcbb00de3f2ba) )
+	ROM_LOAD( "17",             0x60000, 0x20000, CRC(b7241ab9) SHA1(3e83f9285ff4c476f1287bf73b514eace482dccc) )
+
+	ROM_REGION( 0x40000,  REGION_GFX3, ROMREGION_DISPOSE ) /* tiles */
+	ROM_LOAD( "22",             0x10000, 0x10000, CRC(35a54bb4) SHA1(1869eb77a060e9df42b761b02e7fa5ecb7c414d1) )
+	ROM_CONTINUE(0x00000,0x10000)
+	ROM_LOAD( "21",             0x30000, 0x10000, CRC(4b9227b3) SHA1(7059f2d07fffa0468a45a42b87bf561da5e9c5a4) )
+	ROM_CONTINUE(0x20000,0x10000)
+
+	ROM_REGION( 0x80000, REGION_GFX4, ROMREGION_DISPOSE ) /* sprites */
+	ROM_LOAD( "4",             0x00000, 0x10000, CRC(3f499acb) SHA1(1a22cfeed0497ddc2d571114d9f246b3ae18ede9) )
+	ROM_LOAD( "8",             0x10000, 0x10000, CRC(5e7a6800) SHA1(8dd5c9005b6804a30627644053f14e4477fe0074) )
+	ROM_LOAD( "2",             0x20000, 0x10000, CRC(897ba6e4) SHA1(70fd9cba3922751cb317770d6effdc2fb94c1324) )
+	ROM_LOAD( "6",             0x30000, 0x10000, CRC(9fefb810) SHA1(863a81540261e78de5c612dea807ba29b12054d4) )
+	ROM_LOAD( "3",             0x40000, 0x10000, CRC(ebafe720) SHA1(b9f76d2f1b59f1d028e6156b831c5c8ada033641) )
+	ROM_LOAD( "7",             0x50000, 0x10000, CRC(bb8cf641) SHA1(a22e47a15d38d4f33e5a2c90f3a90a16a4231d2c) ) /* slight changes, check (equivalent to 3.bin in above)*/
+	ROM_LOAD( "1",             0x60000, 0x10000, CRC(fd0bd8d3) SHA1(d6b19869ddc2a8ed4f38ba9d613b71853f2d13c0) )
+	ROM_LOAD( "5",             0x70000, 0x10000, CRC(fc46d5ed) SHA1(20ddf3f67f0dfb222ad8d3fd464b892ec9c9e4f5) )
+
+	ROM_REGION( 0x40000, REGION_SOUND1, 0 ) /* ADPCM samples */
+	ROM_LOAD( "16",            0x00000, 0x10000, CRC(ccf24b52) SHA1(39b2663c548b30684197284cb8e7a6ca803330c9))
+ROM_END
+
 ROM_START( bouldash )
 	ROM_REGION( 0x60000, REGION_CPU1, 0 ) /* 68000 code */
 	ROM_LOAD16_BYTE( "fn-15",   0x00000, 0x10000, CRC(ca19a967) SHA1(b9dc2b1323f19b6239e550ed020943bf13de8db0) )
@@ -2093,6 +2457,16 @@ ROM_START( bouldshj )
 	ROM_LOAD( "ta-16.21k",          0x0000, 0x0100, CRC(ad26e8d4) SHA1(827337aeb8904429a1c050279240ae38aa6ce064) )	/* Priority (not used) */
 ROM_END
 
+
+static DRIVER_INIT( midresbj )
+{
+	install_mem_read16_handler(0, 0x00180000, 0x0018000f,  dec0_controls_r );
+	install_mem_read16_handler(0, 0x001a0000, 0x001a000f,  dec0_rotary_r );
+
+	install_mem_write16_handler(0, 0x00180014, 0x00180015, midres_sound_w );
+}
+
+
 /******************************************************************************/
 
 GAME( 1987, hbarrel,  0,        hbarrel,  hbarrel,  hbarrel,  ROT270, "Data East USA",         "Heavy Barrel (US)" )
@@ -2116,5 +2490,6 @@ GAMEX(1989, secretab, slyspy,   slyspy,   slyspy,   slyspy,   ROT0,   "bootleg",
 GAME( 1989, midres,   0,        midres,   midres,   0,        ROT0,   "Data East Corporation", "Midnight Resistance (World)" )
 GAME( 1989, midresu,  midres,   midres,   midres,   0,        ROT0,   "Data East USA",         "Midnight Resistance (US)" )
 GAME( 1989, midresj,  midres,   midres,   midres,   0,        ROT0,   "Data East Corporation", "Midnight Resistance (Japan)" )
-GAME( 1990, bouldash, 0,        slyspy,   bouldash, slyspy,   ROT0,   "Data East Corporation (licensed from First Star)", "Boulder Dash / Boulder Dash Part 2 (World)" )
-GAME( 1990, bouldshj, bouldash, slyspy,   bouldash, slyspy,   ROT0,   "Data East Corporation (licensed from First Star)", "Boulder Dash / Boulder Dash Part 2 (Japan)" )
+GAME( 1989, midresbj, midres,   midresbj, midresbj, midresbj, ROT0,   "bootleg",               "Midnight Resistance (joystick hack bootleg)" )
+GAME( 1990, bouldash, 0,        slyspy,   bouldash, slyspy,   ROT0,   "Data East Corporation (licensed from First Star)", "Boulder Dash - Boulder Dash Part 2 (World)" )
+GAME( 1990, bouldshj, bouldash, slyspy,   bouldash, slyspy,   ROT0,   "Data East Corporation (licensed from First Star)", "Boulder Dash - Boulder Dash Part 2 (Japan)" )
