@@ -15,13 +15,70 @@ Notes:
   The 0x6000-0x7fff ROM space doesn't seem to be used: instead the game writes
   to 6048 and reads from 6000. Silly copy protection?
 
+- Increased REGION_GFX3 to address 0x400 sprites, to avoid Ghosts'n Goblins
+  from drawing a bad sprite. (18/08/2005 Pierpaolo Prazzoli)
+
 ***************************************************************************/
 
 #include "driver.h"
 #include "vidhrdw/generic.h"
 #include "cpu/m6809/m6809.h"
 
+bool	gng_playing = false;
+bool	gng_start = false;
+bool	gng_diddy = false;
+bool	gng_title_diddy = false;
+bool	gng_title = false;
+bool	gng_lastwave = false;
+int		gng_start_counter = 0;
 
+
+const char *const gng_sample_names[] =
+{
+	"*gng",
+	"intro2-01",
+	"intro2-02",
+	"lap1-01",
+	"lap1-02",
+	"1stnm-01",
+	"1stnm-02",
+	"2ndee-01",
+	"2ndee02",
+	"2ndnm-01",
+	"2ndnm-02",
+	"stg56-01",
+	"stg56-02",
+	"bossintro-01",
+	"bossintro-02",
+	"stg12-01",
+	"stg12-02",
+	"boss-01",
+	"boss-02",
+	"boss2-01",
+	"boss2-02",
+	"map-01",
+	"map-02",
+	"2ndlap-01",
+	"2ndlap-02",
+	"stg34-01",
+	"stg34-02",
+	"boss1-01",
+	"boss1-02",
+	"intro-01",
+	"intro-02",
+	"bossintro2-01",
+	"bossintro2-02",
+	"intro3-01",
+	"intro3-02",
+	0
+};
+
+static struct Samplesinterface gng_samples =
+{
+	2,	/* 2 channels*/
+	100, /* volume*/
+	gng_sample_names
+};
 
 extern unsigned char *gng_fgvideoram;
 extern unsigned char *gng_bgvideoram;
@@ -56,6 +113,240 @@ static WRITE_HANDLER( gng_coin_counter_w )
 	coin_counter_w(offset,data);
 }
 
+static WRITE_HANDLER( sound_command_w )
+{
+    if(gng_playing == true) {
+	   int a = 0;
+	   int o_max_samples = 41;
+	   int sa_left = 0;
+	   int sa_right = 1;
+	   bool sa_loop = 1; // --> 1 == loop, 0 == do not loop.
+	   bool sa_play_sample = false;
+	   bool sa_play_original = false;
+	   bool gng_do_nothing = false;
+	   bool gng_stop_samples = false;
+	   bool gng_play_default = false;
+		
+		if(gng_start == true) {
+			sa_play_sample = true;
+			sa_left = 0;
+			sa_right = 1;
+			gng_start = false;
+			gng_diddy = true;
+			gng_lastwave = false;
+		}
+			
+		switch (data) {	            
+			/* before stage intro part 2*/
+			case 0x10:
+			    gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 0;
+				sa_right = 1;			
+				break;			
+			/* 1st lap Clear*/
+			case 0x1C:
+				gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 2;
+				sa_right = 3;			
+				break;
+			/* 1st Place name Reg*/
+			case 0x26:
+                gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 4;
+				sa_right = 5;	
+                break;				
+			/* Below 2nd Entry End*/
+			case 0x27:
+		        gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_left = 6;
+				sa_right = 7;				
+				break;
+			/* Below 2nd Place name Reg */
+			case 0x28:
+                gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 8;
+				sa_right = 9;			
+				break;
+			/* stage #5 and #6 TH Demon Castle*/
+			case 0x29:
+                gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_left = 10;
+				sa_right = 11;							
+				break;
+			/* Boss #7*/
+			case 0x2A:
+                gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 12;
+				sa_right = 13;			
+				break;			
+			/* stage #1 and #2: */
+			case 0x2B:
+		        gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 14;
+				sa_right = 15;			
+				break;
+			/* stage #1 and #2 boss*/
+			case 0x2D:
+			    gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 16;
+				sa_right = 17;			
+				break;
+			/* Boss #5 and #6*/
+			case 0x2E:
+                gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 18;
+				sa_right = 19;			
+				break;
+			/* the map*/
+			case 0x30:
+                gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 18;
+				sa_right = 19;			
+				break;
+			/* 2nd Lap clear */
+			case 0x32:
+				gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 20;
+				sa_right = 21;			
+				break;
+			/* stage #3 and #4*/
+			case 0x33:
+				gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 20;
+				sa_right = 21;			
+				break;
+			/* stage #3 and #4 boss*/
+			case 0x34:
+				gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 20;
+				sa_right = 21;			
+				break;
+			/* stage introduction*/
+			case 0x36:
+				gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 20;
+				sa_right = 21;			
+				break;
+			//*last boss intro  */
+			case 0x38:
+				gng_diddy = false;
+				gng_title_diddy = false;
+				gng_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 20;
+				sa_right = 21;			
+				break;
+			/* before stage intro*/
+			case 0x3A:			
+               if(gng_lastwave == false) {
+					gng_diddy = false;
+					gng_title_diddy = false;
+					gng_lastwave = true;
+					sa_play_sample = true;
+					sa_left = 22;
+					sa_right = 23;		
+			   }
+				else
+					gng_do_nothing = true;
+				break;    
+                default:
+				soundlatch_w(offset,data & 0xff);
+			break;
+		}
+
+		if(sa_play_sample == true) {
+			a = 0;
+
+			for(a = 0; a <= o_max_samples; a++) {
+				sample_stop(a);
+			}
+
+			sample_start(0, sa_left, sa_loop);
+			sample_start(1, sa_right, sa_loop);
+			
+			// Determine how we should mix these samples together.
+			if(sample_playing(0) == 0 && sample_playing(1) == 1) { // Right channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(1, 100, 100);
+			}
+			else if(sample_playing(0) == 1 && sample_playing(1) == 0) { // Left channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(0, 100, 100);
+			}
+			else if(sample_playing(0) == 1 && sample_playing(1) == 1) { // Both left and right channels. Lets make them play in there respective speakers.
+				sample_set_stereo_volume(0, 100, 0);
+				sample_set_stereo_volume(1, 0, 100);
+			}
+			else if(sample_playing(0) == 0 && sample_playing(1) == 0 && gng_do_nothing == false) { // No sample playing, revert to the default sound.
+				sa_play_original = false;
+				soundlatch_w(offset,data & 0xff);
+			}
+
+			if(sa_play_original == true)
+				soundlatch_w(offset,data & 0xff);
+		}
+		else if(gng_do_nothing == true) {
+			// --> Do nothing.
+		}
+		else if(gng_stop_samples == true) {
+			a = 0;
+
+			for(a = 0; a <= o_max_samples; a++) {
+				sample_stop(a);
+			}
+		    
+            // Now play the default sound.
+			soundlatch_w(offset,data & 0xff);
+			cpu_set_irq_line(1,IRQ_LINE_NMI,PULSE_LINE);
+		}
+		else if(gng_play_default == true) {
+			soundlatch_w(offset,data & 0xff);
+		}
+	}
+}
+
+		
 static MEMORY_READ_START( readmem )
 	{ 0x0000, 0x2fff, MRA_RAM },
 	{ 0x3000, 0x3000, input_port_0_r },
@@ -75,12 +366,12 @@ static MEMORY_WRITE_START( writemem )
 	{ 0x2800, 0x2fff, gng_bgvideoram_w, &gng_bgvideoram },
 	{ 0x3800, 0x38ff, paletteram_RRRRGGGGBBBBxxxx_split2_w, &paletteram_2 },
 	{ 0x3900, 0x39ff, paletteram_RRRRGGGGBBBBxxxx_split1_w, &paletteram },
-	{ 0x3a00, 0x3a00, soundlatch_w },
+	{ 0x3a00, 0x3a00, sound_command_w },
 	{ 0x3b08, 0x3b09, gng_bgscrollx_w },
 	{ 0x3b0a, 0x3b0b, gng_bgscrolly_w },
 	{ 0x3c00, 0x3c00, MWA_NOP },   /* watchdog? */
 	{ 0x3d00, 0x3d00, gng_flipscreen_w },
-//	{ 0x3d01, 0x3d01, reset sound cpu?
+ /*	{ 0x3d01, 0x3d01, cpu_reset?}, */
 	{ 0x3d02, 0x3d03, gng_coin_counter_w },
 	{ 0x3e00, 0x3e00, gng_bankswitch_w },
 	{ 0x4000, 0xffff, MWA_ROM },
@@ -96,6 +387,7 @@ MEMORY_END
 
 static MEMORY_WRITE_START( sound_writemem )
 	{ 0xc000, 0xc7ff, MWA_RAM },
+    { 0xc800, 0xc800, soundlatch_w },
 	{ 0xe000, 0xe000, YM2203_control_port_0_w },
 	{ 0xe001, 0xe001, YM2203_write_port_0_w },
 	{ 0xe002, 0xe002, YM2203_control_port_1_w },
@@ -407,11 +699,12 @@ static struct YM2203interface ym2203_interface =
 {
 	2,			/* 2 chips */
 	1500000,	/* 1.5 MHz (?) */
+		
 	{ YM2203_VOL(20,40), YM2203_VOL(20,40) },
 	{ 0 },
 	{ 0 },
 	{ 0 },
-	{ 0 }
+	{ 0 },
 };
 
 
@@ -430,6 +723,7 @@ static MACHINE_DRIVER_START( gng )
 
 	MDRV_FRAMES_PER_SECOND(60)
 	MDRV_VBLANK_DURATION(DEFAULT_60HZ_VBLANK_DURATION)
+	
 
 	/* video hardware */
 	MDRV_VIDEO_ATTRIBUTES(VIDEO_TYPE_RASTER | VIDEO_BUFFERS_SPRITERAM)
@@ -444,6 +738,9 @@ static MACHINE_DRIVER_START( gng )
 
 	/* sound hardware */
 	MDRV_SOUND_ADD(YM2203, ym2203_interface)
+    MDRV_SOUND_ADD(SAMPLES, gng_samples)
+	gng_playing = true;
+	gng_start = 0;
 MACHINE_DRIVER_END
 
 
@@ -474,13 +771,13 @@ ROM_START( gng )
 	ROM_LOAD( "gg7.bin",      0x10000, 0x4000, CRC(e525207d) SHA1(1947f159189b3a53f1251d8653b6e7c65c91fc3c) ) /* tiles 0-1 Plane 3*/
 	ROM_LOAD( "gg6.bin",      0x14000, 0x4000, CRC(2d77e9b2) SHA1(944da1ce29a18bf0fc8deff78bceacba0bf23a07) ) /* tiles 2-3 Plane 3*/
 
-	ROM_REGION( 0x18000, REGION_GFX3, ROMREGION_DISPOSE )
+	ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE | ROMREGION_ERASEFF )
 	ROM_LOAD( "gg17.bin",     0x00000, 0x4000, CRC(93e50a8f) SHA1(42d367f57bb2fdf60a0445ac1533da99cfeaa617) ) /* sprites 0 Plane 1-2 */
 	ROM_LOAD( "gg16.bin",     0x04000, 0x4000, CRC(06d7e5ca) SHA1(9e06012bcd82f98fad43de666ef9a75979d940ab) ) /* sprites 1 Plane 1-2 */
 	ROM_LOAD( "gg15.bin",     0x08000, 0x4000, CRC(bc1fe02d) SHA1(e3a1421d465b87148ffa94f5673b2307f0246afe) ) /* sprites 2 Plane 1-2 */
-	ROM_LOAD( "gg14.bin",     0x0c000, 0x4000, CRC(6aaf12f9) SHA1(207a7407288182a4f3eddaea634c6a6452131182) ) /* sprites 0 Plane 3-4 */
-	ROM_LOAD( "gg13.bin",     0x10000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
-	ROM_LOAD( "gg12.bin",     0x14000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
+	ROM_LOAD( "gg14.bin",     0x10000, 0x4000, CRC(6aaf12f9) SHA1(207a7407288182a4f3eddaea634c6a6452131182) ) /* sprites 0 Plane 3-4 */
+	ROM_LOAD( "gg13.bin",     0x14000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
+	ROM_LOAD( "gg12.bin",     0x18000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
 
 	ROM_REGION( 0x0200, REGION_PROMS, 0 )
 	ROM_LOAD( "tbp24s10.14k", 0x0000, 0x0100, CRC(0eaf5158) SHA1(bafd4108708f66cd7b280e47152b108f3e254fc9) )  /* video timing (not used) */
@@ -509,13 +806,13 @@ ROM_START( gnga )
 	ROM_LOAD( "gg7.bin",      0x10000, 0x4000, CRC(e525207d) SHA1(1947f159189b3a53f1251d8653b6e7c65c91fc3c) ) /* tiles 0-1 Plane 3*/
 	ROM_LOAD( "gg6.bin",      0x14000, 0x4000, CRC(2d77e9b2) SHA1(944da1ce29a18bf0fc8deff78bceacba0bf23a07) ) /* tiles 2-3 Plane 3*/
 
-	ROM_REGION( 0x18000, REGION_GFX3, ROMREGION_DISPOSE )
+	ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE | ROMREGION_ERASEFF )
 	ROM_LOAD( "gg17.bin",     0x00000, 0x4000, CRC(93e50a8f) SHA1(42d367f57bb2fdf60a0445ac1533da99cfeaa617) ) /* sprites 0 Plane 1-2 */
 	ROM_LOAD( "gg16.bin",     0x04000, 0x4000, CRC(06d7e5ca) SHA1(9e06012bcd82f98fad43de666ef9a75979d940ab) ) /* sprites 1 Plane 1-2 */
 	ROM_LOAD( "gg15.bin",     0x08000, 0x4000, CRC(bc1fe02d) SHA1(e3a1421d465b87148ffa94f5673b2307f0246afe) ) /* sprites 2 Plane 1-2 */
-	ROM_LOAD( "gg14.bin",     0x0c000, 0x4000, CRC(6aaf12f9) SHA1(207a7407288182a4f3eddaea634c6a6452131182) ) /* sprites 0 Plane 3-4 */
-	ROM_LOAD( "gg13.bin",     0x10000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
-	ROM_LOAD( "gg12.bin",     0x14000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
+	ROM_LOAD( "gg14.bin",     0x10000, 0x4000, CRC(6aaf12f9) SHA1(207a7407288182a4f3eddaea634c6a6452131182) ) /* sprites 0 Plane 3-4 */
+	ROM_LOAD( "gg13.bin",     0x14000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
+	ROM_LOAD( "gg12.bin",     0x18000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
 
 	ROM_REGION( 0x0200, REGION_PROMS, 0 )
 	ROM_LOAD( "tbp24s10.14k", 0x0000, 0x0100, CRC(0eaf5158) SHA1(bafd4108708f66cd7b280e47152b108f3e254fc9) )  /* video timing (not used) */
@@ -542,13 +839,13 @@ ROM_START( gngt )
 	ROM_LOAD( "gg7.bin",      0x10000, 0x4000, CRC(e525207d) SHA1(1947f159189b3a53f1251d8653b6e7c65c91fc3c) ) /* tiles 0-1 Plane 3*/
 	ROM_LOAD( "gg6.bin",      0x14000, 0x4000, CRC(2d77e9b2) SHA1(944da1ce29a18bf0fc8deff78bceacba0bf23a07) ) /* tiles 2-3 Plane 3*/
 
-	ROM_REGION( 0x18000, REGION_GFX3, ROMREGION_DISPOSE )
+	ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE | ROMREGION_ERASEFF )
 	ROM_LOAD( "gg17.bin",     0x00000, 0x4000, CRC(93e50a8f) SHA1(42d367f57bb2fdf60a0445ac1533da99cfeaa617) ) /* sprites 0 Plane 1-2 */
 	ROM_LOAD( "gg16.bin",     0x04000, 0x4000, CRC(06d7e5ca) SHA1(9e06012bcd82f98fad43de666ef9a75979d940ab) ) /* sprites 1 Plane 1-2 */
 	ROM_LOAD( "gg15.bin",     0x08000, 0x4000, CRC(bc1fe02d) SHA1(e3a1421d465b87148ffa94f5673b2307f0246afe) ) /* sprites 2 Plane 1-2 */
-	ROM_LOAD( "gg14.bin",     0x0c000, 0x4000, CRC(6aaf12f9) SHA1(207a7407288182a4f3eddaea634c6a6452131182) ) /* sprites 0 Plane 3-4 */
-	ROM_LOAD( "gg13.bin",     0x10000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
-	ROM_LOAD( "gg12.bin",     0x14000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
+	ROM_LOAD( "gg14.bin",     0x10000, 0x4000, CRC(6aaf12f9) SHA1(207a7407288182a4f3eddaea634c6a6452131182) ) /* sprites 0 Plane 3-4 */
+	ROM_LOAD( "gg13.bin",     0x14000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
+	ROM_LOAD( "gg12.bin",     0x18000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
 
 	ROM_REGION( 0x0200, REGION_PROMS, 0 )
 	ROM_LOAD( "tbp24s10.14k", 0x0000, 0x0100, CRC(0eaf5158) SHA1(bafd4108708f66cd7b280e47152b108f3e254fc9) )  /* video timing (not used) */
@@ -575,13 +872,13 @@ ROM_START( makaimur )
 	ROM_LOAD( "gg7.bin",      0x10000, 0x4000, CRC(e525207d) SHA1(1947f159189b3a53f1251d8653b6e7c65c91fc3c) ) /* tiles 0-1 Plane 3*/
 	ROM_LOAD( "gg6.bin",      0x14000, 0x4000, CRC(2d77e9b2) SHA1(944da1ce29a18bf0fc8deff78bceacba0bf23a07) ) /* tiles 2-3 Plane 3*/
 
-	ROM_REGION( 0x18000, REGION_GFX3, ROMREGION_DISPOSE )
+	ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE | ROMREGION_ERASEFF )
 	ROM_LOAD( "gng13.n4",     0x00000, 0x4000, CRC(4613afdc) SHA1(13e5a38a134bd7cfa16c63a18fa332c6d66b9345) ) /* sprites 0 Plane 1-2 */
 	ROM_LOAD( "gg16.bin",     0x04000, 0x4000, CRC(06d7e5ca) SHA1(9e06012bcd82f98fad43de666ef9a75979d940ab) ) /* sprites 1 Plane 1-2 */
 	ROM_LOAD( "gg15.bin",     0x08000, 0x4000, CRC(bc1fe02d) SHA1(e3a1421d465b87148ffa94f5673b2307f0246afe) ) /* sprites 2 Plane 1-2 */
-	ROM_LOAD( "gng16.l4",     0x0c000, 0x4000, CRC(608d68d5) SHA1(af207f9ee2f93a0cf9cf25cfe72b0fdfe55481b8) ) /* sprites 0 Plane 3-4 */
-	ROM_LOAD( "gg13.bin",     0x10000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
-	ROM_LOAD( "gg12.bin",     0x14000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
+	ROM_LOAD( "gng16.l4",     0x10000, 0x4000, CRC(608d68d5) SHA1(af207f9ee2f93a0cf9cf25cfe72b0fdfe55481b8) ) /* sprites 0 Plane 3-4 */
+	ROM_LOAD( "gg13.bin",     0x14000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
+	ROM_LOAD( "gg12.bin",     0x18000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
 
 	ROM_REGION( 0x0200, REGION_PROMS, 0 )
 	ROM_LOAD( "tbp24s10.14k", 0x0000, 0x0100, CRC(0eaf5158) SHA1(bafd4108708f66cd7b280e47152b108f3e254fc9) )  /* video timing (not used) */
@@ -608,13 +905,13 @@ ROM_START( makaimuc )
 	ROM_LOAD( "gg7.bin",      0x10000, 0x4000, CRC(e525207d) SHA1(1947f159189b3a53f1251d8653b6e7c65c91fc3c) ) /* tiles 0-1 Plane 3*/
 	ROM_LOAD( "gg6.bin",      0x14000, 0x4000, CRC(2d77e9b2) SHA1(944da1ce29a18bf0fc8deff78bceacba0bf23a07) ) /* tiles 2-3 Plane 3*/
 
-	ROM_REGION( 0x18000, REGION_GFX3, ROMREGION_DISPOSE )
+	ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE | ROMREGION_ERASEFF )
 	ROM_LOAD( "gng13.n4",     0x00000, 0x4000, CRC(4613afdc) SHA1(13e5a38a134bd7cfa16c63a18fa332c6d66b9345) ) /* sprites 0 Plane 1-2 */
 	ROM_LOAD( "gg16.bin",     0x04000, 0x4000, CRC(06d7e5ca) SHA1(9e06012bcd82f98fad43de666ef9a75979d940ab) ) /* sprites 1 Plane 1-2 */
 	ROM_LOAD( "gg15.bin",     0x08000, 0x4000, CRC(bc1fe02d) SHA1(e3a1421d465b87148ffa94f5673b2307f0246afe) ) /* sprites 2 Plane 1-2 */
-	ROM_LOAD( "gng16.l4",     0x0c000, 0x4000, CRC(608d68d5) SHA1(af207f9ee2f93a0cf9cf25cfe72b0fdfe55481b8) )     /* sprites 0 Plane 3-4 */
-	ROM_LOAD( "gg13.bin",     0x10000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
-	ROM_LOAD( "gg12.bin",     0x14000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
+	ROM_LOAD( "gng16.l4",     0x10000, 0x4000, CRC(608d68d5) SHA1(af207f9ee2f93a0cf9cf25cfe72b0fdfe55481b8) ) /* sprites 0 Plane 3-4 */
+	ROM_LOAD( "gg13.bin",     0x14000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
+	ROM_LOAD( "gg12.bin",     0x18000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
 
 	ROM_REGION( 0x0200, REGION_PROMS, 0 )
 	ROM_LOAD( "tbp24s10.14k", 0x0000, 0x0100, CRC(0eaf5158) SHA1(bafd4108708f66cd7b280e47152b108f3e254fc9) )  /* video timing (not used) */
@@ -641,13 +938,13 @@ ROM_START( makaimug )
 	ROM_LOAD( "gg7.bin",      0x10000, 0x4000, CRC(e525207d) SHA1(1947f159189b3a53f1251d8653b6e7c65c91fc3c) ) /* tiles 0-1 Plane 3*/
 	ROM_LOAD( "gg6.bin",      0x14000, 0x4000, CRC(2d77e9b2) SHA1(944da1ce29a18bf0fc8deff78bceacba0bf23a07) ) /* tiles 2-3 Plane 3*/
 
-	ROM_REGION( 0x18000, REGION_GFX3, ROMREGION_DISPOSE )
+	ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE | ROMREGION_ERASEFF )
 	ROM_LOAD( "gng13.n4",     0x00000, 0x4000, CRC(4613afdc) SHA1(13e5a38a134bd7cfa16c63a18fa332c6d66b9345) ) /* sprites 0 Plane 1-2 */
 	ROM_LOAD( "gg16.bin",     0x04000, 0x4000, CRC(06d7e5ca) SHA1(9e06012bcd82f98fad43de666ef9a75979d940ab) ) /* sprites 1 Plane 1-2 */
 	ROM_LOAD( "gg15.bin",     0x08000, 0x4000, CRC(bc1fe02d) SHA1(e3a1421d465b87148ffa94f5673b2307f0246afe) ) /* sprites 2 Plane 1-2 */
-	ROM_LOAD( "gng16.l4",     0x0c000, 0x4000, CRC(608d68d5) SHA1(af207f9ee2f93a0cf9cf25cfe72b0fdfe55481b8) ) /* sprites 0 Plane 3-4 */
-	ROM_LOAD( "gg13.bin",     0x10000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
-	ROM_LOAD( "gg12.bin",     0x14000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
+	ROM_LOAD( "gng16.l4",     0x10000, 0x4000, CRC(608d68d5) SHA1(af207f9ee2f93a0cf9cf25cfe72b0fdfe55481b8) ) /* sprites 0 Plane 3-4 */
+	ROM_LOAD( "gg13.bin",     0x14000, 0x4000, CRC(e80c3fca) SHA1(cb641c25bb04b970b2cbeca41adb792bbe142fb5) ) /* sprites 1 Plane 3-4 */
+	ROM_LOAD( "gg12.bin",     0x18000, 0x4000, CRC(7780a925) SHA1(3f129ca6d695548b659955fe538584bd9ac2ff17) ) /* sprites 2 Plane 3-4 */
 
 	ROM_REGION( 0x0200, REGION_PROMS, 0 )
 	ROM_LOAD( "tbp24s10.14k", 0x0000, 0x0100, CRC(0eaf5158) SHA1(bafd4108708f66cd7b280e47152b108f3e254fc9) )  /* video timing (not used) */
@@ -675,9 +972,9 @@ ROM_START( diamond )
 	ROM_LOAD( "d7",           0x10000, 0x4000, CRC(fd595274) SHA1(8d22f89a7251ecc8b56ee3f8cfaab2fd5a716b3f) ) /* tiles 0-1 Plane 3*/
 	ROM_LOAD( "d6",           0x14000, 0x4000, CRC(7f51dcd2) SHA1(ff4a68a7a6a5caa558898b03ba4a4dc3ab43ce30) ) /* tiles 2-3 Plane 3*/
 
-	ROM_REGION( 0x08000, REGION_GFX3, ROMREGION_DISPOSE )
+	ROM_REGION( 0x20000, REGION_GFX3, ROMREGION_DISPOSE | ROMREGION_ERASEFF )
 	ROM_LOAD( "d17",          0x00000, 0x4000, CRC(8164b005) SHA1(d03bf62734b03c90a8393a23f8ce0a3769c43bf7) ) /* sprites 0 Plane 1-2 */
-	ROM_LOAD( "d14",          0x04000, 0x4000, CRC(6f132163) SHA1(cd1ebf9671bcce58896dadbf20f036eaadbe8bd5) ) /* sprites 0 Plane 3-4 */
+	ROM_LOAD( "d14",          0x10000, 0x4000, CRC(6f132163) SHA1(cd1ebf9671bcce58896dadbf20f036eaadbe8bd5) ) /* sprites 0 Plane 3-4 */
 
 	ROM_REGION( 0x0200, REGION_PROMS, 0 )
 	ROM_LOAD( "prom1",        0x0000, 0x0100, CRC(0eaf5158) SHA1(bafd4108708f66cd7b280e47152b108f3e254fc9) )  /* video timing (not used) */
@@ -698,8 +995,8 @@ static DRIVER_INIT( diamond )
 
 
 
-GAME( 1985, gng,	  0,   gng, gng,	  0,	   ROT0, "Capcom", "Ghosts'n Goblins (World? set 1)" )
-GAME( 1985, gnga,	  gng, gng, gng,	  0,	   ROT0, "Capcom", "Ghosts'n Goblins (World? set 2)" )
+GAME( 1985, gng,	  0,   gng, gng,	  0,	   ROT0, "Capcom", "Ghosts'n Goblins (World[Q] set 1)" )
+GAME( 1985, gnga,	  gng, gng, gng,	  0,	   ROT0, "Capcom", "Ghosts'n Goblins (World[Q] set 2)" )
 GAME( 1985, gngt,	  gng, gng, gng,	  0,	   ROT0, "Capcom (Taito America license)", "Ghosts'n Goblins (US)" )
 GAME( 1985, makaimur, gng, gng, makaimur, 0,	   ROT0, "Capcom", "Makai-Mura (Japan)" )
 GAME( 1985, makaimuc, gng, gng, makaimur, 0,	   ROT0, "Capcom", "Makai-Mura (Japan Revision C)" )
