@@ -17,6 +17,53 @@ Credits:
 #include "vidhrdw/generic.h"
 #include "cpu/m6809/m6809.h"
 
+bool	contra_playing = false;
+bool	contra_start = false;
+bool	contra_diddy = false;
+bool	contra_title_diddy = false;
+bool	contra_title = false;
+bool	contra_lastwave = false;
+int		contra_start_counter = 0;
+
+const char *const contra_sample_set_names[] =
+{
+	"*contra",
+	
+	"stage1-01",
+	"stage1-02",
+	"stage3-01",
+	"stage3-02",
+	"stage6-01",
+	"stage6-02",
+	"stage2-01",
+	"stage2-02",	
+	"stage5-01",
+	"stage5-02",
+	"boss-01",
+	"boss-02",
+	"stage8-01",
+	"stage8-02",	
+	"credits-01",
+	"credits-02", 
+	"over-01",
+	"over-02",
+	"diddy-01",
+	"diddy-02",
+	"complete-01",
+	"complete-02",	
+	"title-01",
+	"title-02",	
+	0
+};
+
+static struct Samplesinterface contra_samples_set =
+{
+	2,	// 2 channels
+	100, // volume
+	contra_sample_set_names
+};
+
+
 extern unsigned char *contra_fg_vram,*contra_fg_cram;
 extern unsigned char *contra_bg_vram,*contra_bg_cram;
 extern unsigned char *contra_text_vram,*contra_text_cram;
@@ -60,12 +107,252 @@ WRITE_HANDLER( contra_coin_counter_w )
 
 static WRITE_HANDLER( cpu_sound_command_w )
 {
-	soundlatch_w(offset,data);
+	if(contra_playing == true) {
+		int a = 0;
+		int o_max_samples = 41;
+		int sa_left = 0;
+		int sa_right = 1;
+		bool sa_loop = 1; // --> 1 == loop, 0 == do not loop.
+		bool sa_play_sample = false;
+		bool sa_play_original = false;
+		bool contra_do_nothing = false;
+		bool contra_stop_samples = false;
+		bool contra_play_default = false;
+		
+		if(contra_start == true) {
+			sa_play_sample = true;
+			sa_left = 0;
+			sa_right = 1;
+			contra_start = false;
+			contra_diddy = true;
+			contra_lastwave = false;
+		}
+			
+		switch (data) {	            
+			// Stage 1 Jungle
+			case 0x40:
+			    contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 0;
+				sa_right = 1;			
+				break;			
+			// Stage 3 Waterfalls
+			case 0x42:
+				contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 2;
+				sa_right = 3;			
+				break;
+			//  Stage 6 Energy Zone and Hangar
+			case 0x43:
+                contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 4;
+				sa_right = 5;	
+                break;				
+			// Stage 2 The Base
+			case 0x44:
+		        contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 6;
+				sa_right = 7;				
+				break;
+			// Ranking
+			case 0x45:
+                contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 8;
+				sa_right = 9;			
+				break;
+			// Stage 5 Snowfield
+			case 0x46:
+                contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 10;
+				sa_right = 11;							
+				break;
+			// Boss
+			case 0x47:
+                contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 12;
+				sa_right = 13;			
+				break;			
+			// Stage 8 Alien Base
+			case 0x48:
+		        contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 14;
+				sa_right = 15;			
+				break;
+			case 0x49:	
+			// Ending
+			    contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 16;
+				sa_right = 17;			
+				break;
+			// Game Over
+			case 0x4A:
+                contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 18;
+				sa_right = 19;			
+				break;
+			// Stage Clear
+			case 0x4B :
+                contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 18;
+				sa_right = 19;			
+				break;
+			//  Clear 2
+			case 0x4C:
+				contra_diddy = false;
+				contra_title_diddy = false;
+				contra_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 20;
+				sa_right = 21;			
+				break;
+			// Title
+			case 0x4D:			
+               if(contra_lastwave == false) {
+					contra_diddy = false;
+					contra_title_diddy = false;
+					contra_lastwave = true;
+					sa_play_sample = true;
+					sa_left = 22;
+					sa_right = 23;		
+			   }
+				else
+					contra_do_nothing = true;
+				break;    
+                default:
+				soundlatch_w( offset, data );
+			break;
+		}
+
+		if(sa_play_sample == true) {
+			a = 0;
+
+			for(a = 0; a <= o_max_samples; a++) {
+				sample_stop(a);
+			}
+
+			sample_start(0, sa_left, sa_loop);
+			sample_start(1, sa_right, sa_loop);
+			
+			// Determine how we should mix these samples together.
+			if(sample_playing(0) == 0 && sample_playing(1) == 1) { // Right channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(1, 100, 100);
+			}
+			else if(sample_playing(0) == 1 && sample_playing(1) == 0) { // Left channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(0, 100, 100);
+			}
+			else if(sample_playing(0) == 1 && sample_playing(1) == 1) { // Both left and right channels. Lets make them play in there respective speakers.
+				sample_set_stereo_volume(0, 100, 0);
+				sample_set_stereo_volume(1, 0, 100);
+			}
+			else if(sample_playing(0) == 0 && sample_playing(1) == 0 && contra_do_nothing == false) { // No sample playing, revert to the default sound.
+				sa_play_original = false;
+				soundlatch_w( offset, data );
+			}
+
+			if(sa_play_original == true)
+				soundlatch_w( offset, data );
+		}
+		else if(contra_do_nothing == true) {
+			// --> Do nothing.
+		}
+		else if(contra_stop_samples == true) {
+			a = 0;
+
+			for(a = 0; a <= o_max_samples; a++) {
+				sample_stop(a);
+			}
+		    
+            // Now play the default sound.
+			soundlatch_w( offset, data );
+			cpu_set_irq_line( 1, IRQ_LINE_NMI, PULSE_LINE );
+		}
+		else if(contra_play_default == true) {
+			soundlatch_w( offset, data );
+		}
+	}				
 }
 
 
+UINT32 math_regs[6];
+UINT16 multiply_result;
+UINT16 divide_quotient;
+UINT16 divide_remainder;
+
+
+READ_HANDLER(contra_k007452_r)
+{
+	switch (offset & 7)
+	{
+		case 0: return multiply_result & 0xff;
+		case 1: return (multiply_result >> 8) & 0xff;
+		case 2: return divide_remainder & 0xff;
+		case 3: return (divide_remainder >> 8) & 0xff;
+		case 4:	return divide_quotient & 0xff;
+		case 5: return (divide_quotient >> 8) & 0xff;
+		default: return 0;
+	}
+}
+
+
+WRITE_HANDLER(contra_k007452_w)
+{
+	if (offset < 6) math_regs[offset] = data;
+
+	if (offset == 1)
+	{
+		// Starts multiplication process
+		multiply_result = math_regs[0] * math_regs[1];
+	}
+	else if (offset == 5)
+	{
+		// Starts division process
+		UINT16 dividend = (math_regs[4]<<8) + math_regs[5];
+		UINT16 divisor = (math_regs[2]<<8) + math_regs[3];
+		if (!divisor) {
+			divide_quotient = 0xffff;
+			divide_remainder = 0x0000;
+		} else {
+			divide_quotient = dividend / divisor;
+			divide_remainder = dividend % divisor;
+		}
+	}
+}
+
 
 static MEMORY_READ_START( readmem )
+  { 0x0008, 0x000f, contra_k007452_r },
 	{ 0x0010, 0x0010, input_port_0_r },		/* IN0 */
 	{ 0x0011, 0x0011, input_port_1_r },		/* IN1 */
 	{ 0x0012, 0x0012, input_port_2_r },		/* IN2 */
@@ -82,6 +369,7 @@ MEMORY_END
 
 static MEMORY_WRITE_START( writemem )
 	{ 0x0000, 0x0007, contra_K007121_ctrl_0_w },
+	{ 0x0008, 0x000f, contra_k007452_w },
 	{ 0x0018, 0x0018, contra_coin_counter_w },
 	{ 0x001a, 0x001a, contra_sh_irqtrigger_w },
 	{ 0x001c, 0x001c, cpu_sound_command_w },
@@ -94,7 +382,7 @@ static MEMORY_WRITE_START( writemem )
 	{ 0x2800, 0x2bff, contra_text_cram_w, &contra_text_cram },
 	{ 0x2c00, 0x2fff, contra_text_vram_w, &contra_text_vram },
 	{ 0x3000, 0x37ff, MWA_RAM, &spriteram },/* 2nd bank is at 0x5000 */
-	{ 0x3800, 0x3fff, MWA_RAM }, // second sprite buffer
+	{ 0x3800, 0x3fff, MWA_RAM }, /* second sprite buffer*/
 	{ 0x4000, 0x43ff, contra_bg_cram_w, &contra_bg_cram },
 	{ 0x4400, 0x47ff, contra_bg_vram_w, &contra_bg_vram },
 	{ 0x4800, 0x5fff, MWA_RAM },
@@ -184,7 +472,7 @@ INPUT_PORTS_START( contra )
 	PORT_DIPSETTING(    0xc0, DEF_STR( 1C_4C ) )
 	PORT_DIPSETTING(    0xb0, DEF_STR( 1C_5C ) )
 	PORT_DIPSETTING(    0xa0, DEF_STR( 1C_6C ) )
-	PORT_DIPSETTING(    0x90, DEF_STR( 1C_7C ) )//marvins.c
+	PORT_DIPSETTING(    0x90, DEF_STR( 1C_7C ) )/*marvins.c*/
 	/* 0x00 is invalid */
 
 	PORT_START	/* DSW1 */
@@ -285,6 +573,9 @@ static MACHINE_DRIVER_START( contra )
 	/* sound hardware */
 	MDRV_SOUND_ATTRIBUTES(SOUND_SUPPORTS_STEREO)
 	MDRV_SOUND_ADD(YM2151, ym2151_interface)
+	MDRV_SOUND_ADD(SAMPLES, contra_samples_set)
+	contra_playing = true;
+	contra_start = 0;
 MACHINE_DRIVER_END
 
 
