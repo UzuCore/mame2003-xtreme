@@ -41,6 +41,51 @@ Caveman Ninja Issues:
 #include "decocrpt.h"
 #include "decoprot.h"
 
+bool	cninja_playing = false;
+bool	cninja_start = false;
+bool	cninja_diddy = false;
+bool	cninja_title_diddy = false;
+bool	cninja_title = false;
+bool	cninja_lastwave = false;
+int		cninja_start_counter = 0;
+
+const char *const cninja_sample_set_names[] =
+{
+	"*cninja",	
+	"kidnap-01",
+	"kidnap-02",
+	"stg1-3-01",
+	"stg1-3-02",
+	"stg2-5-01",
+	"stg2-5-02",
+	"stg4-01",
+	"stg4-02",	
+	"xtra-01",
+	"xtra-02",	
+	"rescue-01",
+	"rescue-02",
+	"boss-01",
+	"boss-02",				
+	"endinga-01",
+	"endinga-02",   
+    "endingb-01",
+	"endingb-02",
+	"clear-01",
+	"clear-02",	
+	"endingc-01",
+	"endingc-02",
+	"continue-01",
+	"continue-02",	
+	0
+};
+
+static struct Samplesinterface cninja_samples_set =
+{
+	2,	// 2 channels
+	100, // volume
+	cninja_sample_set_names
+};
+
 static int cninja_scanline, cninja_irq_mask;
 static void *raster_irq_timer;
 static data16_t *cninja_ram;
@@ -49,8 +94,198 @@ static data16_t *cninja_ram;
 
 static WRITE16_HANDLER( cninja_sound_w )
 {
-	soundlatch_w(0,data&0xff);
-	cpu_set_irq_line(1,0,HOLD_LINE);
+		
+	if(cninja_playing == true) {
+		int a = 0;
+		int o_max_samples = 41;
+		int sa_left = 0;
+		int sa_right = 1;
+		bool sa_loop = 1; // --> 1 == loop, 0 == do not loop.
+		bool sa_play_sample = false;
+		bool sa_play_original = false;
+		bool cninja_do_nothing = false;
+		bool cninja_stop_samples = false;
+		bool cninja_play_default = false;
+		
+		if(cninja_start == true) {
+			sa_play_sample = true;
+			sa_left = 0;
+			sa_right = 1;
+			cninja_start = false;
+			cninja_diddy = true;
+			cninja_lastwave = false;
+		}
+			
+		switch (data) {	            
+			// Girls kidanpped
+			case 0x04:
+			    cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 0;
+				sa_right = 1;			
+				break;			
+			// Stage 1 and 3
+			case 0x05:
+			   cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 2;
+				sa_right = 3;			
+				break;
+			//  Stage 2 and 5
+			case 0x06:
+                cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 4;
+				sa_right = 5;	
+                break;				
+			//  Stage 4 
+			case 0x07:
+		        cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 6;
+				sa_right = 7;				
+				break;
+			//  Xtra
+			case 0x09:
+		        cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 8;
+				sa_right = 9;				
+				break;
+			// Rescue
+			case 0x0A:
+                cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 10;
+				sa_right = 11;							
+				break;
+			// Dinosaur Boss
+			case 0x0C:
+                cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 12;
+				sa_right = 13;			
+				break;			
+			// Great Ending
+			case 0x0D:
+		        cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 14;
+				sa_right = 15;			
+				break;				
+			// Good Ending	
+            case 0x0E:
+			    cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 16;
+				sa_right = 17;			
+				break;	
+            // Course Select	
+            case 0x0F:				           
+			    cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;;
+				sa_play_sample = true;
+				sa_left = 18;
+				sa_right = 19;			
+				break;		
+			// Bad Ending			
+			case 0x10:
+                cninja_diddy = false;
+				cninja_title_diddy = false;
+				cninja_lastwave = false;
+				sa_play_sample = true;
+				sa_left = 20;
+				sa_right = 21;			
+				break;	
+		    // Continue	
+            case 0x19:
+               if(cninja_lastwave == false) {
+					cninja_diddy = false;
+				    cninja_title_diddy = false;
+				    cninja_lastwave = false;
+					sa_play_sample = true;
+					sa_left = 22;
+					sa_right = 23;		
+			   }
+				else
+					cninja_do_nothing = true;
+				break;    
+                default:
+				soundlatch_w(0,data&0xff);
+	            cpu_set_irq_line(1,0,HOLD_LINE);
+			break;
+		}
+
+		if(sa_play_sample == true) {
+			a = 0;
+
+			for(a = 0; a <= o_max_samples; a++) {
+				sample_stop(a);
+			}
+
+			sample_start(0, sa_left, sa_loop);
+			sample_start(1, sa_right, sa_loop);
+			
+			// Determine how we should mix these samples together.
+			if(sample_playing(0) == 0 && sample_playing(1) == 1) { // Right channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(1, 100, 100);
+			}
+			else if(sample_playing(0) == 1 && sample_playing(1) == 0) { // Left channel only. Lets make it play in both speakers.
+				sample_set_stereo_volume(0, 100, 100);
+			}
+			else if(sample_playing(0) == 1 && sample_playing(1) == 1) { // Both left and right channels. Lets make them play in there respective speakers.
+				sample_set_stereo_volume(0, 100, 0);
+				sample_set_stereo_volume(1, 0, 100);
+			}
+			else if(sample_playing(0) == 0 && sample_playing(1) == 0 && cninja_do_nothing == false) { // No sample playing, revert to the default sound.
+				sa_play_original = false;
+				soundlatch_w(0,data&0xff);
+	            cpu_set_irq_line(1,0,HOLD_LINE);
+			}
+
+			if(sa_play_original == true)
+				soundlatch_w(0,data&0xff);
+	            cpu_set_irq_line(1,0,HOLD_LINE);
+		}
+		else if(cninja_do_nothing == true) {
+			// --> Do nothing.
+		}
+		else if(cninja_stop_samples == true) {
+			a = 0;
+
+			for(a = 0; a <= o_max_samples; a++) {
+				sample_stop(a);
+			}
+		    
+            // Now play the default sound.
+			soundlatch_w(0,data&0xff);
+	        cpu_set_irq_line(1,0,HOLD_LINE);
+		   
+		}
+		else if(cninja_play_default == true) {
+			soundlatch_w(0,data&0xff);
+	        cpu_set_irq_line(1,0,HOLD_LINE);	
+		}
+	}				
 }
 
 static WRITE16_HANDLER( stoneage_sound_w )
@@ -89,7 +324,7 @@ static READ16_HANDLER( cninja_irq_r )
 		return 0;
 	}
 
-	logerror("%08x:  Unmapped IRQ read %d\n",activecpu_get_pc(),offset);
+	log_cb(RETRO_LOG_DEBUG, LOGPRE "%08x:  Unmapped IRQ read %d\n",activecpu_get_pc(),offset);
 	return 0;
 }
 
@@ -102,7 +337,7 @@ static WRITE16_HANDLER( cninja_irq_w )
 			0xc8:	Raster IRQ turned on (68k IRQ level 4)
 			0xd8:	Raster IRQ turned on (68k IRQ level 3)
 		*/
-		logerror("%08x:  IRQ write %d %08x\n",activecpu_get_pc(),offset,data);
+		log_cb(RETRO_LOG_DEBUG, LOGPRE "%08x:  IRQ write %d %08x\n",activecpu_get_pc(),offset,data);
 		cninja_irq_mask=data&0xff;
 		return;
 
@@ -118,7 +353,7 @@ static WRITE16_HANDLER( cninja_irq_w )
 		return;
 	}
 
-	logerror("%08x:  Unmapped IRQ write %d %04x\n",activecpu_get_pc(),offset,data);
+	log_cb(RETRO_LOG_DEBUG, LOGPRE "%08x:  Unmapped IRQ write %d %04x\n",activecpu_get_pc(),offset,data);
 }
 
 static READ16_HANDLER( robocop2_prot_r )
@@ -131,10 +366,10 @@ static READ16_HANDLER( robocop2_prot_r )
 		case 0x4e6: /* Dip switches */
 			return readinputport(2);
 		case 0x504: /* PC: 6b6.  b4, 2c, 36 written before read */
-			logerror("Protection PC %06x: warning - read unmapped memory address %04x\n",activecpu_get_pc(),offset);
+			log_cb(RETRO_LOG_DEBUG, LOGPRE "Protection PC %06x: warning - read unmapped memory address %04x\n",activecpu_get_pc(),offset);
 			return 0x84;
 	}
-	logerror("Protection PC %06x: warning - read unmapped memory address %04x\n",activecpu_get_pc(),offset);
+	log_cb(RETRO_LOG_DEBUG, LOGPRE "Protection PC %06x: warning - read unmapped memory address %04x\n",activecpu_get_pc(),offset);
 	return 0;
 }
 
@@ -258,7 +493,7 @@ static MEMORY_WRITE16_START( robocop2_writemem )
 
 	{ 0x180000, 0x1807ff, MWA16_RAM, &spriteram16, &spriteram_size },
 	{ 0x18c064, 0x18c065, cninja_sound_w },
-//	{ 0x18c000, 0x18c0ff, cninja_loopback_w }, /* Protection writes */
+/*	{ 0x18c000, 0x18c0ff, cninja_loopback_w },  // Protection writes /*/
 	{ 0x198000, 0x198001, buffer_spriteram16_w }, /* DMA flag */
 	{ 0x1a8000, 0x1a9fff, deco16_nonbuffered_palette_w, &paletteram16 },
 	{ 0x1b0000, 0x1b0007, cninja_irq_w },
@@ -916,6 +1151,9 @@ static MACHINE_DRIVER_START( cninja )
 	MDRV_SOUND_ADD(YM2203, ym2203_interface)
 	MDRV_SOUND_ADD(YM2151, ym2151_interface)
 	MDRV_SOUND_ADD(OKIM6295, okim6295_interface)
+	MDRV_SOUND_ADD(SAMPLES, cninja_samples_set)
+	cninja_playing = true;
+	cninja_start = 0;
 MACHINE_DRIVER_END
 
 static MACHINE_DRIVER_START( stoneage )
@@ -1739,7 +1977,7 @@ GAME( 1990, edrandyj, edrandy, edrandy,  edrandy, 0,        ROT0, "Data East Cor
 GAME( 1991, cninja,   0,       cninja,   cninja,  cninja,   ROT0, "Data East Corporation", "Caveman Ninja (World revision 3)" )
 GAME( 1991, cninja0,  cninja,  cninja,   cninja,  cninja,   ROT0, "Data East Corporation", "Caveman Ninja (World revision 0)" )
 GAME( 1991, cninjau,  cninja,  cninja,   cninjau, cninja,   ROT0, "Data East Corporation", "Caveman Ninja (US)" )
-GAME( 1991, joemac,   cninja,  cninja,   cninja,  cninja,   ROT0, "Data East Corporation", "Tatakae Genshizin Joe & Mac (Japan)" )
+GAME( 1991, joemac,   cninja,  cninja,   cninja,  cninja,   ROT0, "Data East Corporation", "Tatakae Genshizin Joe and Mac (Japan)" )
 GAME( 1991, stoneage, cninja,  stoneage, cninja,  stoneage, ROT0, "bootleg", "Stoneage" )
 GAME( 1991, robocop2, 0,       robocop2, robocop2,0,        ROT0, "Data East Corporation", "Robocop 2 (World)" )
 GAME( 1991, robocp2u, robocop2,robocop2, robocop2,0,        ROT0, "Data East Corporation", "Robocop 2 (US)" )
