@@ -233,8 +233,8 @@ const char *const ikari_sample_set_names[] =
     "*ikari",
 	"title-01",
 	"title-02",
-	"credit-01",
-	"credit-02",	
+//	"credit-01",
+//	"credit-02",	
 	"landing-01",
 	"landing-02",
 	"theme-01",
@@ -564,14 +564,14 @@ static WRITE_HANDLER( snk_soundlatch_w ){
 				sa_right = 1;			
 				break;			
 			// Credit
-			case 0x90:
-				ikari_diddy = false;
-				ikari_title_diddy = false;
-				ikari_lastwave = false;
-				sa_play_sample = true;
-				sa_left = 2;
-				sa_right = 3;			
-				break;	
+//			case 0x90:
+//				ikari_diddy = false;
+//				ikari_title_diddy = false;
+//				ikari_lastwave = false;
+//				sa_play_sample = true;
+//				sa_left = 2;
+//				sa_right = 3;			
+//				break;	
             // Force landing
             case 0xA5:
 			    ikari_diddy = false;
