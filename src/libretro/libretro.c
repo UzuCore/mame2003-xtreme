@@ -91,8 +91,8 @@ void retro_set_audio_buff_status_cb(void)
 void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
-      { "mame2003-xtreme-turboboost", "TurboBoost; 20|disabled|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|auto|auto_aggressive|auto_max" },
-      { "mame2003-xtreme-oc", "Reverse OverClock; 86|87|88|89|90|91|92|93|94|95|96|97|98|99|100|101|102|103|104|105|106|107|108|109|110|111|112|113|114|115|116|117|118|119|120|121|122|123|124|125|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|80|81|82|83|84|85" },
+      { "mame2003-xtreme-turboboost", "TurboBoost; X6|disabled|X1|X2|X3|X4|X5|X6|X7|X8|X9|XX|auto|auto_aggressive|auto_max" },
+      { "mame2003-xtreme-oc", "Reverse OverClock; 99|100|101|102|103|104|105|106|107|108|109|110|111|112|113|114|115|116|117|118|119|120|121|122|123|124|125|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|80|81|82|83|84|85|86|87|88|89|90|91|92|93|94|95|96|97|98" },
       { "mame2003-xtreme-dcs-speedhack",
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
          "MK2/MK3 DCS Speedhack; enabled|disabled"
@@ -249,38 +249,35 @@ static void update_variables(void)
    {
 				prev_frameskip_type = frameskip;
 
-   				if (strcmp(var.value, "1") == 0)
+   				if (strcmp(var.value, "X1") == 0)
 					frameskip = 1;
 
-				else if (strcmp(var.value, "2") == 0)
+				else if (strcmp(var.value, "X2") == 0)
 					frameskip = 2;
 
-				else if (strcmp(var.value, "3") == 0)
+				else if (strcmp(var.value, "X3") == 0)
 					frameskip = 3;
 
-				else if (strcmp(var.value, "4") == 0)
+				else if (strcmp(var.value, "X4") == 0)
 					frameskip = 4;
 
-				else if (strcmp(var.value, "5") == 0)
+				else if (strcmp(var.value, "X5") == 0)
 					frameskip = 5;
 
-				else if (strcmp(var.value, "6") == 0)
+				else if (strcmp(var.value, "X6") == 0)
 					frameskip = 6;
 
-				else if (strcmp(var.value, "7") == 0)
+				else if (strcmp(var.value, "X7") == 0)
 					frameskip = 7;
 
-				else if (strcmp(var.value, "8") == 0)
+				else if (strcmp(var.value, "X8") == 0)
 					frameskip = 8;
 
-				else if (strcmp(var.value, "9") == 0)
+				else if (strcmp(var.value, "X9") == 0)
 					frameskip = 9;
 					
-				else if (strcmp(var.value, "10") == 0)
+				else if (strcmp(var.value, "XX") == 0)
 					frameskip = 10;
-
-				else if (strcmp(var.value, "11") == 0)
-					frameskip = 11;
 
 				else if (strcmp(var.value, "auto") == 0)
 					frameskip = 12;

@@ -1,5 +1,5 @@
 # mame2003-xtreme
-MAME as it was in 2003, with a 2K22 touch up! Suitable for lower-spec devices that would struggle to run current versions of MAME (later versions of MAME are increasingly accurate, thus can perform worse).
+MAME as it was in 2003, with a 2K23+ touch up! Suitable for lower-spec devices that would struggle to run current versions of MAME (later versions of MAME are increasingly accurate, thus can perform worse).
 
 ## ROMset compatibility with MAME 2003 Xtreme
 **The MAME 2003 Xtreme core accepts MAME 0.78 ROMsets.** Each version of an arcade emulator must be used with ROMs that have the same exact version number. For example, MAME 0.37b5 ROMsets are required by the MAME 2000 emulator, but MAME 0.37b5 sets will not work correctly with the MAME 2003 or MAME 2010 emulator cores. Those cores require MAME 0.78 and MAME 0.139 ROM sets, respectively.
