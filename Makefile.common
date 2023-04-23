@@ -313,6 +313,7 @@ SOURCES_C += $(CORE_DIR)/drivers/pacman.c \
 				 $(CORE_DIR)/machine/namcos1_machine.c $(CORE_DIR)/vidhrdw/namcos1_vidhrdw.c $(CORE_DIR)/drivers/namcos1.c \
 				 $(CORE_DIR)/machine/namcos2_machine.c $(CORE_DIR)/vidhrdw/namcos2_vidhrdw.c $(CORE_DIR)/drivers/namcos2.c \
 				 $(CORE_DIR)/drivers/namcoic.c \
+	                         $(CORE_DIR)/drivers/tatsumi.c $(CORE_DIR)/vidhrdw/tatsumi.c $(CORE_DIR)/machine/tatsumi.c \
 				 $(CORE_DIR)/vidhrdw/namcona1_vidhrdw.c $(CORE_DIR)/drivers/namcona1.c \
 				 $(CORE_DIR)/vidhrdw/namconb1_vidhrdw.c $(CORE_DIR)/drivers/namconb1.c \
 				 $(CORE_DIR)/machine/namcond1_machine.c $(CORE_DIR)/vidhrdw/ygv608.c $(CORE_DIR)/drivers/namcond1.c \

@@ -5679,6 +5679,10 @@ Other Sun games
 	/* Seibu Hardware */
 	DRIVER( denjinmk )  /* (c) 1994 Banpresto */
 
+	/* Tatsumi 68000 based hardware */
+	DRIVER( roundup5 )  /* (c) 1998 Tatsumi / Data East */
+	DRIVER( bigfight )  /* (c) 1992 Tatsumi */
+	DRIVER( cyclwarr )  /* (c) 1989 Tatsumi */
 
 #endif	/* DRIVER_RECURSIVE */
 

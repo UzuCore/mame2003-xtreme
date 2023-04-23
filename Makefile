@@ -2,7 +2,7 @@ DEBUG=0
 DEBUGGER=0
 SPLIT_UP_LINK=0
 CORE_DIR := src
-TARGET_NAME := km_mame2003_xtreme
+TARGET_NAME := km_mame2003_xtreme_amped
 
 #gcc 10 sets -fno-common this will patch you to compile until the issue is fixed
 
