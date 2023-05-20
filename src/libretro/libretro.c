@@ -91,29 +91,29 @@ void retro_set_audio_buff_status_cb(void)
 void retro_set_environment(retro_environment_t cb)
 {
    static const struct retro_variable vars[] = {
-      { "mame2003-xtreme-turboboost", "TurboBoost; X6|disabled|X1|X2|X3|X4|X5|X6|X7|X8|X9|XX|auto|auto_aggressive|auto_max" },
-      { "mame2003-xtreme-oc", "Reverse OverClock; 99|100|101|102|103|104|105|106|107|108|109|110|111|112|113|114|115|116|117|118|119|120|121|122|123|124|125|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|80|81|82|83|84|85|86|87|88|89|90|91|92|93|94|95|96|97|98" },
-      { "mame2003-xtreme-dcs-speedhack",
+      { "mame2003-xtreme-amped-turboboost", "TurboBoost; X6|disabled|X1|X2|X3|X4|X5|X6|X7|X8|X9|XX|auto|auto_aggressive|auto_max" },
+      { "mame2003-xtreme-amped-oc", "Reverse OverClock; 99|100|101|102|103|104|105|106|107|108|109|110|111|112|113|114|115|116|117|118|119|120|121|122|123|124|125|1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|41|42|43|44|45|46|47|48|49|50|51|52|53|54|55|56|57|58|59|60|61|62|63|64|65|66|67|68|69|70|71|72|73|74|75|76|77|78|79|80|81|82|83|84|85|86|87|88|89|90|91|92|93|94|95|96|97|98" },
+      { "mame2003-xtreme-amped-dcs-speedhack",
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
          "MK2/MK3 DCS Speedhack; enabled|disabled"
 #else
          "MK2/MK3 DCS Speedhack; enabled|disabled"
 #endif
       },
-      { "mame2003-xtreme-skip_disclaimer", "Skip Disclaimer; enabled|disabled" },
-      { "mame2003-xtreme-skip_warnings", "Skip Warnings; enabled|disabled" },
-      { "mame2003-xtreme-samples", "Samples; enabled|disabled" },
-      { "mame2003-xtreme-sample_rate", "Sample Rate (KHz); 48000|8000|11025|18500|22050|30000|44100" },
-      { "mame2003-xtreme-cheats", "Cheats; enabled|disabled" },
-      { "mame2003-xtreme-dialsharexy", "Share 2 player dial controls across one X/Y device; disabled|enabled" },
+      { "mame2003-xtreme-amped-skip_disclaimer", "Skip Disclaimer; enabled|disabled" },
+      { "mame2003-xtreme-amped-skip_warnings", "Skip Warnings; enabled|disabled" },
+      { "mame2003-xtreme-amped-samples", "Samples; enabled|disabled" },
+      { "mame2003-xtreme-amped-sample_rate", "Sample Rate (KHz); 48000|8000|11025|18500|22050|30000|44100" },
+      { "mame2003-xtreme-amped-cheats", "Cheats; enabled|disabled" },
+      { "mame2003-xtreme-amped-dialsharexy", "Share 2 player dial controls across one X/Y device; disabled|enabled" },
 #if defined(__IOS__)
-      { "mame2003-xtreme-mouse_device", "Mouse Device; pointer|mouse|disabled" },
+      { "mame2003-xtreme-amped-mouse_device", "Mouse Device; pointer|mouse|disabled" },
 #else
-      { "mame2003-xtreme-mouse_device", "Mouse Device; mouse|pointer|disabled" },
+      { "mame2003-xtreme-amped-mouse_device", "Mouse Device; mouse|pointer|disabled" },
 #endif
-      { "mame2003-xtreme-rstick_to_btns", "Right Stick to Buttons; enabled|disabled" },
-      { "mame2003-xtreme-option_tate_mode", "TATE Mode; disabled|enabled" },
-      { "mame2003-xtreme-use_artwork", "Artwork(Restart); enabled|disabled" },
+      { "mame2003-xtreme-amped-rstick_to_btns", "Right Stick to Buttons; enabled|disabled" },
+      { "mame2003-xtreme-amped-option_tate_mode", "TATE Mode; disabled|enabled" },
+      { "mame2003-xtreme-amped-use_artwork", "Artwork(Restart); enabled|disabled" },
       { NULL, NULL },
    };
    environ_cb = cb;
@@ -243,7 +243,7 @@ static void update_variables(void)
 	int prev_frameskip_type;
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-turboboost";
+   var.key = "mame2003-xtreme-amped-turboboost";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -292,7 +292,7 @@ static void update_variables(void)
    }
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-oc";
+   var.key = "mame2003-xtreme-amped-oc";
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {	
       options.oc = (double) atoi(var.value) / 100;
@@ -300,7 +300,7 @@ static void update_variables(void)
    }	
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-dcs-speedhack";
+   var.key = "mame2003-xtreme-amped-dcs-speedhack";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -311,7 +311,7 @@ static void update_variables(void)
    }
    
    var.value = NULL;
-   var.key = "mame2003-xtreme-skip_disclaimer";
+   var.key = "mame2003-xtreme-amped-skip_disclaimer";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -322,7 +322,7 @@ static void update_variables(void)
    }
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-skip_warnings";
+   var.key = "mame2003-xtreme-amped-skip_warnings";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -333,7 +333,7 @@ static void update_variables(void)
    }
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-samples";
+   var.key = "mame2003-xtreme-amped-samples";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -344,7 +344,7 @@ static void update_variables(void)
    }
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-sample_rate";
+   var.key = "mame2003-xtreme-amped-sample_rate";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -354,7 +354,7 @@ static void update_variables(void)
       options.samplerate = 48000;
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-cheats";
+   var.key = "mame2003-xtreme-amped-cheats";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -365,7 +365,7 @@ static void update_variables(void)
    }
    
    var.value = NULL;
-   var.key = "mame2003-xtreme-dialsharexy";
+   var.key = "mame2003-xtreme-amped-dialsharexy";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -376,7 +376,7 @@ static void update_variables(void)
    }
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-mouse_device";
+   var.key = "mame2003-xtreme-amped-mouse_device";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -389,7 +389,7 @@ static void update_variables(void)
    }
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-rstick_to_btns";
+   var.key = "mame2003-xtreme-amped-rstick_to_btns";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -400,7 +400,7 @@ static void update_variables(void)
    }
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-option_tate_mode";
+   var.key = "mame2003-xtreme-amped-option_tate_mode";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
@@ -411,7 +411,7 @@ static void update_variables(void)
    }
 
    var.value = NULL;
-   var.key = "mame2003-xtreme-use_artwork";
+   var.key = "mame2003-xtreme-amped-use_artwork";
 
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
