@@ -538,7 +538,6 @@ static READ16_HANDLER(ga2_wakeup_protection_r)
 
 static WRITE16_HANDLER(sonic_level_load_protection)
 {
-	unsigned short level;
 	UINT16 level;
 /*Perform write*/
 	COMBINE_DATA(&system32_workram[CLEARED_LEVELS / 2]);
