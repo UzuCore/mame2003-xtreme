@@ -3715,7 +3715,7 @@ static void onscrd_init(void)
 		/* K.Wilkins Feb2003 Additional of Disrete Sound System ADJUSTMENT sliders */
 	}
 
-	if (options.cheat)
+	if (/*options.cheat*/ 1) //Always show overclock options in the ui for this core
 	{
 		for (ch = 0;ch < cpu_gettotalcpu();ch++)
 		{
