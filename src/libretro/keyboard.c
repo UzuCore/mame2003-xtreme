@@ -62,7 +62,7 @@ const struct KeyboardInfo retroKeys[] =
     EMIT2(ESCAPE, ESC),
     EMIT1(SPACE),
     EMITX(EXCLAIM),
-    EMIT2(QUOTEDBL, TILDE),
+    EMIT1(TILDE), 
     EMITX(HASH),
     EMITX(DOLLAR),
     EMITX(AMPERSAND),
@@ -90,7 +90,7 @@ const struct KeyboardInfo retroKeys[] =
     EMITX(RIGHTBRACKET),
     EMITX(CARET),
     EMITX(UNDERSCORE),
-    EMITX(BACKQUOTE),
+    EMIT1(BACKQUOTE),
     
     EMIT2(a, A), EMIT2(b, B), EMIT2(c, C), EMIT2(d, D), EMIT2(e, E), EMIT2(f, F),
     EMIT2(g, G), EMIT2(h, H), EMIT2(i, I), EMIT2(j, J), EMIT2(k, K), EMIT2(l, L),

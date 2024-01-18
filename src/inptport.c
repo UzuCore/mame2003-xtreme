@@ -191,7 +191,7 @@ const char ipdn_defaultstrings[][MAX_DEFSTR_LEN] =
 struct ipd inputport_defaults[] =
 {
 	{ IPT_UI_CONFIGURE,         "Config Menu",			SEQ_DEF_3(KEYCODE_TAB, CODE_OR, JOYCODE_1_BUTTON8) },
-	{ IPT_UI_ON_SCREEN_DISPLAY, "On Screen Display",	SEQ_DEF_1(KEYCODE_TILDE) },
+	{ IPT_UI_ON_SCREEN_DISPLAY, "On Screen Display",	SEQ_DEF_3(KEYCODE_TILDE, CODE_OR, KEYCODE_BACKQUOTE) },
 	{ IPT_UI_PAUSE,             "Pause",				SEQ_DEF_1(KEYCODE_P) },
 	{ IPT_UI_RESET_MACHINE,     "Reset Game",			SEQ_DEF_1(KEYCODE_F3) },
 	{ IPT_UI_SHOW_GFX,          "Show Gfx",				SEQ_DEF_1(KEYCODE_F4) },
@@ -826,7 +826,7 @@ struct ik input_keywords[] =
 	{ "KEYCODE_LWIN",		  	IKT_STD,		KEYCODE_LWIN },
 	{ "KEYCODE_RWIN",		  	IKT_STD,		KEYCODE_RWIN },
 	{ "KEYCODE_MENU",		  	IKT_STD,		KEYCODE_MENU },
-
+	{ "KEYCODE_BACKQUOTE",	  	IKT_STD,		KEYCODE_BACKQUOTE },
 	{ "JOYCODE_1_LEFT",		  	IKT_STD,		JOYCODE_1_LEFT },
 	{ "JOYCODE_1_RIGHT",	  	IKT_STD,		JOYCODE_1_RIGHT },
 	{ "JOYCODE_1_UP",		  	IKT_STD,		JOYCODE_1_UP },
