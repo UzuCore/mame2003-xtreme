@@ -2280,4 +2280,4 @@ GAME ( 1997, biofreak, 0,        seattle150, biofreak, biofreak, ROT0, "Midway G
 GAME ( 1997, blitz,    0,        seattle150, blitz,    blitz,    ROT0, "Midway Games", "NFL Blitz" )
 GAME ( 1998, blitz99,  0,        seattle150, blitz99,  blitz99,  ROT0, "Midway Games", "NFL Blitz '99" )
 GAME ( 1999, blitz2k,  0,        seattle150, blitz99,  blitz2k,  ROT0, "Midway Games", "NFL Blitz 2000" )
-GAME ( 1998, carnevil, 0,        carnevil,   carnevil, carnevil, ROT0, "Midway Games", "CarnEvil" )
+GAMEC( 1998, carnevil, 0,        carnevil,   carnevil, carnevil, ROT0, "Midway Games", "CarnEvil", NULL, &carnevil_bootstrap )
