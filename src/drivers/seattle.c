@@ -40,6 +40,7 @@
 #include "machine/midwayic.h"
 #include "vidhrdw/voodoo.h"
 #include "bootstrap.h"
+#include "inptport.h"
 
 
 #define TIMER_CLOCK			TIME_IN_HZ(6100000)
