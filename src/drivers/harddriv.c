@@ -177,6 +177,8 @@
 #include "machine/asic65.h"
 #include "sndhrdw/atarijsa.h"
 #include "harddriv.h"
+#include "bootstrap.h"
+#include "inptport.h"
 
 /* from slapstic.c */
 void slapstic_init(int chip);
@@ -646,7 +648,7 @@ INPUT_PORTS_START( harddriv )
 	PORT_BIT( 0xfff8, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START		/* b00000 - 8 bit ADC 0 - gas pedal */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL, 100, 20, 0x00, 0xff )
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_REVERSE, 100, 20, 0x00, 0xff )
 
 	PORT_START		/* b00000 - 8 bit ADC 1 - clutch pedal */
 	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER3, 100, 25, 0x00, 0xff )
@@ -702,7 +704,7 @@ INPUT_PORTS_START( racedriv )
 	PORT_BIT( 0xfff8, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START		/* b00000 - 8 bit ADC 0 - gas pedal */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL, 100, 20, 0x00, 0xff )
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_REVERSE, 100, 20, 0x00, 0xff )
 
 	PORT_START		/* b00000 - 8 bit ADC 1 - clutch pedal */
 	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER3, 100, 25, 0x00, 0xff )
@@ -765,7 +767,7 @@ INPUT_PORTS_START( racedrvc )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START		/* b00000 - 8 bit ADC 0 - gas pedal */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL, 100, 20, 0x00, 0xff )
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_REVERSE, 100, 20, 0x00, 0xff )
 
 	PORT_START		/* b00000 - 8 bit ADC 1 - clutch pedal */
 	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_PLAYER3, 100, 25, 0x00, 0xff )
@@ -945,7 +947,7 @@ INPUT_PORTS_START( hdrivair )
 	PORT_BIT( 0x8000, IP_ACTIVE_LOW, IPT_UNUSED )
 
 	PORT_START		/* b00000 - 8 bit ADC 0 - gas pedal */
-	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL, 100, 20, 0x00, 0xff )
+	PORT_ANALOG( 0xff, 0x00, IPT_PEDAL | IPF_REVERSE, 100, 20, 0x00, 0xff )
 
 	PORT_START		/* b00000 - 8 bit ADC 1 */
 	PORT_BIT( 0xff, IP_ACTIVE_LOW, IPT_UNUSED )
@@ -1059,7 +1061,7 @@ static MACHINE_DRIVER_START( driver_msp )
 	MDRV_IMPORT_FROM(driver_nomsp)
 
 	/* basic machine hardware */
-	MDRV_CPU_ADD_TAG("msp", TMS34010, 50000000/TMS34010_CLOCK_DIVIDER)
+	MDRV_CPU_ADD_TAG("msp", TMS34010, 58675309/TMS34010_CLOCK_DIVIDER)
 	MDRV_CPU_MEMORY(driver_readmem_msp,driver_writemem_msp)
 	MDRV_CPU_CONFIG(msp_config)
 
@@ -1092,7 +1094,7 @@ static MACHINE_DRIVER_START( multisync_msp )
 	MDRV_IMPORT_FROM(multisync_nomsp)
 
 	/* basic machine hardware */
-	MDRV_CPU_ADD_TAG("msp", TMS34010, 50000000/TMS34010_CLOCK_DIVIDER)
+	MDRV_CPU_ADD_TAG("msp", TMS34010, 58675309/TMS34010_CLOCK_DIVIDER)
 	MDRV_CPU_MEMORY(multisync_readmem_msp,multisync_writemem_msp)
 	MDRV_CPU_CONFIG(msp_config)
 MACHINE_DRIVER_END
@@ -1122,7 +1124,7 @@ MACHINE_DRIVER_END
 static MACHINE_DRIVER_START( adsp )
 
 	/* basic machine hardware */
-	MDRV_CPU_ADD_TAG("adsp", ADSP2100, 8000000)
+	MDRV_CPU_ADD_TAG("adsp", ADSP2100, 8675309/2)
 	MDRV_CPU_MEMORY(adsp_readmem,adsp_writemem)
 MACHINE_DRIVER_END
 
@@ -3999,7 +4001,7 @@ static DRIVER_INIT( hdrivaip )
  *
  *************************************/
 
-GAME ( 1988, harddriv, 0,        harddriv, harddriv, harddriv, ROT0, "Atari Games", "Hard Drivin' (cockpit, rev 7)" )
+GAMEC( 1988, harddriv, 0,        harddriv, harddriv, harddriv, ROT0, "Atari Games", "Hard Drivin' (cockpit, rev 7)", NULL, &harddriv_bootstrap )
 GAME ( 1988, harddrvb, harddriv, harddriv, harddriv, harddriv, ROT0, "Atari Games", "Hard Drivin' (cockpit, British, rev 7)" )
 GAME ( 1988, harddrvg, harddriv, harddriv, harddriv, harddriv, ROT0, "Atari Games", "Hard Drivin' (cockpit, German, rev 7)" )
 GAME ( 1988, harddrvj, harddriv, harddriv, harddriv, harddriv, ROT0, "Atari Games", "Hard Drivin' (cockpit, Japan, rev 7)" )

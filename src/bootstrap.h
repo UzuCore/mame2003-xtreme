@@ -30,6 +30,7 @@ extern const struct bin2cFILE defendg_bootstrap;
 extern const struct bin2cFILE foodf_bootstrap;
 extern const struct bin2cFILE foodfc_bootstrap;
 extern const struct bin2cFILE gaiapols_bootstrap;
+extern const struct bin2cFILE harddriv_bootstrap;
 extern const struct bin2cFILE hiimpact_bootstrap;
 extern const struct bin2cFILE joust_bootstrap;
 extern const struct bin2cFILE joust2_bootstrap;
