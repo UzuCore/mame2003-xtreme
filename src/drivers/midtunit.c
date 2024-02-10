@@ -26,6 +26,9 @@
 #include "sndhrdw/dcs.h"
 #include "midtunit.h"
 
+#include "bootstrap.h"
+#include "inptport.h"
+
 const char *const mk_sample_names_tunit[] =
 {
 	"*mk",
@@ -1486,23 +1489,24 @@ ROM_END
  *
  *************************************/
 
-GAME( 1992, mk,       0,       mk, mk,      mk,       ROT0, "Midway",   "Mortal Kombat (rev 5.0 T-Unit 03/19/93)" )
-GAME( 1992, mkr4,     mk,      mk, mk,      mkr4,     ROT0, "Midway",   "Mortal Kombat (rev 4.0 T-Unit 02/11/93)" )
+GAME( 1992, mk,       0,       mk, mk,      mk,       ROT0, "Midway",   "Mortal Kombat (rev 5.0 T-Unit 03-19-93)" )
+GAME( 1992, mkr4,     mk,      mk, mk,      mkr4,     ROT0, "Midway",   "Mortal Kombat (rev 4.0 T-Unit 02-11-93)" )
 
-GAME( 1993, mk2,      0,       tunit_dcs,   mk2,     mk2,      ROT0, "Midway",   "Mortal Kombat II (rev L3.1)" )
-GAME( 1993, mk2r32,   mk2,     tunit_dcs,   mk2,     mk2,      ROT0, "Midway",   "Mortal Kombat II (rev L3.2 (European))" )
-GAME( 1993, mk2r21,   mk2,     tunit_dcs,   mk2,     mk2r21,   ROT0, "Midway",   "Mortal Kombat II (rev L2.1)" )
-GAME( 1993, mk2r14,   mk2,     tunit_dcs,   mk2,     mk2r14,   ROT0, "Midway",   "Mortal Kombat II (rev L1.4)" )
-GAME( 1993, mk2r42,   mk2,     tunit_dcs,   mk2,     mk2,      ROT0, "hack",     "Mortal Kombat II (rev L4.2, hack)" )
-GAME( 1993, mk2r91,   mk2,     tunit_dcs,   mk2,     mk2,      ROT0, "hack",     "Mortal Kombat II (rev L9.1, hack)" )
-GAME( 1993, mk2chal,  mk2,     tunit_dcs,   mk2,     mk2,      ROT0, "hack",     "Mortal Kombat II Challenger (hack)" )
+GAMEC( 1993, mk2,      0,       tunit_dcs,   mk2,     mk2,      ROT0, "Midway",   "Mortal Kombat II (rev L3.1)", NULL, &mk2_bootstrap )
+GAMEC( 1993, mk2r32,   mk2,     tunit_dcs,   mk2,     mk2,      ROT0, "Midway",   "Mortal Kombat II (rev L3.2 (European))", NULL, &mk2r32_bootstrap )
+GAMEC( 1993, mk2r21,   mk2,     tunit_dcs,   mk2,     mk2r21,   ROT0, "Midway",   "Mortal Kombat II (rev L2.1)", NULL, &mk2r21_bootstrap)
+GAMEC( 1993, mk2r14,   mk2,     tunit_dcs,   mk2,     mk2r14,   ROT0, "Midway",   "Mortal Kombat II (rev L1.4)", NULL, &mk2r14_bootstrap )
+GAMEC( 1993, mk2r42,   mk2,     tunit_dcs,   mk2,     mk2,      ROT0, "hack",     "Mortal Kombat II (rev L4.2, hack)", NULL, &mk2r42_bootstrap )
+GAMEC( 1993, mk2r91,   mk2,     tunit_dcs,   mk2,     mk2,      ROT0, "hack",     "Mortal Kombat II (rev L9.1, hack)", NULL, &mk2r91_bootstrap)
+GAMEC( 1993, mk2chal,  mk2,     tunit_dcs,   mk2,     mk2,      ROT0, "hack",     "Mortal Kombat II Challenger (hack)", NULL, &mk2chal_bootstrap )
 
 GAME( 1993, jdreddp,  0,       tunit_adpcm, jdreddp, jdreddp,  ROT0, "Midway",   "Judge Dredd (rev LA1, prototype)" )
 
-GAME( 1993, nbajam,   0,       nbajam, nbajam,  nbajam,   ROT0, "Midway",   "NBA Jam (rev 3.01 04/07/93)" )
-GAME( 1993, nbajamr2, nbajam,  nbajam, nbajam,  nbajam20, ROT0, "Midway",   "NBA Jam (rev 2.00 02/10/93)" )
-GAME( 1994, nbajamte, nbajam,  tunit_adpcm, nbajamte,  nbajamte, ROT0, "Midway",   "NBA Jam TE (rev 4.0 03/23/94)" )
-GAME( 1994, nbajamt1, nbajam,  tunit_adpcm, nbajamte,  nbajamte, ROT0, "Midway",   "NBA Jam TE (rev 1.0 01/17/94)" )
-GAME( 1994, nbajamt2, nbajam,  tunit_adpcm, nbajamte,  nbajamte, ROT0, "Midway",   "NBA Jam TE (rev 2.0 01/28/94)" )
-GAME( 1994, nbajamt3, nbajam,  tunit_adpcm, nbajamte,  nbajamte, ROT0, "Midway",   "NBA Jam TE (rev 3.0 03/04/94)" )
-GAME( 2022, nbajamtr, nbajamte, tunit_adpcm, nbajamte, nbajamte, ROT0, "Midway",   "NBA Jam TE Rewind ver 1.1" )
+GAMEC( 1993, nbajam,   0,       nbajam,      nbajam,    nbajam,   ROT0, "Midway", "NBA Jam (rev 3.01 04-07-93)", NULL, &nbajam_bootstrap )
+GAMEC( 1993, nbajamr2, nbajam,  nbajam,      nbajam,    nbajam20, ROT0, "Midway", "NBA Jam (rev 2.00 02-10-93)", NULL, &nbajamr2_bootstrap )
+
+GAMEC( 1994, nbajamte, 0,        tunit_adpcm, nbajamte,  nbajamte, ROT0, "Midway", "NBA Jam TE (rev 4.0 03-23-94)", NULL, &nbajamte_bootstrap )
+GAMEC( 1994, nbajamt1, nbajamte, tunit_adpcm, nbajamte,  nbajamte, ROT0, "Midway", "NBA Jam TE (rev 1.0 01-17-94)", NULL, &nbajamt1_bootstrap )
+GAMEC( 1994, nbajamt2, nbajamte, tunit_adpcm, nbajamte,  nbajamte, ROT0, "Midway", "NBA Jam TE (rev 2.0 01-28-94)", NULL, &nbajamt2_bootstrap )
+GAMEC( 1994, nbajamt3, nbajamte, tunit_adpcm, nbajamte,  nbajamte, ROT0, "Midway", "NBA Jam TE (rev 3.0 03-04-94)", NULL, &nbajamt3_bootstrap )
+GAMEC( 2022, nbajamtr, nbajamte, tunit_adpcm, nbajamte,  nbajamte, ROT0, "Midway", "NBA Jam TE Rewind ver 1.1", NULL, NULL)
