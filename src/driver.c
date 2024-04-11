@@ -5668,6 +5668,7 @@ Other Sun games
 	DRIVER( crswd2bl )  /* 0054 Crossed Swords 2  (CD only? not confirmed, MVS might exist) */
 	DRIVER( zintrckb )	/* 0211 hack - this is not a genuine MVS proto, its a bootleg made from the CD version */
 	DRIVER( lasthope )      /* (c) 2005 NG:DEV.TEAM */
+        DRIVER( cyborgforce )   /* (c) 2023 Neo Byte Force Ltd */
 
 	/* SemiCom 68020 based hardware */
         DRIVER( baryon )    /* (c) 1997 SemiCom / Tirano */
