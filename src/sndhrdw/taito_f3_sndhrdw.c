@@ -3,7 +3,12 @@
 static int counter,vector_reg,imr_status;
 static data16_t es5510_dsp_ram[0x200];
 static data32_t	es5510_gpr[0xc0];
+static data32_t   es5510_dram[1<<16];
+static data32_t   es5510_dol_latch;
+static data32_t   es5510_dil_latch;
+static data32_t   es5510_dadr_latch;
 static data32_t	es5510_gpr_latch;
+static data8_t    es5510_ram_sel;
 static void *timer_68681=NULL;
 extern data32_t *f3_shared_ram;
 static int timer_mode,m68681_imr;
@@ -61,8 +66,8 @@ WRITE16_HANDLER( f3_volume_w )
 	if (offset==1) channel[latch]=data>>8;
 
 	if(Machine->sample_rate) {
-//		if (channel[7]!=last_l) mixer_set_volume(0, (int)((float)channel[7]*1.58)); /* Left master volume */
-//		if (channel[6]!=last_r) mixer_set_volume(1, (int)((float)channel[6]*1.58)); /* Right master volume */
+/*		if (channel[7]!=last_l) mixer_set_volume(0, (int)((float)channel[7]*1.58));*/ /* Left master volume */
+/*		if (channel[6]!=last_r) mixer_set_volume(1, (int)((float)channel[6]*1.58));*/ /* Right master volume */
 		last_l=channel[7];
 		last_r=channel[6];
 	}
@@ -112,38 +117,38 @@ WRITE16_HANDLER(f3_68681_w)
 		case 0x04: /* ACR */
 			switch ((data>>4)&7) {
 				case 0:
-					logerror("Counter:  Unimplemented external IP2\n");
+					log_cb(RETRO_LOG_DEBUG, LOGPRE "Counter:  Unimplemented external IP2\n");
 					break;
 				case 1:
-					logerror("Counter:  Unimplemented TxCA - 1X clock of channel A\n");
+					log_cb(RETRO_LOG_DEBUG, LOGPRE "Counter:  Unimplemented TxCA - 1X clock of channel A\n");
 					break;
 				case 2:
-					logerror("Counter:  Unimplemented TxCB - 1X clock of channel B\n");
+					log_cb(RETRO_LOG_DEBUG, LOGPRE "Counter:  Unimplemented TxCB - 1X clock of channel B\n");
 					break;
 				case 3:
-					logerror("Counter:  X1/Clk - divided by 16, counter is %04x, so interrupt every %d cycles\n",counter,(M68000_CLOCK/M68681_CLOCK)*counter*16);
+					log_cb(RETRO_LOG_DEBUG, LOGPRE "Counter:  X1/Clk - divided by 16, counter is %04x, so interrupt every %d cycles\n",counter,(M68000_CLOCK/M68681_CLOCK)*counter*16);
 					timer_mode=TIMER_SINGLESHOT;
 					timer_adjust(timer_68681, TIME_IN_CYCLES((M68000_CLOCK/M68681_CLOCK)*counter*16,1), 0, 0);
 					break;
 				case 4:
-					logerror("Timer:  Unimplemented external IP2\n");
+					log_cb(RETRO_LOG_DEBUG, LOGPRE "Timer:  Unimplemented external IP2\n");
 					break;
 				case 5:
-					logerror("Timer:  Unimplemented external IP2/16\n");
+					log_cb(RETRO_LOG_DEBUG, LOGPRE "Timer:  Unimplemented external IP2/16\n");
 					break;
 				case 6:
-					logerror("Timer:  X1/Clk, counter is %04x, so interrupt every %d cycles\n",counter,(M68000_CLOCK/M68681_CLOCK)*counter);
+					log_cb(RETRO_LOG_DEBUG, LOGPRE "Timer:  X1/Clk, counter is %04x, so interrupt every %d cycles\n",counter,(M68000_CLOCK/M68681_CLOCK)*counter);
 					timer_mode=TIMER_PULSE;
 					timer_adjust(timer_68681, TIME_IN_CYCLES((M68000_CLOCK/M68681_CLOCK)*counter,1), 0, TIME_IN_CYCLES((M68000_CLOCK/M68681_CLOCK)*counter,1));
 					break;
 				case 7:
-					logerror("Timer:  Unimplemented X1/Clk - divided by 16\n");
+					log_cb(RETRO_LOG_DEBUG, LOGPRE "Timer:  Unimplemented X1/Clk - divided by 16\n");
 					break;
 			}
 			break;
 
 		case 0x05: /* IMR */
-			logerror("68681:  %02x %02x\n",offset,data&0xff);
+			log_cb(RETRO_LOG_DEBUG, LOGPRE "68681:  %02x %02x\n",offset,data&0xff);
 			m68681_imr=data&0xff;
 			break;
 
@@ -161,15 +166,15 @@ WRITE16_HANDLER(f3_68681_w)
 			vector_reg=data&0xff;
 			break;
 		default:
-			logerror("68681:  %02x %02x\n",offset,data&0xff);
+			log_cb(RETRO_LOG_DEBUG, LOGPRE "68681:  %02x %02x\n",offset,data&0xff);
 			break;
 	}
 }
 
 READ16_HANDLER(es5510_dsp_r)
 {
-//	logerror("%06x: DSP read offset %04x (data is %04x)\n",activecpu_get_pc(),offset,es5510_dsp_ram[offset]);
-//	if (es_tmp) return es5510_dsp_ram[offset];
+/*	log_cb(RETRO_LOG_DEBUG, LOGPRE "%06x: DSP read offset %04x (data is %04x)\n",activecpu_get_pc(),offset,es5510_dsp_ram[offset]);*/
+/*	if (es_tmp) return es5510_dsp_ram[offset];*/
 /*
 	switch (offset) {
 		case 0x00: return (es5510_gpr_latch>>16)&0xff;
@@ -178,13 +183,13 @@ READ16_HANDLER(es5510_dsp_r)
 		case 0x03: return 0;
 	}
 */
-//	offset<<=1;
+/*	offset<<=1;*/
 
-//if (offset<7 && es5510_dsp_ram[0]!=0xff) return rand()%0xffff;
+/*if (offset<7 && es5510_dsp_ram[0]!=0xff) return rand()%0xffff;*/
 
 	if (offset==0x12) return 0;
 
-//	if (offset>4)
+/*	if (offset>4)*/
 	if (offset==0x16) return 0x27;
 
 	return es5510_dsp_ram[offset];
@@ -194,8 +199,8 @@ WRITE16_HANDLER(es5510_dsp_w)
 {
 	UINT8 *snd_mem = (UINT8 *)memory_region(REGION_SOUND1);
 
-//	if (offset>4 && offset!=0x80  && offset!=0xa0  && offset!=0xc0  && offset!=0xe0)
-//		logerror("%06x: DSP write offset %04x %04x\n",activecpu_get_pc(),offset,data);
+	if (offset>4 && offset!=0x80  && offset!=0xa0  && offset!=0xc0  && offset!=0xe0)
+		log_cb(RETRO_LOG_DEBUG, LOGPRE "%06x: DSP write offset %04x %04x\n",activecpu_get_pc(),offset,data);
 
 	COMBINE_DATA(&es5510_dsp_ram[offset]);
 
@@ -206,7 +211,7 @@ WRITE16_HANDLER(es5510_dsp_w)
 		case 0x03: break;
 
 		case 0x80: /* Read select - GPR + INSTR */
-	//		logerror("ES5510:  Read GPR/INSTR %06x (%06x)\n",data,es5510_gpr[data]);
+			log_cb(RETRO_LOG_DEBUG, LOGPRE "ES5510:  Read GPR/INSTR %06x (%06x)\n",data,es5510_gpr[data]);
 
 			/* Check if a GPR is selected */
 			if (data<0xc0) {
@@ -216,17 +221,103 @@ WRITE16_HANDLER(es5510_dsp_w)
 			break;
 
 		case 0xa0: /* Write select - GPR */
-	//		logerror("ES5510:  Write GPR %06x %06x (0x%04x:=0x%06x\n",data,es5510_gpr_latch,data,snd_mem[es5510_gpr_latch>>8]);
+			log_cb(RETRO_LOG_DEBUG, LOGPRE "ES5510:  Write GPR %06x %06x (0x%04x:=0x%06x\n",data,es5510_gpr_latch,data,snd_mem[es5510_gpr_latch>>8]);
 			if (data<0xc0)
 				es5510_gpr[data]=snd_mem[es5510_gpr_latch>>8];
 			break;
 
 		case 0xc0: /* Write select - INSTR */
-	//		logerror("ES5510:  Write INSTR %06x %06x\n",data,es5510_gpr_latch);
+			log_cb(RETRO_LOG_DEBUG, LOGPRE "ES5510:  Write INSTR %06x %06x\n",data,es5510_gpr_latch);
 			break;
 
 		case 0xe0: /* Write select - GPR + INSTR */
-	//		logerror("ES5510:  Write GPR/INSTR %06x %06x\n",data,es5510_gpr_latch);
+			log_cb(RETRO_LOG_DEBUG, LOGPRE "ES5510:  Write GPR/INSTR %06x %06x\n",data,es5510_gpr_latch);
+			break;
+	}
+}
+
+READ16_HANDLER(ridingf_dsp_r)
+{
+	switch(offset)
+	{
+		case 0x09: return (es5510_dil_latch >> 16) & 0xff;
+		case 0x0a: return (es5510_dil_latch >> 8) & 0xff;
+		case 0x0b: return (es5510_dil_latch >> 0) & 0xff; /* TODO: docs says that this always returns 0 */
+	}
+
+	if (offset==0x12) return 0;
+
+/*	if (offset>4) */
+	if (offset==0x16) return 0x27;
+
+	return es5510_dsp_ram[offset];
+}
+
+WRITE16_HANDLER(ridingf_dsp_w)
+{
+	UINT8 *snd_mem = (UINT8 *)memory_region(REGION_SOUND1);
+
+/*	if (offset>4 && offset!=0x80  && offset!=0xa0  && offset!=0xc0  && offset!=0xe0)
+		log_cb(RETRO_LOG_DEBUG, LOGPRE "%06x: DSP write offset %04x %04x\n",activecpu_get_pc(),offset,data);
+*/
+
+	COMBINE_DATA(&es5510_dsp_ram[offset]);
+
+	switch (offset) {
+		case 0x00: es5510_gpr_latch=(es5510_gpr_latch&0x00ffff)|((data&0xff)<<16); break;
+		case 0x01: es5510_gpr_latch=(es5510_gpr_latch&0xff00ff)|((data&0xff)<< 8); break;
+		case 0x02: es5510_gpr_latch=(es5510_gpr_latch&0xffff00)|((data&0xff)<< 0); break;
+
+		/* 0x03 to 0x08 INSTR Register */
+		/* 0x09 to 0x0b DIL Register (r/o) */
+
+		case 0x0c: es5510_dol_latch=(es5510_dol_latch&0x00ffff)|((data&0xff)<<16); break;
+		case 0x0d: es5510_dol_latch=(es5510_dol_latch&0xff00ff)|((data&0xff)<< 8); break;
+		case 0x0e: es5510_dol_latch=(es5510_dol_latch&0xffff00)|((data&0xff)<< 0); break; /* TODO: docs says that this always returns 0xff */
+
+		case 0x0f:
+			es5510_dadr_latch=(es5510_dadr_latch&0x00ffff)|((data&0xff)<<16);
+
+            if(es5510_ram_sel)
+                es5510_dil_latch = es5510_dram[es5510_dadr_latch&(1<<16)-2];
+            else
+                es5510_dram[es5510_dadr_latch&(1<<16)-2] = es5510_dol_latch;
+            break;
+
+		case 0x10: es5510_dadr_latch=(es5510_dadr_latch&0xff00ff)|((data&0xff)<< 8); break;
+		case 0x11: es5510_dadr_latch=(es5510_dadr_latch&0xffff00)|((data&0xff)<< 0); break;
+
+		/* 0x12 Host Control */
+
+		case 0x14: es5510_ram_sel = data & 0x80; /* bit 6 is i/o select, everything else is undefined */break;
+
+		/* 0x16 Program Counter (test purpose, r/o?) */
+		/* 0x17 Internal Refresh counter (test purpose) */
+		/* 0x18 Host Serial Control */
+		/* 0x1f Halt enable (w) / Frame Counter (r) */
+
+		case 0x80: /* Read select - GPR + INSTR */
+	/*		log_cb(RETRO_LOG_DEBUG, LOGPRE ES5510:  Read GPR/INSTR %06x (%06x)\n",data,es5510_gpr[data]); */
+
+			/* Check if a GPR is selected */
+			if (data<0xc0) {
+				es_tmp=0;
+				es5510_gpr_latch=es5510_gpr[data];
+			} else es_tmp=1;
+			break;
+
+		case 0xa0: /* Write select - GPR */
+	/*		log_cb(RETRO_LOG_DEBUG, LOGPRE "ES5510:  Write GPR %06x %06x (0x%04x:=0x%06x\n",data,es5510_gpr_latch,data,snd_mem[es5510_gpr_latch>>8]); */
+			if (data<0xc0)
+				es5510_gpr[data]=snd_mem[es5510_gpr_latch>>8];
+			break;
+
+		case 0xc0: /* Write select - INSTR */
+	/*		log_cb(RETRO_LOG_DEBUG, LOGPRE "ES5510:  Write INSTR %06x %06x\n",data,es5510_gpr_latch); */
+			break;
+
+		case 0xe0: /* Write select - GPR + INSTR */
+	/*		log_cb(RETRO_LOG_DEBUG, LOGPRE "ES5510:  Write GPR/INSTR %06x %06x\n",data,es5510_gpr_latch); */
 			break;
 	}
 }
