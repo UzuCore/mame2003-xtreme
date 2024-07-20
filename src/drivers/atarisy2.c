@@ -128,6 +128,7 @@
 #include "machine/atarigen.h"
 #include "slapstic.h"
 #include "atarisy2.h"
+#include <math.h>
 
 static UINT16 *rombank1, *rombank2;
 

@@ -516,7 +516,8 @@ CFLAGS += $(INCFLAGS) $(INCFLAGS_PLATFORM)
 # combine the various definitions to one
 CDEFS = $(DEFS) $(COREDEFS) $(CPUDEFS) $(SOUNDDEFS) $(ASMDEFS) $(DBGDEFS)
 
-OBJECTS := $(SOURCES_C:.c=.o)
+#OBJECTS := $(SOURCES_C:.c=.o)
+OBJECTS := $(sort $(SOURCES_C:.c=.o) )
 
 OBJOUT   = -o
 LINKOUT  = -o 

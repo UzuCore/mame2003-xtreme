@@ -1,7 +1,5 @@
 #include "driver.h"
 
-
-
 static int firstchannel,numchannels;
 int leftSampleNum;
 int rightSampleNum;
@@ -132,10 +130,10 @@ void sample_stop(int channel)
 				readsample(Machine->samples->sample[c_sample], c_sample, Machine->samples, 0);
 
 			if (channel == 0)
-				leftSampleNum = NULL;
+				leftSampleNum = 0;
 
 			if (channel == 1)
-				rightSampleNum = NULL;
+				rightSampleNum = 0;
 		}
 	}
 }
