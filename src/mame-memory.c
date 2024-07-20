@@ -731,12 +731,13 @@ void install_port_write32_handler(int cpunum, offs_t start, offs_t end, port_wri
 
 int CLIB_DECL fatalerror(const char *string, ...)
 {
+	static char log_buffer[2048];
 	va_list arg;
 	va_start(arg, string);
-	vprintf(string, arg);
+	vsprintf(log_buffer,string,arg);
 	va_end(arg);
+	log_cb(RETRO_LOG_INFO, "(LOGERROR) %s",log_buffer);
 	exit(1);
-	return 0;
 }
 
 

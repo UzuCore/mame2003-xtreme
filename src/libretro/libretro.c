@@ -18,6 +18,7 @@ int stricmp(const char *string1, const char *string2)
 void mame_frame(void);
 void mame_done(void);
 static void retro_set_audio_buff_status_cb(void);
+void mame2003_video_get_geometry(struct retro_game_geometry *geom);
 
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
 unsigned activate_dcs_speedhack = 1;
@@ -295,7 +296,7 @@ static void update_variables(void)
    var.key = "mame2003-xtreme-amped-oc";
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {	
-      options.oc = (double) atoi(var.value) / 100;
+      options.oc = ((double) atoi(var.value) / 100);
     	
    }	
 

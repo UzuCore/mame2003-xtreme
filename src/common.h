@@ -16,6 +16,7 @@ extern "C" {
 #endif
 
 
+
 /***************************************************************************
 
 	Type definitions
@@ -452,6 +453,7 @@ const struct RomModule *rom_next_chunk(const struct RomModule *romp);
 
 void printromlist(const struct RomModule *romp,const char *name);
 
+void readsample(struct GameSample *SampleInfo, int channel, struct GameSamples *SamplesData, int load);
 
 
 /***************************************************************************
