@@ -3,120 +3,239 @@
 /*********************************************************/
 
 #include "driver.h"
+#include "rf5c68.h"
 #include <math.h>
 
+static struct RF5C68interface *intf;
 
-struct rf5c58 {
-	UINT8 regs[8][7];
-	UINT8 sel;
-	UINT8 keyon;
-	UINT8 *ram;
-	UINT32 addr[8];
-	int clock;
-	double ratio;
-	int stream;
-} rpcm;
-
-static void RF5C68_update( int num, INT16 **buffer, int length )
+enum
 {
-	int ch;
-	memset(buffer[0], 0, length*2);
-	memset(buffer[1], 0, length*2);
+	RF_L_PAN = 0, RF_R_PAN = 1, RF_LR_PAN = 2
+};
 
-	for(ch=0; ch<8; ch++)
-		if(!(rpcm.keyon & (1<<ch))) {
-			int voll = ( rpcm.regs[ch][1]       & 0xf)*rpcm.regs[ch][0];
-			int volr = ((rpcm.regs[ch][1] >> 4) & 0xf)*rpcm.regs[ch][0];
-			UINT32 addr = rpcm.addr[ch];
-			UINT32 step = ((rpcm.regs[ch][3] << 8) | rpcm.regs[ch][2])*rpcm.ratio;
-			int i;
+#define  NUM_CHANNELS    (8)
 
-			for(i=0; i<length; i++) {
-				INT8 v;
-				v = rpcm.ram[addr >> 16];
-				if(v == (INT8)0xff) {
-					addr = (rpcm.regs[ch][5] << 24) | (rpcm.regs[ch][4] << 16);
-					v = rpcm.ram[addr >> 16];
+struct pcm_channel
+{
+	UINT8		enable;
+	UINT8		env;
+	UINT8		pan;
+	UINT8		start;
+	UINT32		addr;
+	UINT16		step;
+	UINT16		loopst;
+};
+
+
+struct rf5c68pcm
+{
+	int 		stream;
+	struct pcm_channel	chan[NUM_CHANNELS];
+	UINT8				cbank;
+	UINT8				wbank;
+	UINT8				enable;
+	UINT8				data[0x10000];
+};
+
+struct rf5c68pcm *chip;
+
+/************************************************/
+/*    RF5C68 stream update                      */
+/************************************************/
+
+INLINE int ILimit(int v, int max, int min) { return v > max ? max : (v < min ? min : v); }
+
+static void rf5c68_update( int num, INT16 **buffer, int length )
+{
+	INT16 *left = buffer[0];
+	INT16 *right = buffer[1];
+	int i, j;
+
+	/* start with clean buffers */
+	memset(left, 0, length * sizeof(*left));
+	memset(right, 0, length * sizeof(*right));
+
+	/* bail if not enabled */
+	if (!chip->enable)
+		return;
+
+	/* loop over channels */
+	for (i = 0; i < NUM_CHANNELS; i++)
+	{
+		struct pcm_channel *chan = &chip->chan[i];
+
+		/* if this channel is active, accumulate samples */
+		if (chan->enable)
+		{
+			int lv = (chan->pan & 0x0f) * chan->env;
+			int rv = ((chan->pan >> 4) & 0x0f) * chan->env;
+
+			/* loop over the sample buffer */
+			for (j = 0; j < length; j++)
+			{
+				int sample;
+
+				/* fetch the sample and handle looping */
+				sample = chip->data[(chan->addr >> 11) & 0xffff];
+				if (sample == 0xff)
+				{
+					chan->addr = chan->loopst << 11;
+					sample = chip->data[(chan->addr >> 11) & 0xffff];
+
+					/* if we loop to a loop point, we're effectively dead */
+					if (sample == 0xff)
+						break;
 				}
-				if(v<0)
-					v = 127-(UINT8)v;
+				chan->addr += chan->step;
 
-				buffer[0][i] += (v*voll) >> 5;
-				buffer[1][i] += (v*volr) >> 5;
-				addr += step;
+				/* add to the buffer */
+				if (sample & 0x80)
+				{
+					sample &= 0x7f;
+					left[j] +=  ILimit( ((sample * lv) >> 5) /2, 16383,-16384);
+					right[j] += ILimit( ((sample * rv) >> 5) /2, 16383,-16384);
+				}
+				else
+				{
+					left[j] -=  ILimit( ((sample * lv) >> 5) /2, 16383,-16384);
+					right[j] -= ILimit( ((sample * rv) >> 5) /2, 16383,-16384);
+				}
 			}
-			rpcm.addr[ch] = addr;
 		}
-}
+	}
 
-int RF5C68_sh_start( const struct MachineSound *msound )
-{
-	struct RF5C68interface *intf = msound->sound_interface;
-	const char *name[2];
-	int vol[2];
-
-	rpcm.ram = malloc(0x10000);
-
-	if(!rpcm.ram)
-		return 1;
-
-	rpcm.clock = intf->clock;
-	rpcm.ratio = (double)rpcm.clock/(8*Machine->sample_rate);
-	memset(rpcm.regs, 0, sizeof(rpcm.regs));
-	rpcm.sel = 0;
-	rpcm.keyon = 0xff;
-
-	name[0] = "RF5C58 L";
-	name[1] = "RF5C68 R";
-	vol[0] = (MIXER_PAN_LEFT<<8)  | (intf->volume & 0xff);
-	vol[1] = (MIXER_PAN_RIGHT<<8) | (intf->volume & 0xff);
-	rpcm.stream = stream_init_multi(2, name, vol, Machine->sample_rate, 0, RF5C68_update );
-
-	return 0;
 
 }
 
+
+/************************************************/
+/*    RF5C68 stop                               */
+/************************************************/
 void RF5C68_sh_stop( void )
 {
 }
 
+
+
+int RF5C68_sh_start( const struct MachineSound *msound )
+{
+	struct RF5C68interface *inintf = msound->sound_interface;
+	char buf[2][40];
+	const char *name[2];
+	int  vol[2];
+	int i;
+
+	if (Machine->sample_rate == 0) return 0;
+	
+	chip = auto_malloc(sizeof(*chip));
+	
+	memset(chip, 0, sizeof(*chip));	
+    /* f1en fix bad sound if set initialized to 0xff fixed in mame0215*/
+	for (i = 0; i < 0x10000; i++)
+		chip->data[i]=0xff;
+
+	intf = inintf;	
+	
+	name[0] = buf[0];
+	name[1] = buf[1];
+	sprintf( buf[0], "%s Left", sound_name(msound) );
+	sprintf( buf[1], "%s Right", sound_name(msound) );
+	vol[0] = (MIXER_PAN_LEFT<<8)  | (intf->volume&0xff);
+	vol[1] = (MIXER_PAN_RIGHT<<8) | (intf->volume&0xff);
+
+	chip->stream = stream_init_multi( RF_LR_PAN, name, vol,  intf->clock / 384 , 0, rf5c68_update );
+	if(chip->stream == -1) return 1;
+	
+	return 0;
+}
+
+
+
+/************************************************/
+/*    RF5C68 write register                     */
+/************************************************/
+
 WRITE_HANDLER( RF5C68_reg_w )
 {
-	switch(offset) {
-	case 7:
-		rpcm.sel = data;
-		break;
-	case 8: {
-		UINT8 map = (~rpcm.keyon)|data;
-		if(map != 0xff) {
-			int i;
-			for(i=0; i<8; i++)
-				if(!(map & (1<<i)))
-					rpcm.addr[i] = rpcm.regs[i][6] << 24;
-		}
-		rpcm.keyon = data;
-		break;
-	}
-	default:
-		rpcm.regs[rpcm.sel & 7][offset] = data;
-		break;
+	struct pcm_channel *chan = &chip->chan[chip->cbank];
+	int i;
+
+	/* force the stream to update first */
+	stream_update(chip->stream, 0);
+
+	/* switch off the address */
+	switch (offset)
+	{
+		case 0x00:	/* envelope */
+			chan->env = data;
+			break;
+
+		case 0x01:	/* pan */
+			chan->pan = data;
+			break;
+
+		case 0x02:	/* FDL */
+			chan->step = (chan->step & 0xff00) | (data & 0x00ff);
+			break;
+
+		case 0x03:	/* FDH */
+			chan->step = (chan->step & 0x00ff) | ((data << 8) & 0xff00);
+			break;
+
+		case 0x04:	/* LSL */
+			chan->loopst = (chan->loopst & 0xff00) | (data & 0x00ff);
+			break;
+
+		case 0x05:	/* LSH */
+			chan->loopst = (chan->loopst & 0x00ff) | ((data << 8) & 0xff00);
+			break;
+
+		case 0x06:	/* ST */
+			chan->start = data;
+			if (!chan->enable)
+				chan->addr = chan->start << (8 + 11);
+			break;
+
+		case 0x07:	/* control reg */
+			chip->enable = (data >> 7) & 1;
+			if (data & 0x40)
+				chip->cbank = data & 7;
+			else
+				chip->wbank = data & 15;
+			break;
+
+		case 0x08:	/* channel on/off reg */
+			for (i = 0; i < 8; i++)
+			{
+				chip->chan[i].enable = (~data >> i) & 1;
+				if (!chip->chan[i].enable)
+					chip->chan[i].addr = chip->chan[i].start << (8 + 11);
+			}
+			break;
 	}
 }
 
-static int RF5C68_pcm_bank(void)
-{
-	if(rpcm.sel & 0x40)
-		return rpcm.regs[rpcm.sel & 7][6] << 8;
-	else
-		return (rpcm.sel & 15) << 12;
-}
+
+/************************************************/
+/*    RF5C68 read memory                        */
+/************************************************/
 
 READ_HANDLER( RF5C68_r )
 {
-	return rpcm.ram[(RF5C68_pcm_bank() + offset) & 0xffff];
+	return chip->data[chip->wbank * 0x1000 + offset];
 }
+
+
+/************************************************/
+/*    RF5C68 write memory                       */
+/************************************************/
 
 WRITE_HANDLER( RF5C68_w )
 {
-	rpcm.ram[(RF5C68_pcm_bank() + offset) & 0xffff] = data;
+	chip->data[chip->wbank * 0x1000 + offset] = data;
 }
+
+
+
+
+/**************** end of file ****************/
