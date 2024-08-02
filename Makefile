@@ -151,6 +151,8 @@ else ifeq ($(platform), rpi2)
    PLATCFLAGS += -fomit-frame-pointer -ffast-math -fsigned-char
    CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
    CPU_ARCH := arm
+   USE_CYCLONE := 1
+   USE_DRZ80 := 1
    ARM = 1
 else ifeq ($(platform), rpi3)
    TARGET = $(TARGET_NAME)_libretro.so
@@ -162,6 +164,8 @@ else ifeq ($(platform), rpi3)
    PLATCFLAGS += -fomit-frame-pointer -ffast-math
    CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
    CPU_ARCH := arm
+   USE_CYCLONE := 1
+   USE_DRZ80 := 1
    ARM = 1
 else ifeq ($(platform), rpi3_64)
    TARGET = $(TARGET_NAME)_libretro.so
