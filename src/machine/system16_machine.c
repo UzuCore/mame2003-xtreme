@@ -2218,8 +2218,7 @@ struct YM2413interface sys16_ym2413_interface= {
 };
 
 struct RF5C68interface sys18_rf5c68_interface = {
-  //3580000 * 2,
-  3579545*2,
+  10000000,
   100
 };
 
