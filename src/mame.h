@@ -237,8 +237,11 @@ struct GameOptions
 
 	int		min_width;		/* minimum width for the display */
 	int		min_height;		/* minimum height for the display */
-
 	#endif
+	#if (HAS_CYCLONE || HAS_DRZ80)
+	int      cyclone_mode;
+	#endif
+
 };
 
 

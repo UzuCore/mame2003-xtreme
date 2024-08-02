@@ -103,7 +103,7 @@ static UINT32 fifoin_pop(void)
 
 static void fifoin_push(UINT32 data)
 {
-	//	logerror("TGP FIFOIN write %08x (%x)\n", data, activecpu_get_pc());
+	/*	logerror("TGP FIFOIN write %08x (%x)\n", data, activecpu_get_pc()); */
 	fifoin_data[fifoin_wpos++] = data;
 	if(fifoin_wpos == FIFO_SIZE)
 		fifoin_wpos = 0;
@@ -350,12 +350,12 @@ static void f14(void)
 	float d = fifoin_pop_f();
 	int r = 0;
 	logerror("TGP f14 %f, %f, %f, %f (%x)\n", a, b, c, d, activecpu_get_pc());
-	//	fprintf(stderr, "TGP f14 %f, %f, %f, %f (%x)\n", a, b, c, d, activecpu_get_pc());
+	/*	fprintf(stderr, "TGP f14 %f, %f, %f, %f (%x)\n", a, b, c, d, activecpu_get_pc()); */
 
 	switch(activecpu_get_pc()) {
-	case 0xc7eea: r=1; break; // stars
-	case 0xc7f19: r=2; break; // stars too, ties?
-	case 0xcac91: r=3; break; // visee???
+	case 0xc7eea: r=1; break; /* stars */
+	case 0xc7f19: r=2; break; /* stars too, ties? */
+	case 0xcac91: r=3; break; /* visee??? */
 	case 0xc2ad0: r=4; break;
 	}
 
@@ -371,7 +371,7 @@ static void f14(void)
 static void f15_swa(void)
 {
 	logerror("TGP f15_swa (%x)\n", activecpu_get_pc());
-	//	fprintf(stderr, "TGP f15_swa (%x)\n", activecpu_get_pc());
+	/*	fprintf(stderr, "TGP f15_swa (%x)\n", activecpu_get_pc()); */
 
 	next_fn();
 }
@@ -428,7 +428,7 @@ static void matrix_trans(void)
 
 	logerror("TGP matrix_trans (%f, %f, %f) (%x)\n", a, b, c, activecpu_get_pc());
 	if(0 && activecpu_get_pc() == 0xfeeaa5)
-		//		fprintf(stderr, "TGP matrix_trans (%f, %f, %f) (%x)\n", a, b, c, activecpu_get_pc());
+		/*		fprintf(stderr, "TGP matrix_trans (%f, %f, %f) (%x)\n", a, b, c, activecpu_get_pc()); */
 		a = 0;
 
 	if(activecpu_get_pc() == 0x22f59) {
@@ -528,22 +528,27 @@ static void matrix_rotz(void)
 	next_fn();
 }
 
-static void f24(void)
+static void track_read_quad(void)
 {
+	const UINT32 *tgp_data = (const UINT32 *)memory_region(REGION_USER2);
 	UINT32 a = fifoin_pop();
-	logerror("TGP f24 %d (%x)\n", a, activecpu_get_pc());
-	fifoout_push_f(1);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
-	fifoout_push_f(1);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
-	fifoout_push_f(1);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
-	fifoout_push_f(0);
+	int offd;
+
+	logerror("TGP track_read_quad %d (%x)\n", a, activecpu_get_pc());
+
+	offd = tgp_data[0x20+tgp_vr_select] + 16*a;
+	fifoout_push(tgp_data[offd]);
+	fifoout_push(tgp_data[offd+1]);
+	fifoout_push(tgp_data[offd+2]);
+	fifoout_push(tgp_data[offd+3]);
+	fifoout_push(tgp_data[offd+4]);
+	fifoout_push(tgp_data[offd+5]);
+	fifoout_push(tgp_data[offd+6]);
+	fifoout_push(tgp_data[offd+7]);
+	fifoout_push(tgp_data[offd+8]);
+	fifoout_push(tgp_data[offd+9]);
+	fifoout_push(tgp_data[offd+10]);
+	fifoout_push(tgp_data[offd+11]);
 	next_fn();
 }
 
@@ -693,7 +698,7 @@ static void f42(void)
 	float b = fifoin_pop_f();
 	float c = fifoin_pop_f();
 	logerror("TGP f42 %f, %f, %f (%x)\n", a, b, c, activecpu_get_pc());
-	//	fifoout_push_f((mame_rand() % 1000) - 500);
+	/*	fifoout_push_f((mame_rand() % 1000) - 500); */
 	fifoout_push_f(0);
 	fifoout_push_f(0);
 	fifoout_push_f(0);
@@ -704,7 +709,7 @@ static void f42(void)
 }
 
 
-// r = (x2 + y2 + z2)1/2,     f = tan-1(y/(x2+z2)1/2),     q = tan-1(z/x)
+/* r = (x2 + y2 + z2)1/2,     f = tan-1(y/(x2+z2)1/2),     q = tan-1(z/x) */
 
 static void xyz2rqf(void)
 {
@@ -858,11 +863,16 @@ static void f47(void)
 	next_fn();
 }
 
-static void f48(void)
+static void track_read_info(void)
 {
-    INT16 a = fifoin_pop();
-	logerror("TGP f48 %d (%x)\n", a, activecpu_get_pc());
-	fifoout_push(1000+a);
+	const UINT32 *tgp_data = (const UINT32 *)memory_region(REGION_USER2);
+    UINT16 a = fifoin_pop();
+	int offd;
+
+	logerror("TGP track_read_info %d (%x)\n", a, activecpu_get_pc());
+
+	offd = tgp_data[0x20+tgp_vr_select] + 16*a;
+	fifoout_push(tgp_data[a+15]);
 	next_fn();
 }
 
@@ -903,8 +913,8 @@ static void colbox_test(void)
 	float c = fifoin_pop_f();
 	logerror("TGP colbox_test %f, %f, %f (%x)\n", a, b, c, activecpu_get_pc());
 
-	// #### Wrong, need to check with the tgp_vr_cbox coordinates
-	// Game only test sign, negative = collision
+	/* #### Wrong, need to check with the tgp_vr_cbox coordinates */
+	/* Game only test sign, negative = collision */
 	fifoout_push_f(-1);
 	next_fn();
 }
@@ -971,6 +981,21 @@ static void matrix_rdir(void)
 	next_fn();
 }
 
+/* A+(B-A)*t1 + (C-A)*t2 = P */
+static void tri_calc_pq(float ax, float ay, float bx, float by, float cx, float cy, float px, float py, float *t1, float *t2)
+{
+	float d;
+	bx -= ax;
+	cx -= ax;
+	px -= ax;
+	by -= ay;
+	cy -= ay;
+	py -= ay;
+	d = bx*cy-by*cx;
+	*t1 = (px*cy-py*cx)/d;
+	*t2 = (bx*py-by*px)/d;
+}
+
 static void track_lookup(void)
 {
 	const UINT32 *tgp_data = (const UINT32 *)memory_region(REGION_USER2);
@@ -980,8 +1005,8 @@ static void track_lookup(void)
 	float d = fifoin_pop_f();
 	int offi, offd, len;
 	float dist;
-	int offe=0, pt=0, i;
-	unsigned int behaviour;
+	int i;
+	unsigned int behaviour, entry;
 	float height;
 
 	logerror("TGP track_lookup %f, 0x%x, %f, %f (%x)\n", a, b, c, d, activecpu_get_pc());
@@ -992,38 +1017,39 @@ static void track_lookup(void)
 	len = tgp_data[offi++];
 
 	dist = -1;
-	if(len>20)
-		len = 0;
+
+	behaviour = 0;
+	height = 0.0;
+	entry = 0;
 
 	for(i=0; i<len; i++) {
 		int j;
-		int posd = offd + tgp_data[offi++]*0x10;
+		int bpos = tgp_data[offi++];
+		int posd = offd + bpos*0x10;
 		const float *pts = (const float *)(tgp_data+posd);
-		for(j=0; j<5; j++) {
-			float dx = c-pts[3*j+0];
-			float dy = a-pts[3*j+1];
-			float dz = d-pts[3*j+2];
-			float dd = dx*dx+dy*dy+dz*dz;
-			if(dist == -1 || dd<dist) {
-				dist = dd;
-				offe = posd;
-				pt = j;
+		float ax = pts[12];
+		float ay = pts[14];
+		float az = pts[13];
+		for(j=0; j<4; j++) {
+			float t1, t2;
+			int k = (j+1) & 3;
+			tri_calc_pq(ax, ay, pts[3*j], pts[3*j+2], pts[3*k], pts[3*k+2], c, d, &t1, &t2);
+			if(t1 >= 0 && t2 >= 0 && t1+t2 <= 1) {
+				float z = az+t1*(pts[3*j+1]-az)+t2*(pts[3*k+1]-az);
+				float d = (a-z)*(a-z);
+				if(dist == -1 || d<dist) {
+					dist = d;
+					behaviour = tgp_data[posd+15];
+					height = z;
+					entry = bpos+i;
+				}
 			}
 		}
 	}
 
-	if(dist == -1) {
-		behaviour = 0;
-		height = 0.0;
-	} else {
-		// Maybe it's doing some kind of interpolation, go figure
-		behaviour = tgp_data[offe+15];
-		height = u2f(tgp_data[offe+pt*3+1]);
-	}
-
-	ram_data[0x0000] = 0; // non zero = still computing
+	ram_data[0x0000] = 0; /* non zero = still computing */
 	ram_data[0x8001] = f2u(height);
-	ram_data[0x8002] = behaviour;
+	ram_data[0x8002] = entry;
 
 	next_fn();
 }
@@ -1313,7 +1339,7 @@ static void matrix_unrot(void)
 static void f80(void)
 {
 	logerror("TGP f80 (%x)\n", activecpu_get_pc());
-	//	cmat[9] = cmat[10] = cmat[11] = 0;
+	/*	cmat[9] = cmat[10] = cmat[11] = 0; */
 	next_fn();
 }
 
@@ -1359,7 +1385,7 @@ static void groundbox_test(void)
 
 	out_x = x < tgp_vf_xmin || x > tgp_vf_xmax;
 	out_z = z < tgp_vf_zmin || z > tgp_vf_zmax;
-	out_y = 1; // Wrong, but untestable it seems.
+	out_y = 1; /* Wrong, but untestable it seems. */
 
 	fifoout_push(out_x);
 	fifoout_push(out_y);
@@ -1523,10 +1549,10 @@ static void f102(void)
 	py = u2f(ram_data[ram_scanadr+0x17]);
 	pz = u2f(ram_data[ram_scanadr+0x18]);
 
-	//	memset(cmat, 0, sizeof(cmat));
-	//	cmat[0] = 1.0;
-	//	cmat[4] = 1.0;
-	//	cmat[8] = 1.0;
+	/*	memset(cmat, 0, sizeof(cmat)); */
+	/*	cmat[0] = 1.0; */
+	/*	cmat[4] = 1.0; */
+	/*	cmat[8] = 1.0; */
 
 	px = c;
 	py = d;
@@ -1589,7 +1615,7 @@ static struct function ftab_vf[] = {
 	{  20, matrix_rotx,     1 },
 	{  21, matrix_roty,     1 },
 	{  22, matrix_rotz,     1 },
-	{  24, f24, 1 },
+	{  24, track_read_quad, 1 },
 	{  26, transform_point, 3 },
 	{  27, fsin,            1 },
 	{  28, fcos,            1 },
@@ -1601,13 +1627,13 @@ static struct function ftab_vf[] = {
 	{  38, acc_add,         1 },
 	{  39, acc_sub,         1 },
 	{  40, acc_mul,         1 },
-	{  41, acc_div,         1 }, // not used ?
+	{  41, acc_div,         1 }, /* not used ? */
 	{  42, f42,   3 },
 	{  43, f43,   6 },
 	{  44, f44,   1 },
 	{  45, f45,   1 },
 	{  46, vlength,         3 },
-	{  48, f48,   1 },
+	{  48, track_read_info, 1 },
 	{  49, colbox_set,     12 },
 	{  50, colbox_test,     3 },
 	{  54, track_lookup,    4 },
@@ -1642,10 +1668,10 @@ static struct function ftab_vf[] = {
 	{ 103, f103,  1 },
 	{ 0, 0, 0 }
 };
-// Used in swa scene 1 and unemulated:
-//   f14
-//   f49_swa
-//   f15_swa
+/* Used in swa scene 1 and unemulated: */
+/*   f14 */
+/*   f49_swa */
+/*   f15_swa */
 
 static struct function ftab_swa[] = {
 	{   0, fadd,            2 },
@@ -1684,7 +1710,7 @@ static struct function ftab_swa[] = {
 	{  38, acc_add,         1 },
 	{  39, acc_sub,         1 },
 	{  40, acc_mul,         1 },
-	{  41, acc_div,         1 }, // not used ?
+	{  41, acc_div,         1 }, /* not used ? */
 	{  42, xyz2rqf,         3 },
 	{  43, f43_swa, 3 },
 	{  44, matrix_sdir,     3 },
@@ -1729,7 +1755,7 @@ static void function_get_vf(void)
 	if(fct->cb) {
 		fifoin_cbcount = fct->count;
 		fifoin_cb = fct->cb;
-		//		logerror("TGP function %d request, %d parameters\n", f, fifoin_cbcount);
+		/*		logerror("TGP function %d request, %d parameters\n", f, fifoin_cbcount); */
 		if(!fifoin_cbcount)
 			fifoin_cb();
 	} else {
@@ -1755,7 +1781,7 @@ static void function_get_swa(void)
 	if(fct->cb) {
 		fifoin_cbcount = fct->count;
 		fifoin_cb = fct->cb;
-		//		logerror("TGP function %d request, %d parameters\n", f, fifoin_cbcount);
+		/*		logerror("TGP function %d request, %d parameters\n", f, fifoin_cbcount); */
 		if(!fifoin_cbcount)
 			fifoin_cb();
 	} else {

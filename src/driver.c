@@ -5256,7 +5256,7 @@ Other Sun games
 
 	/* Sega Model 1 Hardware */	
 	DRIVER( vf )
-	
+	DRIVER( vr )
 	/* RamTek games */
 	DRIVER( hitme )		/* [1976 Ramtek] */
 	DRIVER( mblkjack )	/* [197? Mirco] */

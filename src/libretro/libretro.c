@@ -7,6 +7,10 @@
 #include "state.h"
 #include "log.h"
 
+#if (HAS_DRZ80 || HAS_CYCLONE)
+#include "frontend_list.h"
+#endif
+
 // Wrapper to build MAME on 3DS. It doesn't have stricmp.
 #ifdef _3DS
 int stricmp(const char *string1, const char *string2)
@@ -19,6 +23,7 @@ void mame_frame(void);
 void mame_done(void);
 static void retro_set_audio_buff_status_cb(void);
 void mame2003_video_get_geometry(struct retro_game_geometry *geom);
+static void configure_cyclone_mode (int driverIndex); 
 
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
 unsigned activate_dcs_speedhack = 1;
@@ -115,6 +120,9 @@ void retro_set_environment(retro_environment_t cb)
       { "mame2003-xtreme-amped-rstick_to_btns", "Right Stick to Buttons; enabled|disabled" },
       { "mame2003-xtreme-amped-option_tate_mode", "TATE Mode; disabled|enabled" },
       { "mame2003-xtreme-amped-use_artwork", "Artwork(Restart); enabled|disabled" },
+      #if (HAS_CYCLONE || HAS_DRZ80)
+      { "mame2003-xtreme-amped-cyclone_mode", "Cyclone mode(Restarte); default|disabled|Cyclone|DrZ80|Cyclone+DrZ80|DrZ80(snd)|Cyclone+DrZ80(snd)" },
+      #endif 
       { NULL, NULL },
    };
    environ_cb = cb;
@@ -243,6 +251,29 @@ static void update_variables(void)
    struct retro_variable var;
 	int prev_frameskip_type;
 
+  
+   var.value = NULL;
+   var.key = "mame2003-xtreme-amped-cyclone_mode";
+   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
+   {
+   #if (HAS_CYCLONE || HAS_DRZ80)
+          if(strcmp(var.value, "default") == 0)
+            options.cyclone_mode = 1;
+          else if(strcmp(var.value, "Cyclone") == 0)
+            options.cyclone_mode = 2;
+          else if(strcmp(var.value, "DrZ80") == 0)
+            options.cyclone_mode = 3;
+          else if(strcmp(var.value, "Cyclone+DrZ80") == 0)
+            options.cyclone_mode = 4;
+          else if(strcmp(var.value, "DrZ80(snd)") == 0)
+            options.cyclone_mode = 5;
+          else if(strcmp(var.value, "Cyclone+DrZ80(snd)") == 0)
+            options.cyclone_mode = 6;
+          else /* disabled */
+            options.cyclone_mode = 0;
+       #endif
+   }
+   
    var.value = NULL;
    var.key = "mame2003-xtreme-amped-turboboost";
 
@@ -669,6 +700,8 @@ bool retro_load_game(const struct retro_game_info *game)
 
         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
+        update_variables();
+        configure_cyclone_mode(driverIndex);
         // Boot the emulator
         return run_game(driverIndex) == 0;
     }
@@ -895,4 +928,137 @@ if (Machine->input_ports)
       }
       in++;
     }
+}
+
+static void configure_cyclone_mode (int driverIndex)
+{
+  /* Determine how to use cyclone if available to the platform */
+
+#if (HAS_CYCLONE || HAS_DRZ80)
+  int i;
+  int use_cyclone = 1;
+  int use_drz80 = 1;
+  int use_drz80_snd = 1;
+
+  /* cyclone mode core option: 0=disabled, 1=default, 2=Cyclone, 3=DrZ80, 4=Cyclone+DrZ80, 5=DrZ80(snd), 6=Cyclone+DrZ80(snd) */
+  switch (options.cyclone_mode)
+  {
+    case 0:
+      use_cyclone = 0;
+      use_drz80_snd = 0;
+      use_drz80 = 0;
+      break;
+
+    case 1:
+      for (i=0;i<NUMGAMES;i++)
+      {
+        /* ASM cores: 0=disabled, 1=Cyclone, 2=DrZ80, 3=Cyclone+DrZ80, 4=DrZ80(snd), 5=Cyclone+DrZ80(snd) */
+        if (strcmp(drivers[driverIndex]->name,fe_drivers[i].name)==0)
+        {
+          switch (fe_drivers[i].cores)
+          {
+            case 0:
+              use_cyclone = 0;
+              use_drz80_snd = 0;
+              use_drz80 = 0;
+              break;
+            case 1:
+              use_drz80_snd = 0;
+              use_drz80 = 0;
+              break;
+            case 2:
+              use_cyclone = 0;
+              break;
+            case 4:
+              use_cyclone = 0;
+              use_drz80 = 0;
+              break;
+            case 5:
+              use_drz80 = 0;
+              break;
+            default:
+              break;
+          }
+
+          break; /* end for loop */
+        }
+      }
+      break; /* end case 1 */
+
+    case 2:
+      use_drz80_snd = 0;
+      use_drz80 = 0;
+      break;
+
+    case 3:
+      use_cyclone = 0;
+      break;
+
+    case 5:
+      use_cyclone = 0;
+      use_drz80 = 0;
+      break;
+
+    case 6:
+      use_drz80 = 0;
+      break;
+
+    default:
+      break;
+  }
+
+#if (HAS_CYCLONE)
+  /* Replace M68000 by CYCLONE */
+  if (use_cyclone)
+  {
+    for (i=0;i<MAX_CPU;i++)
+    {
+      unsigned int *type=(unsigned int *)&(Machine->drv->cpu[i].cpu_type);
+
+#ifdef NEOMAME
+      if (*type==CPU_M68000)
+#else
+      if (*type==CPU_M68000 || *type==CPU_M68010 )
+#endif
+      {
+        *type=CPU_CYCLONE;
+        log_cb(RETRO_LOG_INFO, LOGPRE "Replaced CPU_CYCLONE\n");
+      }
+
+      if (!(*type)) break;
+    }
+  }
+#endif
+
+#if (HAS_DRZ80)
+  /* Replace Z80 by DRZ80 */
+  if (use_drz80)
+  {
+    for (i=0;i<MAX_CPU;i++)
+    {
+      unsigned int *type=(unsigned int *)&(Machine->drv->cpu[i].cpu_type);
+      if (type==CPU_Z80)
+      {
+        *type=CPU_DRZ80;
+        log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80\n");
+      }
+    }
+  }
+
+  /* Replace Z80 with DRZ80 only for sound CPUs */
+  if (use_drz80_snd)
+  {
+    for (i=0;i<MAX_CPU;i++)
+    {
+      int *type=(int*)&(Machine->drv->cpu[i].cpu_type);
+      if (type==CPU_Z80 && Machine->drv->cpu[i].cpu_flags&CPU_AUDIO_CPU)
+      {
+        *type=CPU_DRZ80;
+        log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80 sound\n");
+      }
+    }
+  }
+#endif
+
+#endif
 }

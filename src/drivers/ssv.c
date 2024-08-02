@@ -2946,7 +2946,7 @@ DRIVER_INIT( vasara )		{	init_ssv(); ssv_special = 2;
 static MACHINE_DRIVER_START( ssv )
 
 	/* basic machine hardware */
-	MDRV_CPU_ADD_TAG("main", V60, CLOCK_16MHz) /* Based on STA-0001 & STA-0001B System boards */
+	MDRV_CPU_ADD_TAG("main", V60, 16000000) /* Based on STA-0001 & STA-0001B System boards */
 	MDRV_CPU_VBLANK_INT(ssv_interrupt,2)	/* Vblank */
 
 	MDRV_FRAMES_PER_SECOND(60)
