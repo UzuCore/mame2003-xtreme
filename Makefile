@@ -517,7 +517,7 @@ CFLAGS += $(INCFLAGS) $(INCFLAGS_PLATFORM)
 CDEFS = $(DEFS) $(COREDEFS) $(CPUDEFS) $(SOUNDDEFS) $(ASMDEFS) $(DBGDEFS)
 
 #OBJECTS := $(SOURCES_C:.c=.o)
-OBJECTS := $(sort $(SOURCES_C:.c=.o) )
+OBJECTS := $(sort $(SOURCES_C:.c=.o) ) $(SOURCES_ASM:.s=.o)
 
 OBJOUT   = -o
 LINKOUT  = -o 
@@ -564,6 +564,10 @@ endif
 
 %.o: %.c
 	$(CC) $(CDEFS) $(CFLAGS) $(PLATCFLAGS) -c $(OBJOUT)$@ $<
+
+
+%.o: %.s
+	$(CC) -c $(OBJOUT)$@ $< $(CFLAGS)
 
 $(OBJ)/%.a:
 	@echo Archiving $@...
