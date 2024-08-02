@@ -2731,12 +2731,18 @@ DokiDoki Penguin Land *not confirmed
 	DRIVER( dunkshot )	/* (protected) */
 	DRIVER( exctleag )  /* (protected) */
 	DRIVER( lghost )	/* (protected) */
-	DRIVER( loffire )	/* (protected) */
+
 	DRIVER( mvp )		/* (protected) */
 	DRIVER( ryukyu )	/* (protected) */
 	DRIVER( suprleag )  /* (protected) */
-	DRIVER( thndrbld )	/* (protected) */
-	DRIVER( thndrbdj )  /* (protected?) */
+
+	DRIVER( abcop )
+	DRIVER( loffire )
+	DRIVER( rachero )
+	DRIVER( thndrbld )
+	DRIVER( thndrbld1 )
+	DRIVER( smgp )
+
 
 	// Working
 	DRIVER( aburner )	/* (c) 1987 */
