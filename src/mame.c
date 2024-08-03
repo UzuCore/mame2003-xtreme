@@ -262,29 +262,31 @@ INLINE void bail_and_print(const char *message)
 /*-------------------------------------------------
 	run_game - run the given game in a session
 -------------------------------------------------*/
-
-int run_game(int game)
+bool init_game(int game)
 {
-	int err = 1;
-
 	begin_resource_tracking();
 
 #ifdef MAME_DEBUG
 	/* validity checks -- debug build only */
 	if (validitychecks())
-		return 1;
-	#ifdef MESS
-	if (messvaliditychecks()) return 1;
-	#endif
+		return false;
 #endif
 
 	/* first give the machine a good cleaning */
-	memset(Machine, 0, sizeof(Machine));
+	memset(Machine, 0, sizeof(*Machine));
 
 	/* initialize the driver-related variables in the Machine */
 	Machine->gamedrv = gamedrv = drivers[game];
 	expand_machine_driver(gamedrv->drv, &internal_drv);
 	Machine->drv = &internal_drv;
+  return true;
+}
+
+
+
+int run_game(int game)
+{
+	int err = 1;
 
 	/* initialize the game options */
 	if (init_game_options())

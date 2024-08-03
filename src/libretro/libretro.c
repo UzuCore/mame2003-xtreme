@@ -700,6 +700,8 @@ bool retro_load_game(const struct retro_game_info *game)
 
         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
+		if(!init_game(driverIndex))
+		return false;
         update_variables();
         configure_cyclone_mode(driverIndex);
         // Boot the emulator
@@ -1037,7 +1039,7 @@ static void configure_cyclone_mode (int driverIndex)
     for (i=0;i<MAX_CPU;i++)
     {
       unsigned int *type=(unsigned int *)&(Machine->drv->cpu[i].cpu_type);
-      if (type==CPU_Z80)
+      if (*type==CPU_Z80)
       {
         *type=CPU_DRZ80;
         log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80\n");
@@ -1050,8 +1052,8 @@ static void configure_cyclone_mode (int driverIndex)
   {
     for (i=0;i<MAX_CPU;i++)
     {
-      int *type=(int*)&(Machine->drv->cpu[i].cpu_type);
-      if (type==CPU_Z80 && Machine->drv->cpu[i].cpu_flags&CPU_AUDIO_CPU)
+      unsigned int *type=(unsigned int *)&(Machine->drv->cpu[i].cpu_type);
+      if (*type==CPU_Z80 && Machine->drv->cpu[i].cpu_flags&CPU_AUDIO_CPU)
       {
         *type=CPU_DRZ80;
         log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80 sound\n");
