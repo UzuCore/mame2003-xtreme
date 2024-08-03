@@ -700,6 +700,8 @@ bool retro_load_game(const struct retro_game_info *game)
 
         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
+		if(!init_game(driverIndex))
+		return false;
         update_variables();
         configure_cyclone_mode(driverIndex);
         // Boot the emulator
