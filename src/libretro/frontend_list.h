@@ -6,9 +6,7 @@ struct fe_driver {
 	int cores; /* ASM cores: 0=None,1=Cyclone,2=DrZ80,3=Cyclone+DrZ80,4=DrZ80(snd),5=Cyclone+DrZ80(snd) */
 };
 
-#define NUMGAMES 2283
-
-struct fe_driver fe_drivers[NUMGAMES] = {
+struct fe_driver fe_drivers[] = {
 
 { "005", 1 }, 
 { "1941", 3 }, 
