@@ -935,6 +935,7 @@ if (Machine->input_ports)
 #if (HAS_CYCLONE || HAS_DRZ80)
 int check_list(char *name)
 {
+ 
    int found=0;
    int counter=0;
    while (fe_drivers[counter].name[0])
@@ -948,9 +949,9 @@ int check_list(char *name)
    }
    /* todo do a z80 and 68k check to inform its not on the list if matched*/
  
-   for (i=0;i<MAX_CPU;i++)
+   for (counter=0;i<MAX_CPU;i++)
    {
-      unsigned int *type=(unsigned int *)&(Machine->drv->cpu[i].cpu_type);
+      unsigned int *type=(unsigned int *)&(Machine->drv->cpu[counter].cpu_type);
 
       if (*type==CPU_Z80)  log_cb(RETRO_LOG_INFO, "game:%s has no frontend_list.h match and has a z80  %s\n",name);
       if (*type==CPU_M68000) log_cb(RETRO_LOG_INFO, "game:%s has no frontend_list.h match and has a M68000  %s\n",name);
