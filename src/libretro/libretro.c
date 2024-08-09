@@ -947,7 +947,14 @@ int check_list(char *name)
     counter ++;
    }
    /* todo do a z80 and 68k check to inform its not on the list if matched*/
-   log_cb(RETRO_LOG_INFO, "{frontend_list no match for %s\n",name );
+ 
+   for (i=0;i<MAX_CPU;i++)
+   {
+      unsigned int *type=(unsigned int *)&(Machine->drv->cpu[i].cpu_type);
+
+      if (*type==CPU_Z80)  log_cb(RETRO_LOG_INFO, "game:%s has no frontend_list.h match and has a z80  %s\n",name);
+      if (*type==CPU_M68000) log_cb(RETRO_LOG_INFO, "game:%s has no frontend_list.h match and has a M68000  %s\n",name);
+   }
    return 1;
 }
 #endif
