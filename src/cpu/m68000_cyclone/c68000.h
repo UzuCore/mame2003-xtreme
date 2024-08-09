@@ -1,7 +1,7 @@
 #ifndef C68000_H
 #define C68000_H
 
-extern int cyclone_ICount;
+extern int *cyclone_ICount;
 
 #define cyclone_INT_NONE 0							  
 #define cyclone_IRQ_1    1

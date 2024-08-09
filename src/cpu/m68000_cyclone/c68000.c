@@ -13,7 +13,7 @@ typedef struct
 } Cyclone_Regs;
 
 static Cyclone_Regs cyclone;
-int cyclone_ICount;
+int *cyclone_ICount=&cyclone.regs.cycles;
 
 static unsigned int MyCheckPc(unsigned int pc)
 {
@@ -129,9 +129,7 @@ unsigned cyclone_get_context(void *dst)
 int cyclone_execute(int cycles)
 {
 	cyclone.regs.cycles = cycles;
-	cyclone_ICount = cyclone.regs.cycles;
 	CycloneRun(&cyclone.regs);
-	cyclone_ICount = cyclone.regs.cycles;
    	return (cycles - cyclone.regs.cycles);
 }
 
