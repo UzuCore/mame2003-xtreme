@@ -249,26 +249,26 @@ static void update_variables(void)
 {
    struct retro_led_interface ledintf;
    struct retro_variable var;
-	int prev_frameskip_type;
+   int prev_frameskip_type;
 
-  
+   /* ASM cores: 0=None,1=Cyclone,2=DrZ80,3=Cyclone+DrZ80,4=DrZ80(snd),5=Cyclone+DrZ80(snd) */
    var.value = NULL;
    var.key = "mame2003-xtreme-amped-cyclone_mode";
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
    {
    #if (HAS_CYCLONE || HAS_DRZ80)
           if(strcmp(var.value, "default") == 0)
-            options.cyclone_mode = 1;
-          else if(strcmp(var.value, "Cyclone") == 0)
-            options.cyclone_mode = 2;
-          else if(strcmp(var.value, "DrZ80") == 0)
-            options.cyclone_mode = 3;
-          else if(strcmp(var.value, "Cyclone+DrZ80") == 0)
-            options.cyclone_mode = 4;
-          else if(strcmp(var.value, "DrZ80(snd)") == 0)
-            options.cyclone_mode = 5;
-          else if(strcmp(var.value, "Cyclone+DrZ80(snd)") == 0)
             options.cyclone_mode = 6;
+          else if(strcmp(var.value, "Cyclone") == 0)
+            options.cyclone_mode = 1;
+          else if(strcmp(var.value, "DrZ80") == 0)
+            options.cyclone_mode = 2;
+          else if(strcmp(var.value, "Cyclone+DrZ80") == 0)
+            options.cyclone_mode = 3;
+          else if(strcmp(var.value, "DrZ80(snd)") == 0)
+            options.cyclone_mode = 4;
+          else if(strcmp(var.value, "Cyclone+DrZ80(snd)") == 0)
+            options.cyclone_mode = 5;
           else /* disabled */
             options.cyclone_mode = 0;
        #endif
@@ -956,7 +956,7 @@ int check_list(char *name)
       if (*type==CPU_Z80)  log_cb(RETRO_LOG_INFO, "game:%s has no frontend_list.h match and has a z80  %s\n",name);
       if (*type==CPU_M68000) log_cb(RETRO_LOG_INFO, "game:%s has no frontend_list.h match and has a M68000  %s\n",name);
    }
-   return 1;
+   return 0;
 }
 #endif
 
@@ -970,34 +970,32 @@ static void configure_cyclone_mode (int driverIndex)
   int use_drz80 = 0;
   int use_drz80_snd = 0;
 
-  /* cyclone mode core option: 0=disabled, 1=default, 2=Cyclone, 3=DrZ80, 4=Cyclone+DrZ80, 5=DrZ80(snd), 6=Cyclone+DrZ80(snd) */
-
-   if (options.cyclone_mode == 1) 
+   if (options.cyclone_mode == 6) 
      i=check_list(drivers[driverIndex]->name);
    else 
      i=options.cyclone_mode;
-   
+  /* ASM cores: 0=None,1=Cyclone,2=DrZ80,3=Cyclone+DrZ80,4=DrZ80(snd),5=Cyclone+DrZ80(snd) */
   switch (i)
   {
-    /* nothing needs done for case 1 default */
-    case 2:
+    /* nothing needs done for case 0 */
+    case 1:
       use_cyclone = 1;
       break;
 
-    case 3:
+    case 2:
       use_drz80 = 1;
       break;
 
-    case 4:
+    case 3:
       use_cyclone = 1;
       use_drz80=1;
       break;
 
-    case 5:
+    case 4:
       use_drz80_snd = 1;
       break;
 
-    case 6:
+    case 5:
       use_cyclone = 1;
       use_drz80_snd = 1;
       break;
