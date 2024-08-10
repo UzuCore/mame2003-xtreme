@@ -956,7 +956,7 @@ int check_list(char *name)
       if (*type==CPU_Z80)  log_cb(RETRO_LOG_INFO, "game:%s has no frontend_list.h match and has a z80  %s\n",name);
       if (*type==CPU_M68000) log_cb(RETRO_LOG_INFO, "game:%s has no frontend_list.h match and has a M68000  %s\n",name);
    }
-   return 1;
+   return 0;
 }
 #endif
 
