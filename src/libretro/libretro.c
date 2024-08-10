@@ -1031,7 +1031,7 @@ static void configure_cyclone_mode (int driverIndex)
       unsigned int *type=(unsigned int *)&(Machine->drv->cpu[i].cpu_type);
       if (*type==CPU_Z80)
       {
-        //*type=CPU_DRZ80;
+        *type=CPU_DRZ80;
         log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80\n");
       }
     }
