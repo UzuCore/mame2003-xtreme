@@ -949,7 +949,7 @@ int check_list(char *name)
    }
    /* todo do a z80 and 68k check to inform its not on the list if matched*/
  
-   for (counter=0;i<MAX_CPU;i++)
+   for (counter=0;counter<MAX_CPU;counter++)
    {
       unsigned int *type=(unsigned int *)&(Machine->drv->cpu[counter].cpu_type);
 
