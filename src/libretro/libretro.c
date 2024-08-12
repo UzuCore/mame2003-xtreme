@@ -120,8 +120,12 @@ void retro_set_environment(retro_environment_t cb)
       { "mame2003-xtreme-amped-rstick_to_btns", "Right Stick to Buttons; enabled|disabled" },
       { "mame2003-xtreme-amped-option_tate_mode", "TATE Mode; disabled|enabled" },
       { "mame2003-xtreme-amped-use_artwork", "Artwork(Restart); enabled|disabled" },
-      #if (HAS_CYCLONE || HAS_DRZ80)
-      { "mame2003-xtreme-amped-cyclone_mode", "Cyclone mode(Restarte); default|disabled|Cyclone|DrZ80|Cyclone+DrZ80|DrZ80(snd)|Cyclone+DrZ80(snd)" },
+      #if defined(HAS_CYCLONE) && defined(HAS_DRZ80)  
+      { "mame2003-xtreme-amped-cyclone_mode", "Cyclone mode(Restart); default|disabled|Cyclone|DrZ80|Cyclone+DrZ80|DrZ80(snd)|Cyclone+DrZ80(snd)" },
+      #elif defined(HAS_CYCLONE) && !defined(HAS_DRZ80)      
+      { "mame2003-xtreme-amped-cyclone_mode", "Cyclone mode(Restart); default|disabled|Cyclone },
+      #elif !defined(HAS_CYCLONE) && defined(HAS_DRZ80)     
+      { "mame2003-xtreme-amped-cyclone_mode", "Cyclone mode(Restart); default|disabled|DrZ80|DrZ80(snd)" },
       #endif 
       { NULL, NULL },
    };
@@ -1016,7 +1020,7 @@ static void configure_cyclone_mode (int driverIndex)
       if (*type==CPU_M68000 || *type==CPU_M68010 )
       {
         *type=CPU_CYCLONE;
-        log_cb(RETRO_LOG_INFO, LOGPRE "Replaced CPU_CYCLONE\n");
+        log_cb(RETRO_LOG_INFO, LOGPRE "Replaced m68000 with CYCLONE\n");
       }
     }
   }
@@ -1031,8 +1035,15 @@ static void configure_cyclone_mode (int driverIndex)
       unsigned int *type=(unsigned int *)&(Machine->drv->cpu[i].cpu_type);
       if (*type==CPU_Z80)
       {
-        *type=CPU_DRZ80;
-        log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80\n");
+        if ( (use_drz80_snd) && (Machine->drv->cpu[i].cpu_flags&CPU_AUDIO_CPU) )
+        {
+          *type=CPU_DRZ80;
+          log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80 sound cpu\n")
+        }
+        else if (use_drz80)
+        {
+           log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80 cpu\n");
+        }
       }
     }
   }
