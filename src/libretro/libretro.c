@@ -1048,7 +1048,7 @@ static void configure_cyclone_mode (int driverIndex)
         }
       }
     }
-   if (disable_z80)
+   if (!enable_z80)
      log_cb(RETRO_LOG_INFO, LOGPRE "z80 disabled due to interrupt issues for now\n");
   }
 #endif 
