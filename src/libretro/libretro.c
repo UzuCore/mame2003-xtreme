@@ -23,7 +23,7 @@ void mame_frame(void);
 void mame_done(void);
 static void retro_set_audio_buff_status_cb(void);
 void mame2003_video_get_geometry(struct retro_game_geometry *geom);
-static void configure_cyclone_mode (int driverIndex); 
+static void configure_cyclone_mode (int driverIndex);
 
 #if defined(__CELLOS_LV2__) || defined(GEKKO) || defined(_XBOX)
 unsigned activate_dcs_speedhack = 1;
@@ -120,9 +120,13 @@ void retro_set_environment(retro_environment_t cb)
       { "mame2003-xtreme-amped-rstick_to_btns", "Right Stick to Buttons; enabled|disabled" },
       { "mame2003-xtreme-amped-option_tate_mode", "TATE Mode; disabled|enabled" },
       { "mame2003-xtreme-amped-use_artwork", "Artwork(Restart); enabled|disabled" },
-      #if (HAS_CYCLONE || HAS_DRZ80)
-      { "mame2003-xtreme-amped-cyclone_mode", "Cyclone mode(Restarte); default|disabled|Cyclone|DrZ80|Cyclone+DrZ80|DrZ80(snd)|Cyclone+DrZ80(snd)" },
-      #endif 
+      #if defined(HAS_CYCLONE) && defined(HAS_DRZ80)
+      { "mame2003-xtreme-amped-cyclone_mode", "Cyclone mode(Restart); default|disabled|Cyclone|DrZ80|Cyclone+DrZ80|DrZ80(snd)|Cyclone+DrZ80(snd)" },
+      #elif defined(HAS_CYCLONE) && !defined(HAS_DRZ80)
+      { "mame2003-xtreme-amped-cyclone_mode", "Cyclone mode(Restart); default|disabled|Cyclone },
+      #elif !defined(HAS_CYCLONE) && defined(HAS_DRZ80)
+      { "mame2003-xtreme-amped-cyclone_mode", "Cyclone mode(Restart); default|disabled|DrZ80|DrZ80(snd)" },
+      #endif
       { NULL, NULL },
    };
    environ_cb = cb;
@@ -273,7 +277,7 @@ static void update_variables(void)
             options.cyclone_mode = 0;
        #endif
    }
-   
+
    var.value = NULL;
    var.key = "mame2003-xtreme-amped-turboboost";
 
@@ -307,7 +311,7 @@ static void update_variables(void)
 
 				else if (strcmp(var.value, "X9") == 0)
 					frameskip = 9;
-					
+
 				else if (strcmp(var.value, "XX") == 0)
 					frameskip = 10;
 
@@ -326,10 +330,10 @@ static void update_variables(void)
    var.value = NULL;
    var.key = "mame2003-xtreme-amped-oc";
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) || var.value)
-   {	
+   {
       options.oc = ((double) atoi(var.value) / 100);
-    	
-   }	
+
+   }
 
    var.value = NULL;
    var.key = "mame2003-xtreme-amped-dcs-speedhack";
@@ -341,7 +345,7 @@ static void update_variables(void)
       else
          activate_dcs_speedhack = 0;
    }
-   
+
    var.value = NULL;
    var.key = "mame2003-xtreme-amped-skip_disclaimer";
 
@@ -395,7 +399,7 @@ static void update_variables(void)
       else
          options.cheat = 0;
    }
-   
+
    var.value = NULL;
    var.key = "mame2003-xtreme-amped-dialsharexy";
 
@@ -615,14 +619,14 @@ void retro_run (void)
          retroJsState[17 + offset] = 0;
       }
    }
- if (options.oc) 
+ if (options.oc)
  {
-	if (cpunum_get_clockscale(0) != options.oc) 
+	if (cpunum_get_clockscale(0) != options.oc)
 	{	printf("changing cpu - clockscale from %lf to%lf\n",cpunum_get_clockscale(0),options.oc);
 		cpunum_set_clockscale(0, options.oc);
-	}	
+	}
  }
- 
+
    mame_frame();
 }
 
@@ -935,7 +939,7 @@ if (Machine->input_ports)
 #if (HAS_CYCLONE || HAS_DRZ80)
 int check_list(char *name)
 {
- 
+
    int found=0;
    int counter=0;
    while (fe_drivers[counter].name[0])
@@ -948,7 +952,7 @@ int check_list(char *name)
     counter ++;
    }
    /* todo do a z80 and 68k check to inform its not on the list if matched*/
- 
+
    for (counter=0;counter<MAX_CPU;counter++)
    {
       unsigned int *type=(unsigned int *)&(Machine->drv->cpu[counter].cpu_type);
@@ -970,9 +974,9 @@ static void configure_cyclone_mode (int driverIndex)
   int use_drz80 = 0;
   int use_drz80_snd = 0;
 
-   if (options.cyclone_mode == 6) 
+   if (options.cyclone_mode == 6)
      i=check_list(drivers[driverIndex]->name);
-   else 
+   else
      i=options.cyclone_mode;
   /* ASM cores: 0=None,1=Cyclone,2=DrZ80,3=Cyclone+DrZ80,4=DrZ80(snd),5=Cyclone+DrZ80(snd) */
   switch (i)
@@ -1016,11 +1020,12 @@ static void configure_cyclone_mode (int driverIndex)
       if (*type==CPU_M68000 || *type==CPU_M68010 )
       {
         *type=CPU_CYCLONE;
-        log_cb(RETRO_LOG_INFO, LOGPRE "Replaced CPU_CYCLONE\n");
+        log_cb(RETRO_LOG_INFO, LOGPRE "Replaced m68000 with CYCLONE\n");
       }
     }
   }
 #endif
+#define enable_z80 0
 
 #if (HAS_DRZ80)
   /* Replace Z80 by DRZ80 */
@@ -1029,12 +1034,22 @@ static void configure_cyclone_mode (int driverIndex)
     for (i=0;i<MAX_CPU;i++)
     {
       unsigned int *type=(unsigned int *)&(Machine->drv->cpu[i].cpu_type);
-      if (*type==CPU_Z80)
+      if (*type==CPU_Z80 && enable_z80)
       {
-        *type=CPU_DRZ80;
-        log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80\n");
+        if ( (use_drz80_snd) && (Machine->drv->cpu[i].cpu_flags&CPU_AUDIO_CPU) )
+        {
+          *type=CPU_DRZ80;
+          log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80 sound cpu\n");
+        }
+        else if (use_drz80)
+        {
+           *type=CPU_DRZ80;
+           log_cb(RETRO_LOG_INFO, LOGPRE "Replaced Z80 cpu\n");
+        }
       }
     }
+   if (!enable_z80)
+     log_cb(RETRO_LOG_INFO, LOGPRE "z80 replacement disabled due to interrupt issues for now\n");
   }
 #endif
 
