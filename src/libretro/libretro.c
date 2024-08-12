@@ -1049,7 +1049,7 @@ static void configure_cyclone_mode (int driverIndex)
       }
     }
    if (!enable_z80)
-     log_cb(RETRO_LOG_INFO, LOGPRE "z80 replacment disabled due to interrupt issues for now\n");
+     log_cb(RETRO_LOG_INFO, LOGPRE "z80 replacement disabled due to interrupt issues for now\n");
   }
 #endif
 
