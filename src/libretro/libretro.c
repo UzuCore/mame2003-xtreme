@@ -1025,7 +1025,7 @@ static void configure_cyclone_mode (int driverIndex)
     }
   }
 #endif
-#define disable_z80 1
+#define enable_z80 0
 
 #if (HAS_DRZ80)
   /* Replace Z80 by DRZ80 */
@@ -1034,7 +1034,7 @@ static void configure_cyclone_mode (int driverIndex)
     for (i=0;i<MAX_CPU;i++)
     {
       unsigned int *type=(unsigned int *)&(Machine->drv->cpu[i].cpu_type);
-      if (*type==CPU_Z80 && !disable_z80)
+      if (*type==CPU_Z80 && enable_z80)
       {
         if ( (use_drz80_snd) && (Machine->drv->cpu[i].cpu_flags&CPU_AUDIO_CPU) )
         {
