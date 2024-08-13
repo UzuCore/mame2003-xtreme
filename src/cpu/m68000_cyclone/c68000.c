@@ -1,19 +1,10 @@
 #include "c68000.h"
 #include "driver.h"
 #include "cpuintrf.h"
-#include "cyclone.h"
 #include "memory.h"
 
 
-typedef struct
-{
-	struct Cyclone regs;
-	int pending_interrupts;
-	int (*MAMEIrqCallback)(int int_level);
-} Cyclone_Regs;
-
-static Cyclone_Regs cyclone;
-int *cyclone_ICount=&cyclone.regs.cycles;
+Cyclone_Regs cyclone;
 
 static unsigned int MyCheckPc(unsigned int pc)
 {

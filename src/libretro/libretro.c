@@ -1025,7 +1025,7 @@ static void configure_cyclone_mode (int driverIndex)
     }
   }
 #endif
-#define enable_z80 0
+#define enable_z80 1
 
 #if (HAS_DRZ80)
   /* Replace Z80 by DRZ80 */
