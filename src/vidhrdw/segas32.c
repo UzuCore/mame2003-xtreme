@@ -286,7 +286,7 @@ bool opaquey_hack = false; /* dink */
  *
  *************************************/
 
-UINT8 is_multi32;
+static UINT8 is_multi32;
 
 /* tilemap cache */
 static struct cache_entry *cache_head;
@@ -447,7 +447,7 @@ void system32_set_vblank(int state)
  *
  *************************************/
 
-INLINE UINT16 xBBBBBGGGGGRRRRR_to_xBGRBBBBGGGGRRRR(UINT16 value)
+static INLINE UINT16 xBBBBBGGGGGRRRRR_to_xBGRBBBBGGGGRRRR(UINT16 value)
 {
 	int r = (value >> 0) & 0x1f;
 	int g = (value >> 5) & 0x1f;
@@ -458,7 +458,7 @@ INLINE UINT16 xBBBBBGGGGGRRRRR_to_xBGRBBBBGGGGRRRR(UINT16 value)
 }
 
 
-INLINE UINT16 xBGRBBBBGGGGRRRR_to_xBBBBBGGGGGRRRRR(UINT16 value)
+static INLINE UINT16 xBGRBBBBGGGGRRRR_to_xBBBBBGGGGGRRRRR(UINT16 value)
 {
 	int r = ((value >> 12) & 0x01) | ((value << 1) & 0x1e);
 	int g = ((value >> 13) & 0x01) | ((value >> 3) & 0x1e);
@@ -467,7 +467,7 @@ INLINE UINT16 xBGRBBBBGGGGRRRR_to_xBBBBBGGGGGRRRRR(UINT16 value)
 }
 
 
-INLINE void update_color(int offset, UINT16 data)
+static INLINE void update_color(int offset, UINT16 data)
 {
 	/* note that since we use this RAM directly, we don't technically need */
 	/* to call palette_set_color() at all; however, it does give us that */
@@ -478,7 +478,7 @@ INLINE void update_color(int offset, UINT16 data)
 }
 
 
-INLINE UINT16 common_paletteram_r(int which, offs_t offset)
+static INLINE UINT16 common_paletteram_r(int which, offs_t offset)
 {
 	int convert;
 
@@ -990,7 +990,7 @@ static void compute_tilemap_flips(int bgnum, int *flipx, int *flipy)
  *
  *************************************/
 
-INLINE void get_tilemaps(int bgnum, struct tilemap **tilemaps)
+static INLINE void get_tilemaps(int bgnum, struct tilemap **tilemaps)
 {
 	int tilebank, page;
 
@@ -2062,7 +2062,7 @@ static void sprite_render_list(void)
  *
  *************************************/
 
-INLINE UINT8 compute_color_offsets(int which, int layerbit, int layerflag)
+static INLINE UINT8 compute_color_offsets(int which, int layerbit, int layerflag)
 {
 	int mode = ((mixer_control[which][0x3e/2] & 0x8000) >> 14) | (layerbit & 1);
 
@@ -2082,7 +2082,7 @@ INLINE UINT8 compute_color_offsets(int which, int layerbit, int layerflag)
 	}
 }
 
-INLINE UINT16 compute_sprite_blend(UINT8 encoding)
+static INLINE UINT16 compute_sprite_blend(UINT8 encoding)
 {
 	int value = encoding & 0xf;
 
@@ -2103,7 +2103,7 @@ INLINE UINT16 compute_sprite_blend(UINT8 encoding)
 	}
 }
 
-INLINE UINT16 *get_layer_scanline(int layer, int scanline)
+static INLINE UINT16 *get_layer_scanline(int layer, int scanline)
 {
 	if (layer_data[layer].transparent[scanline])
 		return (layer == MIXER_LAYER_SPRITES) ? solid_ffff : solid_0000;
@@ -2773,11 +2773,11 @@ VIDEO_UPDATE( multi32 )
 
 	/* do the mixing */
 	profiler_mark(PROFILER_USER3);
-	if (system32_displayenable[0])
+	if (system32_displayenable[0] && monitor_setting != 2) /* speed up - disable offscreen monitor */
 		mix_all_layers(0, 0, bitmap, &clipleft, enablemask);
 	else
 		fillbitmap(bitmap, get_black_pen(), &clipleft);
-	if (system32_displayenable[1])
+	if (system32_displayenable[1] && monitor_setting != 1) /* speed up - disable offscreen monitor */
 		mix_all_layers(1, clipright.min_x, bitmap, &clipleft, enablemask);
 	else
 		fillbitmap(bitmap, get_black_pen(), &clipright);
