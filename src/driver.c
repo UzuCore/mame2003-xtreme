@@ -3313,6 +3313,12 @@ BOMULEUL CHAJARA SEGA ST-V  1997/04/11
 	/* Dunk Dream 95/Hoops MCE (c) 1995 */
 	/* MCF ?? */
 	DRIVER( avengrgs )	/* MCG (c) 1995 Data East Corporation (Japan) */
+	DRIVER( avengrgsj )
+	DRIVER( skullfng )
+	DRIVER( skullfngj )
+	DRIVER( hoops96 )
+	DRIVER( ddream95 )
+	
 	DRIVER( sotsugyo )	/* (c) 1995 Mitchell (Atlus license) */
 	DRIVER( sshangha )	/* (c) 1992 Hot-B */
 	DRIVER( sshanghb )	/* bootleg */
