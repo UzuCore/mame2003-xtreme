@@ -14,6 +14,7 @@
 static int layer_colorbase[4];
 static int gx_tilebanks[8], gx_oldbanks[8];
 static int gx_invertlayersBC;
+int gx_le2_textcolour_hack;
 static int gx_tilemode, gx_rozenable, psac_colorbase, last_psac_colorbase;
 static struct tilemap *gx_psac_tilemap, *gx_psac_tilemap2;
 extern data32_t *gx_psacram, *gx_subpaletteram32;
@@ -32,27 +33,31 @@ static void get_gx_psac_tile_info(int tile_index)
 	SET_TILE_INFO(0, tileno, colour, TILE_FLIPYX(flipx))
 }
 
+/* Soccer Superstars (tile and flip bits now TRUSTED) */
 static void get_gx_psac3_tile_info(int tile_index)
 {
-	int tileno, colour;
+	int tileno, colour, flip;
 	unsigned char *tmap = memory_region(REGION_GFX4);
 
-	tileno = tmap[tile_index*2] | ((tmap[(tile_index*2)+1] & 0x3f)<<8);
-	colour = (psac_colorbase << 4);
+	tileno = tmap[tile_index*2] | ((tmap[(tile_index*2)+1] & 0x0f)<<8);
+	colour = (psac_colorbase << 8);
 
-	SET_TILE_INFO(0, tileno, colour, 0)
+	flip = 0;
+	if (tmap[(tile_index*2)+1] & 0x20) flip |= TILE_FLIPX;
+	if (tmap[(tile_index*2)+1] & 0x10) flip |= TILE_FLIPY;
+
+	SET_TILE_INFO(0, tileno, colour, flip)
 }
 
 static void get_gx_psac1a_tile_info(int tile_index)
 {
 	int tileno, colour, flip;
-	data8_t *map = (data8_t *)&gx_psacram[tile_index*8];
+	data8_t *map = (data8_t *)&gx_psacram[tile_index*2];	/* *8 / 4 (gx_psacram is data32_t) */
 
-	tileno = map[1]<<8 | map[0];
+	/* this should be &0x7f for opengolf, except that makes the tilemaps unrecognizable.  huh? */
+	tileno = (map[1]&0x3f)<<8 | map[0];
 
-//	if (tileno) printf("1a map: %x\n", tileno);
-
-	colour = (psac_colorbase << 4);
+	colour = 0; /* (psac_colorbase << 4); */
 
 	flip = 0;
 	if (map[7] & 0x80) flip |= TILE_FLIPX;
@@ -64,13 +69,11 @@ static void get_gx_psac1a_tile_info(int tile_index)
 static void get_gx_psac1b_tile_info(int tile_index)
 {
 	int tileno, colour, flip;
-	data8_t *map = (data8_t *)&gx_psacram[tile_index*8];
+	data8_t *map = (data8_t *)&gx_psacram[tile_index*2];
 
-	tileno = map[5]<<8 | map[4];
+	tileno = (map[5]&0x3f)<<8 | map[4];
 
-//	if (tileno) printf("1b map: %x\n", tileno);
-
-	colour = (psac_colorbase << 4);
+	colour = 0; /* (psac_colorbase << 4); */
 
 	flip = 0;
 	if (map[7] & 0x20) flip |= TILE_FLIPX;
@@ -101,9 +104,7 @@ static void konamigx_alpha_tile_callback(int layer, int *code, int *color)
 		/* save mixcode and mark tile alpha (unimplemented) */
 		*code = 0;
 
-		#if VERBOSE
-			usrintf_showmessage("skipped alpha tile(layer=%d mix=%d)", layer, mixcode);
-		#endif
+		log_cb(RETRO_LOG_DEBUG, LOGPRE "skipped alpha tile(layer=%d mix=%d)", layer, mixcode);
 	}
 }
 
@@ -155,12 +156,13 @@ static int _gxcommoninitnosprites(void)
 
 	gx_invertlayersBC = 0;
 	gx_tilemode = 0;
+	gx_le2_textcolour_hack = 0;
 
-	// Documented relative offsets of non-flipped games are (-2, 0, 2, 3),(0, 0, 0, 0).
-	// (+ve values move layers to the right and -ve values move layers to the left)
-	// In most cases only a constant is needed to add to the X offsets to yield correct
-	// displacement. This should be done by the CCU but the CRT timings have not been
-	// figured out.
+	/* Documented relative offsets of non-flipped games are (-2, 0, 2, 3),(0, 0, 0, 0).*/
+	/* (+ve values move layers to the right and -ve values move layers to the left)*/
+	/* In most cases only a constant is needed to add to the X offsets to yield correct*/
+	/* displacement. This should be done by the CCU but the CRT timings have not been*/
+	/* figured out.*/
 	K056832_set_LayerOffset(0, -2, 0);
 	K056832_set_LayerOffset(1,  0, 0);
 	K056832_set_LayerOffset(2,  2, 0);
@@ -171,7 +173,7 @@ static int _gxcommoninitnosprites(void)
 
 static int _gxcommoninit(void)
 {
-	// (+ve values move objects to the right and -ve values move objects to the left)
+	/* (+ve values move objects to the right and -ve values move objects to the left)*/
 	if (K055673_vh_start(REGION_GFX2, K055673_LAYOUT_GX, -26, -23, konamigx_type2_sprite_callback))
 	{
 		return 1;
@@ -185,12 +187,12 @@ static int _gxcommoninit(void)
 
 VIDEO_START(konamigx_5bpp)
 {
-	if (!strcmp(Machine->gamedrv->name,"sexyparo"))
+	if (!strcmp(Machine->gamedrv->name,"sexyparo") || !strcmp(Machine->gamedrv->name,"sexyparoa"))
 		game_tile_callback = konamigx_alpha_tile_callback;
 	else
 		game_tile_callback = konamigx_type2_tile_callback;
 
-	if (K056832_vh_start(REGION_GFX1, K056832_BPP_5, 0, NULL, game_tile_callback))
+	if (K056832_vh_start(REGION_GFX1, K056832_BPP_5, 0, NULL, game_tile_callback, 0))
 	{
 		return 1;
 	}
@@ -222,7 +224,7 @@ VIDEO_START(konamigx_5bpp)
 		K053247GP_set_SpriteOffset(-46, -23);
 	} else
 
-	if (!strcmp(Machine->gamedrv->name,"sexyparo"))
+	if (!strcmp(Machine->gamedrv->name,"sexyparo") || !strcmp(Machine->gamedrv->name,"sexyparoa"))
 	{
 		K053247GP_set_SpriteOffset(-42, -23);
 	}
@@ -232,12 +234,12 @@ VIDEO_START(konamigx_5bpp)
 
 VIDEO_START(winspike)
 {
-	if (K056832_vh_start(REGION_GFX1, K056832_BPP_8, 0, NULL, konamigx_alpha_tile_callback))
+	if (K056832_vh_start(REGION_GFX1, K056832_BPP_8, 0, NULL, konamigx_alpha_tile_callback, 0))
 	{
 		return 1;
 	}
 
-	if (K055673_vh_start(REGION_GFX2, K055673_LAYOUT_LE2, -42, -23, konamigx_le2_sprite_callback))
+	if (K055673_vh_start(REGION_GFX2, K055673_LAYOUT_LE2, -53, -23, konamigx_type2_sprite_callback))
 	{
 		return 1;
 	}
@@ -249,7 +251,7 @@ VIDEO_START(winspike)
 
 VIDEO_START(dragoonj)
 {
-	if (K056832_vh_start(REGION_GFX1, K056832_BPP_5, 1, NULL, konamigx_type2_tile_callback))
+	if (K056832_vh_start(REGION_GFX1, K056832_BPP_5, 1, NULL, konamigx_type2_tile_callback, 0))
 	{
 		return 1;
 	}
@@ -271,7 +273,7 @@ VIDEO_START(dragoonj)
 
 VIDEO_START(le2)
 {
-	if (K056832_vh_start(REGION_GFX1, K056832_BPP_8, 1, NULL, konamigx_type2_tile_callback))
+	if (K056832_vh_start(REGION_GFX1, K056832_BPP_8, 1, NULL, konamigx_type2_tile_callback, 0))
 	{
 		return 1;
 	}
@@ -284,14 +286,16 @@ VIDEO_START(le2)
 	if (_gxcommoninitnosprites()) return 1;
 
 	gx_invertlayersBC = 1;
-	konamigx_mixer_primode(-1); // swapped layer B and C priorities?
+	konamigx_mixer_primode(-1); /* swapped layer B and C priorities?*/
+
+	gx_le2_textcolour_hack = 1; /* force text layer to use the right palette */
 
 	return 0;
 }
 
 VIDEO_START(konamigx_6bpp)
 {
-	if (K056832_vh_start(REGION_GFX1, K056832_BPP_6, 0, NULL, konamigx_type2_tile_callback))
+	if (K056832_vh_start(REGION_GFX1, K056832_BPP_6, 0, NULL, konamigx_type2_tile_callback, 0))
 	{
 		return 1;
 	}
@@ -309,7 +313,7 @@ VIDEO_START(konamigx_6bpp)
 
 VIDEO_START(konamigx_type3)
 {
-	if (K056832_vh_start(REGION_GFX1, K056832_BPP_6, 0, NULL, konamigx_type2_tile_callback))
+	if (K056832_vh_start(REGION_GFX1, K056832_BPP_6, 0, NULL, konamigx_type2_tile_callback, 0))
 	{
 		return 1;
 	}
@@ -319,7 +323,7 @@ VIDEO_START(konamigx_type3)
 	gx_psac_tilemap = tilemap_create(get_gx_psac3_tile_info, tilemap_scan_rows, TILEMAP_TRANSPARENT, 16, 16, 256, 1024);
 	gx_rozenable = 1;
 
-	K053936_wraparound_enable(0, 0);
+	K053936_wraparound_enable(0, 1);
 	K053936GP_set_offset(0, 0, 0);
 
 	return 0;
@@ -327,7 +331,7 @@ VIDEO_START(konamigx_type3)
 
 VIDEO_START(konamigx_type4)
 {
-	if (K056832_vh_start(REGION_GFX1, K056832_BPP_8, 0, NULL, konamigx_type2_tile_callback))
+	if (K056832_vh_start(REGION_GFX1, K056832_BPP_8, 0, NULL, konamigx_type2_tile_callback, 0))
 	{
 		return 1;
 	}
@@ -345,7 +349,7 @@ VIDEO_START(konamigx_type4)
 
 VIDEO_START(konamigx_6bpp_2)
 {
-	if (K056832_vh_start(REGION_GFX1, K056832_BPP_6, 1, NULL, konamigx_type2_tile_callback))
+	if (K056832_vh_start(REGION_GFX1, K056832_BPP_6, 1, NULL, konamigx_type2_tile_callback, 0))
 	{
 		return 1;
 	}
@@ -369,7 +373,7 @@ VIDEO_START(konamigx_6bpp_2)
 
 VIDEO_START(opengolf)
 {
-	if (K056832_vh_start(REGION_GFX1, K056832_BPP_5, 0, NULL, konamigx_type2_tile_callback))
+	if (K056832_vh_start(REGION_GFX1, K056832_BPP_5, 0, NULL, konamigx_type2_tile_callback, 0))
 	{
 		return 1;
 	}
@@ -398,7 +402,7 @@ VIDEO_START(opengolf)
 
 VIDEO_START(racinfrc)
 {
-	if (K056832_vh_start(REGION_GFX1, K056832_BPP_6, 0, NULL, konamigx_type2_tile_callback))
+	if (K056832_vh_start(REGION_GFX1, K056832_BPP_6, 0, NULL, konamigx_type2_tile_callback, 0))
 	{
 		return 1;
 	}
@@ -427,7 +431,7 @@ VIDEO_START(racinfrc)
 
 VIDEO_UPDATE(konamigx)
 {
-	int i, newbank, newbase, dirty, unchained, blendmode;
+	int i, newbank, newbase, dirty, unchained;
 
 	/* if any banks are different from last render, we need to flush the planes */
 	for (dirty = 0, i = 0; i < 8; i++)
@@ -438,7 +442,7 @@ VIDEO_UPDATE(konamigx)
 
 	if (gx_tilemode == 0)
 	{
-		// driver approximates tile update in mode 0 for speed
+		/* driver approximates tile update in mode 0 for speed*/
 		unchained = K056832_get_LayerAssociation();
 		for (i=0; i<4; i++)
 		{
@@ -456,10 +460,10 @@ VIDEO_UPDATE(konamigx)
 	}
 	else
 	{
-		// K056832 does all the tracking in mode 1 for accuracy (Twinbee needs this)
+		/* K056832 does all the tracking in mode 1 for accuracy (Twinbee needs this)*/
 	}
 
-	// sub2 is PSAC colorbase on GX
+	/* sub2 is PSAC colorbase on GX*/
 	if (gx_rozenable)
 	{
 		last_psac_colorbase = psac_colorbase;
@@ -477,40 +481,10 @@ VIDEO_UPDATE(konamigx)
 
 	if (dirty) K056832_MarkAllTilemapsDirty();
 
-	if (konamigx_cfgport >= 0)
-	{
-		// background detail tuning
-		switch (readinputport(konamigx_cfgport))
-		{
-			// Low : disable linescroll and all blend effects
-			case 0 : blendmode = 0x0000f555; break;
-
-			// Med : only disable linescroll which is the most costly
-			case 1 : blendmode = 0x0000f000; break;
-
-			// High: enable all effects
-			default: blendmode = 0;
-		}
-
-		// character detail tuning
-		switch (readinputport(konamigx_cfgport+1))
-		{
-			// Low : disable shadows and turn off depth buffers
-			case 0 : blendmode |= GXMIX_NOSHADOW + GXMIX_NOZBUF; break;
-
-			// Med : only disable shadows
-			case 1 : blendmode |= GXMIX_NOSHADOW; break;
-
-			// High: enable all shadows and depth buffers
-			default: blendmode |= 0;
-		}
-	}
-	else blendmode = 0;
-
 	if (gx_rozenable)
-		konamigx_mixer(bitmap, cliprect, 0, 0, gx_psac_tilemap, GXSUB_8BPP, blendmode);
+		konamigx_mixer(bitmap, cliprect, 0, 0, gx_psac_tilemap, GXSUB_8BPP, 0);
 	else
-		konamigx_mixer(bitmap, cliprect, 0, 0, 0, 0, blendmode);
+		konamigx_mixer(bitmap, cliprect, 0, 0, 0, 0, 0);
 
 	if( gx_invertlayersBC )
 	{
@@ -550,7 +524,7 @@ WRITE32_HANDLER( konamigx_palette2_w )
 	palette_set_color(offset,r,g,b);
 }
 
-// main monitor for type 3
+/* main monitor for type 3*/
 WRITE32_HANDLER( konamigx_555_palette_w )
 {
 	COMBINE_DATA(&paletteram32[offset]);
@@ -562,7 +536,7 @@ WRITE32_HANDLER( konamigx_555_palette_w )
 		paletteram16_xRRRRRGGGGGBBBBB_word_w(offset*2+1, data, mem_mask);
 }
 
-// sub monitor for type 3
+/* sub monitor for type 3*/
 WRITE32_HANDLER( konamigx_555_palette2_w )
 {
 	COMBINE_DATA(&gx_subpaletteram32[offset]);
@@ -590,7 +564,7 @@ WRITE32_HANDLER( konamigx_tilebank_w )
 		gx_tilebanks[offset*4+3] = data&0xff;
 }
 
-// type 1 RAM-based PSAC tilemap
+/* type 1 RAM-based PSAC tilemap*/
 WRITE32_HANDLER(konamigx_t1_psacmap_w)
 {
 	COMBINE_DATA(&gx_psacram[offset]);
@@ -598,11 +572,10 @@ WRITE32_HANDLER(konamigx_t1_psacmap_w)
 	tilemap_mark_tile_dirty(gx_psac_tilemap2, offset/2);
 }
 
-// type 4 RAM-based PSAC tilemap
+/* type 4 RAM-based PSAC tilemap*/
 WRITE32_HANDLER( konamigx_t4_psacmap_w )
 {
 	COMBINE_DATA(&gx_psacram[offset]);
 
 	tilemap_mark_tile_dirty(gx_psac_tilemap, offset);
 }
-
