@@ -1,5 +1,6 @@
 /* helper function to join two 16-bit ROMs and form a 32-bit data stream */
 void konami_rom_deinterleave_2(int mem_region);
+void konami_rom_deinterleave_2_half(int mem_region);
 /* helper function to join four 16-bit ROMs and form a 64-bit data stream */
 void konami_rom_deinterleave_4(int mem_region);
 
@@ -75,6 +76,7 @@ WRITE16_HANDLER( K052109_lsb_w );
 void K052109_set_RMRD_line(int state);
 void K052109_tilemap_update(void);
 int K052109_is_IRQ_enabled(void);
+void K052109_set_layer_offsets(int layer, int dx, int dy);
 
 
 /*
@@ -109,21 +111,25 @@ READ_HANDLER( K052109_051960_r );
 WRITE_HANDLER( K052109_051960_w );
 
 
-int K053245_vh_start(int gfx_memory_region,int plane0,int plane1,int plane2,int plane3,
+int K053245_vh_start(int chip, int gfx_memory_region,int plane0,int plane1,int plane2,int plane3,
 		void (*callback)(int *code,int *color,int *priority_mask));
 READ16_HANDLER( K053245_word_r );
 WRITE16_HANDLER( K053245_word_w );
 READ_HANDLER( K053245_r );
 WRITE_HANDLER( K053245_w );
+WRITE_HANDLER( K053245_1_w );
 READ_HANDLER( K053244_r );
 WRITE_HANDLER( K053244_w );
+WRITE_HANDLER( K053244_1_w );
 READ16_HANDLER( K053244_lsb_r );
 WRITE16_HANDLER( K053244_lsb_w );
 READ16_HANDLER( K053244_word_r );
 WRITE16_HANDLER( K053244_word_w );
-void K053244_bankselect(int bank);	/* used by TMNT2, Asterix and Premier Soccer for ROM testing */
-void K053245_sprites_draw(struct mame_bitmap *bitmap,const struct rectangle *cliprect);
-void K053245_clear_buffer(void);
+void K053244_bankselect(int chip, int bank);	/* used by TMNT2, Asterix and Premier Soccer for ROM testing */
+void K053245_sprites_draw(int chip, struct mame_bitmap *bitmap,const struct rectangle *cliprect);
+void K053245_sprites_draw_lethal(int chip, struct mame_bitmap *bitmap,const struct rectangle *cliprect); /* for lethal enforcers */
+void K053245_clear_buffer(int chip);
+void K053245_set_SpriteOffset(int chip,int offsx, int offsy);
 
 #define K055673_LAYOUT_GX  0
 #define K055673_LAYOUT_RNG 1
@@ -153,14 +159,14 @@ READ16_HANDLER( K053247_word_r );
 WRITE16_HANDLER( K053247_word_w );
 READ32_HANDLER( K053247_long_r );
 WRITE32_HANDLER( K053247_long_w );
-WRITE16_HANDLER( K053247_reg_word_w ); // "OBJSET2" registers
+WRITE16_HANDLER( K053247_reg_word_w ); /* "OBJSET2" registers*/
 WRITE32_HANDLER( K053247_reg_long_w );
 void K053247_sprites_draw(struct mame_bitmap *bitmap,const struct rectangle *cliprect);
 int K053247_read_register(int regnum);
 void K053247_set_SpriteOffset(int offsx, int offsy);
 void K053247_wraparound_enable(int status);
-void K05324x_set_z_rejection(int zcode); // common to K053245/6/7
-void K053247_export_config(data16_t **ram, struct GfxElement **gfx, void **callback, int *dx, int *dy);
+void K05324x_set_z_rejection(int zcode); /* common to K053245/6/7 */
+void K053247_export_config(data16_t **ram, struct GfxElement **gfx, void (**callback)(int *, int *, int *), int *dx, int *dy);
 
 READ_HANDLER( K053246_r );
 WRITE_HANDLER( K053246_w );
@@ -254,16 +260,20 @@ READ16_HANDLER( K054157_rom_word_r );
 READ16_HANDLER( K054157_rom_word_8000_r );
 WRITE16_HANDLER( K054157_word_w );
 WRITE16_HANDLER( K054157_b_word_w );
+
 void K054157_tilemap_update(void);
 void K054157_tilemap_draw(struct mame_bitmap *bitmap, const struct rectangle *cliprect, int num, int flags, UINT32 priority);
 void K054157_tilemap_draw_alpha(struct mame_bitmap *bitmap, const struct rectangle *cliprect, int num, int flags, int alpha);
 int K054157_is_IRQ_enabled(void);
 int K054157_get_lookup(int bits);
 void K054157_set_tile_bank(int bank);	/* Asterix */
+int K054157_get_current_rambank(void);
+void K056832_SetExtLinescroll(void);	/* Lethal Enforcers */
 
 int K056832_vh_start(int gfx_memory_region, int bpp, int big,
 			int (*scrolld)[4][2],
-			void (*callback)(int, int *, int *));
+			void (*callback)(int, int *, int *),
+			int djmain_hack);
 READ16_HANDLER( K056832_ram_word_r );
 WRITE16_HANDLER( K056832_ram_word_w );
 READ16_HANDLER( K056832_ram_half_word_r );
@@ -272,8 +282,19 @@ READ16_HANDLER( K056832_5bpp_rom_word_r );
 READ32_HANDLER( K056832_5bpp_rom_long_r );
 READ32_HANDLER( K056832_6bpp_rom_long_r );
 READ16_HANDLER( K056832_rom_word_r );
-WRITE16_HANDLER( K056832_word_w ); // "VRAM" registers
+READ16_HANDLER( K056832_old_rom_word_r );
+WRITE16_HANDLER( K056832_word_w ); /* "VRAM" registers */
 WRITE16_HANDLER( K056832_b_word_w );
+READ_HANDLER( K056832_ram_code_lo_r );
+READ_HANDLER( K056832_ram_code_hi_r );
+READ_HANDLER( K056832_ram_attr_lo_r );
+READ_HANDLER( K056832_ram_attr_hi_r );
+WRITE_HANDLER( K056832_ram_code_lo_w );
+WRITE_HANDLER( K056832_ram_code_hi_w );
+WRITE_HANDLER( K056832_ram_attr_lo_w );
+WRITE_HANDLER( K056832_ram_attr_hi_w );
+WRITE_HANDLER( K056832_w );
+WRITE_HANDLER( K056832_b_w );
 void K056832_mark_plane_dirty(int num);
 void K056832_MarkAllTilemapsDirty(void);
 void K056832_tilemap_draw(struct mame_bitmap *bitmap, const struct rectangle *cliprect, int num, int flags, UINT32 priority);
@@ -287,6 +308,9 @@ void K056832_linemap_enable(int enable);
 int  K056832_is_IRQ_enabled(int irqline);
 void K056832_read_AVAC(int *mode, int *data);
 int  K056832_read_register(int regnum);
+int K056832_get_current_rambank(void);
+int K056832_get_lookup(int bits);	/* Asterix */
+void K056832_set_tile_bank(int bank);	/* Asterix */
 
 READ32_HANDLER( K056832_ram_long_r );
 READ32_HANDLER( K056832_rom_long_r );
@@ -294,14 +318,16 @@ WRITE32_HANDLER( K056832_ram_long_w );
 WRITE32_HANDLER( K056832_long_w );
 WRITE32_HANDLER( K056832_b_long_w );
 
+
 /* bit depths for the 56832 */
 #define K056832_BPP_4	0
 #define K056832_BPP_5	1
 #define K056832_BPP_6	2
 #define K056832_BPP_8	3
 #define K056832_BPP_4dj	4
+#define K056832_BPP_8LE	5
 
-void K055555_vh_start(void); // "PCU2"
+void K055555_vh_start(void); /* "PCU2"*/
 void K055555_write_reg(data8_t regnum, data8_t regdat);
 WRITE16_HANDLER( K055555_word_w );
 WRITE32_HANDLER( K055555_long_w );
@@ -310,58 +336,58 @@ int K055555_get_palette_index(int idx);
 
 /* K055555 registers */
 /* priority inputs */
-#define K55_PALBASE_BG		0	// background palette
-#define K55_CONTROL			1	// control register
-#define K55_COLSEL_0		2	// layer A, B color depth
-#define K55_COLSEL_1		3	// layer C, D color depth
-#define K55_COLSEL_2		4	// object, S1 color depth
-#define K55_COLSEL_3		5	// S2, S3 color depth
+#define K55_PALBASE_BG		0	/* background palette*/
+#define K55_CONTROL			1	/* control register*/
+#define K55_COLSEL_0		2	/* layer A, B color depth*/
+#define K55_COLSEL_1		3	/* layer C, D color depth*/
+#define K55_COLSEL_2		4	/* object, S1 color depth*/
+#define K55_COLSEL_3		5	/* S2, S3 color depth*/
 
-#define K55_PRIINP_0		7	// layer A pri 0
-#define K55_PRIINP_1		8	// layer A pri 1
-#define K55_PRIINP_2		9	// layer A "COLPRI"
-#define K55_PRIINP_3		10	// layer B pri 0
-#define K55_PRIINP_4		11	// layer B pri 1
-#define K55_PRIINP_5		12	// layer B "COLPRI"
-#define K55_PRIINP_6		13	// layer C pri
-#define K55_PRIINP_7		14	// layer D pri
-#define K55_PRIINP_8		15	// OBJ pri
-#define K55_PRIINP_9		16	// sub 1 (GP:PSAC) pri
-#define K55_PRIINP_10		17	// sub 2 (GX:PSAC) pri
-#define K55_PRIINP_11		18	// sub 3 pri
+#define K55_PRIINP_0		7	/* layer A pri 0*/
+#define K55_PRIINP_1		8	/* layer A pri 1*/
+#define K55_PRIINP_2		9	/* layer A "COLPRI"*/
+#define K55_PRIINP_3		10	/* layer B pri 0*/
+#define K55_PRIINP_4		11	/* layer B pri 1*/
+#define K55_PRIINP_5		12	/* layer B "COLPRI"*/
+#define K55_PRIINP_6		13	/* layer C pri*/
+#define K55_PRIINP_7		14	/* layer D pri*/
+#define K55_PRIINP_8		15	/* OBJ pri*/
+#define K55_PRIINP_9		16	/* sub 1 (GP:PSAC) pri*/
+#define K55_PRIINP_10		17	/* sub 2 (GX:PSAC) pri*/
+#define K55_PRIINP_11		18	/* sub 3 pri*/
 
-#define K55_OINPRI_ON 		19	// object priority bits selector
+#define K55_OINPRI_ON 		19	/* object priority bits selector*/
 
-#define K55_PALBASE_A 		23	// layer A palette
-#define K55_PALBASE_B 		24	// layer B palette
-#define K55_PALBASE_C 		25	// layer C palette
-#define K55_PALBASE_D 		26	// layer D palette
-#define K55_PALBASE_OBJ		27	// OBJ palette
-#define K55_PALBASE_SUB1	28	// SUB1 palette
-#define K55_PALBASE_SUB2	29	// SUB2 palette
-#define K55_PALBASE_SUB3	30	// SUB3 palette
+#define K55_PALBASE_A 		23	/* layer A palette*/
+#define K55_PALBASE_B 		24	/* layer B palette*/
+#define K55_PALBASE_C 		25	/* layer C palette*/
+#define K55_PALBASE_D 		26	/* layer D palette*/
+#define K55_PALBASE_OBJ		27	/* OBJ palette*/
+#define K55_PALBASE_SUB1	28	/* SUB1 palette*/
+#define K55_PALBASE_SUB2	29	/* SUB2 palette*/
+#define K55_PALBASE_SUB3	30	/* SUB3 palette*/
 
-#define K55_BLEND_ENABLES	33	// blend enables for tilemaps
-#define K55_VINMIX_ON		34	// additional blend enables for tilemaps
-#define K55_OSBLEND_ENABLES	35	// obj/sub blend enables
-#define K55_OSBLEND_ON		36	// not sure, related to obj/sub blend
+#define K55_BLEND_ENABLES	33	/* blend enables for tilemaps*/
+#define K55_VINMIX_ON		34	/* additional blend enables for tilemaps*/
+#define K55_OSBLEND_ENABLES	35	/* obj/sub blend enables*/
+#define K55_OSBLEND_ON		36	/* not sure, related to obj/sub blend*/
 
-#define K55_SHAD1_PRI		37	// shadow/highlight 1 priority
-#define K55_SHAD2_PRI		38	// shadow/highlight 2 priority
-#define K55_SHAD3_PRI		39	// shadow/highlight 3 priority
-#define K55_SHD_ON			40	// shadow/highlight
-#define K55_SHD_PRI_SEL		41	// shadow/highlight
+#define K55_SHAD1_PRI		37	/* shadow/highlight 1 priority*/
+#define K55_SHAD2_PRI		38	/* shadow/highlight 2 priority*/
+#define K55_SHAD3_PRI		39	/* shadow/highlight 3 priority*/
+#define K55_SHD_ON			40	/* shadow/highlight*/
+#define K55_SHD_PRI_SEL		41	/* shadow/highlight*/
 
-#define K55_VBRI			42	// VRAM layer brightness enable
-#define K55_OSBRI			43	// obj/sub brightness enable, part 1
-#define K55_OSBRI_ON		44	// obj/sub brightness enable, part 2
-#define K55_INPUT_ENABLES	45	// input enables
+#define K55_VBRI			42	/* VRAM layer brightness enable*/
+#define K55_OSBRI			43	/* obj/sub brightness enable, part 1*/
+#define K55_OSBRI_ON		44	/* obj/sub brightness enable, part 2*/
+#define K55_INPUT_ENABLES	45	/* input enables*/
 
 /* bit masks for the control register */
-#define K55_CTL_GRADDIR		0x01	// 0=vertical, 1=horizontal
-#define K55_CTL_GRADENABLE	0x02	// 0=BG is base color only, 1=gradient
-#define K55_CTL_FLIPPRI		0x04	// 0=standard Konami priority, 1=reverse
-#define K55_CTL_SDSEL		0x08	// 0=normal shadow timing, 1=(not used by GX)
+#define K55_CTL_GRADDIR		0x01	/* 0=vertical, 1=horizontal*/
+#define K55_CTL_GRADENABLE	0x02	/* 0=BG is base color only, 1=gradient*/
+#define K55_CTL_FLIPPRI		0x04	/* 0=standard Konami priority, 1=reverse*/
+#define K55_CTL_SDSEL		0x08	/* 0=normal shadow timing, 1=(not used by GX)*/
 
 /* bit masks for the input enables */
 #define K55_INP_VRAM_A		0x01
@@ -375,14 +401,14 @@ int K055555_get_palette_index(int idx);
 
 /* K054338 mixer/alpha blender */
 int K054338_vh_start(void);
-WRITE16_HANDLER( K054338_word_w ); // "CLCT" registers
+WRITE16_HANDLER( K054338_word_w ); /* "CLCT" registers*/
 WRITE32_HANDLER( K054338_long_w );
 int K054338_read_register(int reg);
-void K054338_update_all_shadows(void);								// called at the beginning of VIDEO_UPDATE()
-void K054338_fill_solid_bg(struct mame_bitmap *bitmap);				// solid backcolor fill
-void K054338_fill_backcolor(struct mame_bitmap *bitmap, int mode);	// unified fill, 0=solid, 1=gradient
-int  K054338_set_alpha_level(int pblend);							// blend style 0-2
-void K054338_invert_alpha(int invert);								// 0=0x00(invis)-0x1f(solid), 1=0x1f(invis)-0x00(solod)
+void K054338_update_all_shadows(void);								/* called at the beginning of VIDEO_UPDATE()*/
+void K054338_fill_solid_bg(struct mame_bitmap *bitmap);				/* solid backcolor fill*/
+void K054338_fill_backcolor(struct mame_bitmap *bitmap, int mode);	/* unified fill, 0=solid, 1=gradient*/
+int  K054338_set_alpha_level(int pblend);							/* blend style 0-2*/
+void K054338_invert_alpha(int invert);								/* 0=0x00(invis)-0x1f(solid), 1=0x1f(invis)-0x00(solod)*/
 void K054338_export_config(int **shdRGB);
 
 #define K338_REG_BGC_R		0
@@ -411,7 +437,7 @@ WRITE16_HANDLER( K053250_1_ram_w );
 READ16_HANDLER( K053250_1_ram_r );
 READ16_HANDLER( K053250_1_rom_r );
 
-// K053250_draw() control flags
+/* K053250_draw() control flags*/
 #define K053250_WRAP500		0x01
 #define K053250_OVERDRIVE	0x02
 
@@ -421,25 +447,25 @@ void K053250_unpack_pixels(int region);
 void K053250_dma(int chip, int limiter);
 
 
-// K053252 CRT and interrupt control unit
-READ16_HANDLER( K053252_word_r );	// CCU registers
+/* K053252 CRT and interrupt control unit*/
+READ16_HANDLER( K053252_word_r );	/* CCU registers*/
 WRITE16_HANDLER( K053252_word_w );
 WRITE32_HANDLER( K053252_long_w );
 
 
-// debug handlers
-READ16_HANDLER( K054157_word_r );		// VACSET (legacy)
-READ16_HANDLER( K056832_word_r );		// VACSET
-READ16_HANDLER( K056832_b_word_r );		// VSCCS  (board dependent)
-READ16_HANDLER( K053246_reg_word_r );	// OBJSET1
-READ16_HANDLER( K053247_reg_word_r );	// OBJSET2
-READ16_HANDLER( K053251_lsb_r );		// PCU1
-READ16_HANDLER( K053251_msb_r );		// PCU1
-READ16_HANDLER( K055555_word_r );		// PCU2
-READ16_HANDLER( K054338_word_r );		// CLTC
+/* debug handlers*/
+READ16_HANDLER( K054157_word_r );		/* VACSET (legacy)*/
+READ16_HANDLER( K056832_word_r );		/* VACSET*/
+READ16_HANDLER( K056832_b_word_r );		/* VSCCS  (board dependent)*/
+READ16_HANDLER( K053246_reg_word_r );	/* OBJSET1*/
+READ16_HANDLER( K053247_reg_word_r );	/* OBJSET2*/
+READ16_HANDLER( K053251_lsb_r );		/* PCU1*/
+READ16_HANDLER( K053251_msb_r );		/* PCU1*/
+READ16_HANDLER( K055555_word_r );		/* PCU2*/
+READ16_HANDLER( K054338_word_r );		/* CLTC*/
 
-READ32_HANDLER( K056832_long_r );		// VACSET
-READ32_HANDLER( K053247_reg_long_r );	// OBJSET2
-READ32_HANDLER( K055555_long_r );		// PCU2
+READ32_HANDLER( K056832_long_r );		/* VACSET*/
+READ32_HANDLER( K053247_reg_long_r );	/* OBJSET2*/
+READ32_HANDLER( K055555_long_r );		/* PCU2*/
 
-READ16_HANDLER( K053244_reg_word_r );	// OBJSET0
+READ16_HANDLER( K053244_reg_word_r );	/* OBJSET0*/

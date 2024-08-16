@@ -203,13 +203,13 @@ static int driverIndex; //< Index of mame game loaded
 
 extern const struct KeyboardInfo retroKeys[];
 extern int retroKeyState[512];
-extern int retroJsState[72];
+extern int retroJsState[ 6*18];
 
-extern int16_t mouse_x[4];
-extern int16_t mouse_y[4];
+extern int16_t mouse_x[6];
+extern int16_t mouse_y[6];
 int16_t prev_pointer_x;
 int16_t prev_pointer_y;
-extern int16_t analogjoy[4][4];
+extern int16_t analogjoy[6][4];
 
 extern struct osd_create_params videoConfig;
 
@@ -550,7 +550,7 @@ void retro_run (void)
       thisInput ++;
    }
 
-   for (i = 0; i < 4; i ++)
+   for (i = 0; i < 6; i ++)
    {
       unsigned int offset = (i * 18);
 

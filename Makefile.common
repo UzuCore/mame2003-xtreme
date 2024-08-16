@@ -541,7 +541,7 @@ SOURCES_C += $(CORE_DIR)/drivers/pacman.c \
 				 $(CORE_DIR)/vidhrdw/lemmings_vidhrdw.c $(CORE_DIR)/drivers/lemmings.c \
 				 $(CORE_DIR)/vidhrdw/funkyjet_vidhrdw.c $(CORE_DIR)/drivers/funkyjet.c \
 				 $(CORE_DIR)/vidhrdw/deco32_vidhrdw.c $(CORE_DIR)/drivers/deco32.c \
-				 $(CORE_DIR)/vidhrdw/avengrgs_vidhrdw.c $(CORE_DIR)/drivers/avengrgs.c \
+				 $(CORE_DIR)/vidhrdw/deco_mlc_vidhrdw.c $(CORE_DIR)/drivers/deco_mlc.c \
 				 $(CORE_DIR)/vidhrdw/sshangha_vidhrdw.c $(CORE_DIR)/drivers/sshangha.c \
 				 $(CORE_DIR)/sndhrdw/senjyo_sndhrdw.c $(CORE_DIR)/vidhrdw/senjyo_vidhrdw.c $(CORE_DIR)/drivers/senjyo.c \
 				 $(CORE_DIR)/vidhrdw/bombjack_vidhrdw.c $(CORE_DIR)/drivers/bombjack.c \
