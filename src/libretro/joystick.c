@@ -36,6 +36,8 @@ struct JoystickInfo jsItems[] =
     EMIT_RETRO_PAD(2),
     EMIT_RETRO_PAD(3),
     EMIT_RETRO_PAD(4),
+    EMIT_RETRO_PAD(5),
+    EMIT_RETRO_PAD(6),
     {0, 0, 0}
 };
 
@@ -46,10 +48,11 @@ struct JoystickInfo jsItems[] =
 
 ******************************************************************************/
 
-int retroJsState[72];
-int16_t mouse_x[4];
-int16_t mouse_y[4];
-int16_t analogjoy[4][4];
+#define max_players 6
+int retroJsState[max_players * 18];
+int16_t mouse_x[max_players];
+int16_t mouse_y[max_players];
+int16_t analogjoy[max_players][4];
 
 const struct JoystickInfo *osd_get_joy_list(void)
 {
