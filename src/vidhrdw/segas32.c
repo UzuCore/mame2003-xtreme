@@ -2739,28 +2739,17 @@ VIDEO_UPDATE( multi32 )
 	struct rectangle clipleft, clipright;
 	UINT8 enablemask;
 	int remix = -1;
-  
-	int monitor_setting = readinputport(0xf);
-	int monitor_display_start = 0;
-	int monitor_display_width = 2;
 
 /*
    MAME2003-PLUS uses a single screen to draw to where as current mame
    uses dedicated left and right screens. We force an aspect ratio change
    to maintain the correct 4:3 ratio across single or dual monitors.
 */
-	if (monitor_setting != 3)
-	{
-		monitor_display_start = monitor_setting - 1;
-		monitor_display_width = monitor_setting;
-		video_config.aspect_x = 4;
-		video_config.aspect_y = 3;
-	}
-	else
-	{
-		video_config.aspect_x = 8;
-		video_config.aspect_y = 3;
-	}
+	int monitor_setting = readinputport(0xf);
+	int monitor_display_start = (monitor_setting == 3) ? 0 : monitor_setting - 1;
+	int monitor_display_width = (monitor_setting == 3) ? 2 : monitor_setting;
+	    video_config.aspect_x = (monitor_setting == 3) ? 8 : 4;
+	    video_config.aspect_y = 3;
 
 	/* update the visible area */
 	if (system32_videoram[0x1ff00/2] & 0x8000)
@@ -2800,6 +2789,15 @@ VIDEO_UPDATE( multi32 )
 					remix = titlef_mixer[i][2];
 				break;
 			}
+		{ /* patch ending credits */
+			UINT16 *src1 = get_layer_scanline(MIXER_LAYER_NBG0, 0);
+			UINT16 *src2 = get_layer_scanline(MIXER_LAYER_NBG1, 0);
+			if (src1[0]==0x1902 && src1[8]==0x1901 && src1[16]==0x1902 && src1[24]==0x1901)
+				system32_videoram[0x1ff8e/2] = 0x8;
+
+			if (src2[0]==0x1902 && src2[8]==0x1901 && src2[16]==0x1902 && src2[24]==0x1901)
+				system32_videoram[0x1ff8e/2] = (system32_videoram[0x1ff8e/2]==0x8) ? 0x18 : 0x10;
+		}
 	}
 
 	/* update the tilemaps */
