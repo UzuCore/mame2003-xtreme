@@ -6731,7 +6731,7 @@ GAME( 1996, ddsomur1, ddsom,   cps2, ddtod,   cps2, ROT0,   "Capcom", "Dungeons 
 GAME( 1996, ddsomj,   ddsom,   cps2, ddtod,   cps2, ROT0,   "Capcom", "Dungeons & Dragons: Shadow over Mystara (Japan 960619)" )
 GAME( 1996, ddsomjr1, ddsom,   cps2, ddtod,   cps2, ROT0,   "Capcom", "Dungeons & Dragons: Shadow over Mystara (Japan 960206)" )
 GAME( 1996, ddsoma,   ddsom,   cps2, ddtod,   cps2, ROT0,   "Capcom", "Dungeons & Dragons: Shadow over Mystara (Asia 960619)" )
-GAMEC(1996, ddsomk,   ddsom,   cps2, ddtod,   cps2, ROT0,   "Capcom", "Dungeons & Dragons: Shadow over Mystara (Korean Translation 960619)"/*, &ddsom_ctrl, &ddsoma_bootstrap*/ )
+GAMEC(1996, ddsomk,   ddsom,   cps2, ddtod,   cps2, ROT0,   "Capcom", "Dungeons & Dragons: Shadow over Mystara (Korean Translation 960619)" )
 GAME( 1996, megaman2, 0,       cps2, sgemf,   cps2, ROT0,   "Capcom", "Mega Man 2: The Power Fighters (US 960708)" )
 GAMEX(1996, megamn2a, megaman2,cps2, sgemf,   cps2, ROT0,   "Capcom", "Mega Man 2: The Power Fighters (Asia 960708)", GAME_NOT_WORKING )
 GAME( 1996, rckman2j, megaman2,cps2, sgemf,   cps2, ROT0,   "Capcom", "Rockman 2: The Power Fighters (Japan 960708)" )
