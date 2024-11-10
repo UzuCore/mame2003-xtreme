@@ -1659,6 +1659,33 @@ ROM_START( hookj )
 	ROM_LOAD( "hook-da.rom", 0x000000, 0x080000, CRC(88cd0212) SHA1(789532f5544b5d024d8af60eb8a5c133ae0d19d4) )
 ROM_END
 
+ROM_START( hookk )
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )
+	ROM_LOAD16_BYTE( "h-h0-k.3h",  0x000001, 0x040000, CRC(fd07a242) SHA1(3728e6d412c195eb1a655c6ff60405b612b50f60) )
+	ROM_LOAD16_BYTE( "h-l0-k.5h",  0x000000, 0x040000, CRC(95200fad) SHA1(1ef19e182d1da2a146d250a4e441f2aebccaf784) )
+	ROM_LOAD16_BYTE( "h-h1.rom",   0x080001, 0x020000, CRC(264ba1f0) SHA1(49ecf9b3e5375629607fb747abe264406065580b) )
+	ROM_LOAD16_BYTE( "h-l1.rom",   0x080000, 0x020000, CRC(f9913731) SHA1(be7871d6843e76f66fae6b501c5ee83ccc366463) )
+
+	ROM_REGION( 0x100000 * 2, REGION_CPU2, 0 )	/* 1MB for the audio CPU - encrypted V30 = NANAO custom D80001 (?) */
+	ROM_LOAD16_BYTE( "h-sh0-a.3l", 0x000001, 0x010000, CRC(bd3d1f61) SHA1(0c884a0b5519f9c0823128872baf7b0c4078e5c4) )
+	ROM_LOAD16_BYTE( "h-sl0-a.3n", 0x000000, 0x010000, CRC(76371def) SHA1(b7a86fd4eecdd8a538c32e08cd920c27bd50924b) )
+
+	ROM_REGION( 0x100000, REGION_GFX1, ROMREGION_DISPOSE )/* Tiles */
+	ROM_LOAD( "hook-c0k.rom", 0x000000, 0x040000, CRC(eda80f88) SHA1(c9a81ecf66e754e5db3a6716da351a98fb475977) )
+	ROM_LOAD( "hook-c1k.rom", 0x040000, 0x040000, CRC(cd4896f8) SHA1(d0dbb81375ff3755515d7edc268e6a6a042c035f) )
+	ROM_LOAD( "hook-c2k.rom", 0x080000, 0x040000, CRC(e1dc2199) SHA1(87fc955a13653613822bc2dc96cdc8a28d27f490) )
+	ROM_LOAD( "hook-c3k.rom", 0x0c0000, 0x040000, CRC(1ced76e5) SHA1(335e696602381e5648df3150a344268639ed0cb0) )
+
+	ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE )/* Sprites */
+	ROM_LOAD( "hook-000.rom", 0x000000, 0x100000, CRC(ccceac30) SHA1(16e2b4393840344debe869034135feead7450184) )
+	ROM_LOAD( "hook-010.rom", 0x100000, 0x100000, CRC(8ac8da67) SHA1(a9b962cb0bc0d8bc3bda8a0ed1ce06641d666b41) )
+	ROM_LOAD( "hook-020.rom", 0x200000, 0x100000, CRC(8847af9a) SHA1(f82cdbd640fac373136219422172ca9fbf5d1830) )
+	ROM_LOAD( "hook-030.rom", 0x300000, 0x100000, CRC(239e877e) SHA1(445e1096619c4e3a2d5b50a645fd45bd7c501590) )
+
+	ROM_REGION( 0x80000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+	ROM_LOAD( "hook-da.rom", 0x000000, 0x080000, CRC(88cd0212) SHA1(789532f5544b5d024d8af60eb8a5c133ae0d19d4) )
+ROM_END
+
 ROM_START( rtypeleo )
 	ROM_REGION( 0x100000, REGION_CPU1, 0 )
 	ROM_LOAD16_BYTE( "rtl-h0-c",     0x000001, 0x040000, CRC(5fef7fa1) SHA1(7d18d4ea979d887d6da42c79734b8c695f3df02b) )
@@ -1821,6 +1848,33 @@ ROM_START( uccopsj )
 	ROM_LOAD( "uca-da.bin", 0x000000, 0x080000, CRC(0b2855e9) SHA1(70f9decd78eab679a2ccad69e01cb303b61e0d38) )
 ROM_END
 
+ROM_START( uccopsk )
+	ROM_REGION( 0x100000, REGION_CPU1, 0 )
+	ROM_LOAD16_BYTE( "uca-h0.bin",  0x000001, 0x040000, CRC(9e17cada) SHA1(086bb9c1ab851cab3734c2f9188d8ff3c5f98913) )
+	ROM_LOAD16_BYTE( "uca-l0.bin",  0x000000, 0x040000, CRC(4a4e3208) SHA1(d61c74d46584e2c15e70f7a17b598e51981da9e8) )
+	ROM_LOAD16_BYTE( "uca-h1k.bin", 0x080001, 0x020000, CRC(891c0678) SHA1(aeee5a45f3fe29ae1687f87a48c18af7856117c1) )
+	ROM_LOAD16_BYTE( "uca-l1k.bin", 0x080000, 0x020000, CRC(77beea06) SHA1(fc1a584cf0dddf8c5be6595f70b82b7409bf7a09) )
+
+	ROM_REGION( 0x100000 * 2, REGION_CPU2, 0 )	/* 1MB for the audio CPU - encrypted V30 = NANAO custom D80001 (?) */
+	ROM_LOAD16_BYTE( "uca-sh0.bin", 0x000001, 0x010000, CRC(f0ca1b03) SHA1(07154a2c747091f8be23587c109d91ed1672da6e) )
+	ROM_LOAD16_BYTE( "uca-sl0.bin", 0x000000, 0x010000, CRC(d1661723) SHA1(bdc00196aa2074e7b21e5949f73e9f2b93d76fd9) )
+
+	ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE ) /* Tiles */
+	ROM_LOAD( "uca-c0k.bin", 0x000000, 0x080000, CRC(dc672f1b) SHA1(12894ad8d2d5fc9820bd25c1c013f472ddfa85c3) )
+	ROM_LOAD( "uca-c1k.bin", 0x080000, 0x080000, CRC(bb73ca75) SHA1(068dd9f3f674ec55ad23cff20d6e69efb30f6058) )
+	ROM_LOAD( "uca-c2.bin",  0x100000, 0x080000, CRC(96397ac6) SHA1(6dfe507bd9f41b5d46d85ef5f46a368745593b52) )
+	ROM_LOAD( "uca-c3.bin",  0x180000, 0x080000, CRC(5d07d10d) SHA1(ee1a928b37043c476346f189f75d2bfcc44bffe6) )
+
+	ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE ) /* Sprites */
+	ROM_LOAD( "uca-o3.bin", 0x000000, 0x100000, CRC(97f7775e) SHA1(5cd147fd940b1ab6eba8e6c6f803bdcc5da5a563) )
+	ROM_LOAD( "uca-o2.bin", 0x100000, 0x100000, CRC(5e0b1d65) SHA1(9e45753d10b2d7b580cd11cef74181209a424189) )
+	ROM_LOAD( "uca-o1.bin", 0x200000, 0x100000, CRC(bdc224b3) SHA1(09477ec39890d954fac6ff653b9f46c9adea56b6) )
+	ROM_LOAD( "uca-o0.bin", 0x300000, 0x100000, CRC(7526daec) SHA1(79431d711deb6ed09dc52be753b7b0f2c5588dc3) )
+
+	ROM_REGION( 0x80000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+	ROM_LOAD( "uca-da.bin", 0x000000, 0x080000, CRC(0b2855e9) SHA1(70f9decd78eab679a2ccad69e01cb303b61e0d38) )
+ROM_END
+
 ROM_START( lethalth )
 	ROM_REGION( 0x100000, REGION_CPU1, 0 )
 	ROM_LOAD16_BYTE( "lt_d-h0.rom",  0x000001, 0x020000, CRC(20c68935) SHA1(edbb5322082bde7136ab015931fdcd18e5c293a8) )
@@ -1927,6 +1981,33 @@ ROM_START( leaguemn )
 
 	ROM_REGION( 0x80000, REGION_SOUND1, ROMREGION_SOUNDONLY )
 	ROM_LOAD( "lh534k0k.8" ,0x000000, 0x080000, CRC(735e6380) SHA1(bf019815e579ef2393c00869f101a01f746e04d6) )
+ROM_END
+
+ROM_START( leaguemk )
+	ROM_REGION( 0x180000, REGION_CPU1, 0 )
+	ROM_LOAD16_BYTE( "lma1-h0k.34", 0x000001, 0x040000, CRC(0707e8e0) SHA1(ee850edd2542d730ac1efad9781eed620dac6f79) )
+	ROM_LOAD16_BYTE( "lma1-l0k.31", 0x000000, 0x040000, CRC(898652c7) SHA1(e3b64463b92b16aca64ef438d3e9868516adae91) )
+	ROM_LOAD16_BYTE( "a1-h1-k.33",  0x100001, 0x040000, CRC(51c3c8ca) SHA1(1cc87f32876db3d5e1aa74eaf018ab2bc4902410) )
+	ROM_LOAD16_BYTE( "a1-l1-k.32",  0x100000, 0x040000, CRC(6b7ab60b) SHA1(003722267360a6e6b631afd0b273af203fb97dfc) )
+
+	ROM_REGION( 0x100000 * 2, REGION_CPU2, 0 )	/* 1MB for the audio CPU */
+	ROM_LOAD16_BYTE( "a1-sh0-.14",  0x000001, 0x010000, CRC(b7fae3e6) SHA1(ce41380d6c0f29f2facf9bf23dd4403648cd9eb4) )
+	ROM_LOAD16_BYTE( "a1-sl0-.17",  0x000000, 0x010000, CRC(b26d54fc) SHA1(136e1a83da08a0dc9046faf71f3f58d8d3095fde) )
+
+	ROM_REGION( 0x200000, REGION_GFX1, ROMREGION_DISPOSE ) /* Tiles */
+	ROM_LOAD( "lh534k0ck.9",  0x000000, 0x080000, CRC(347bef8a) SHA1(741bb891257d11e5812a49b2c3b590bd6f4b2386) )
+	ROM_LOAD( "lh534k0ek.10", 0x080000, 0x080000, CRC(b2413b78) SHA1(1e7626e881e315aa20271745a03e18c2eee18691) )
+	ROM_LOAD( "lh534k0fk.11", 0x100000, 0x080000, CRC(bd7f3055) SHA1(264d8b48525afded7d457984cdb0f547bf7f58af) )
+	ROM_LOAD( "lh534k0gk.12", 0x180000, 0x080000, CRC(cb394021) SHA1(80c4688b112688689fd1ebadba7580c2266b407f) )
+
+	ROM_REGION( 0x400000, REGION_GFX2, ROMREGION_DISPOSE ) /* Sprites */
+	ROM_LOAD( "lh538393k.42", 0x000000, 0x100000, CRC(b005fc63) SHA1(d4164b82fd46c6e782f8fca38c9434cca8dd945d) )
+	ROM_LOAD( "lh538394k.43", 0x100000, 0x100000, CRC(73154a63) SHA1(1b32de6eb1cb438f17ba7dcd6ca32ad455a3a382) )
+	ROM_LOAD( "lh538395k.44", 0x200000, 0x100000, CRC(774c697b) SHA1(b7ba21ba1b006bcdf9f009fc0981190ae082a0d1) )
+	ROM_LOAD( "lh538396k.45", 0x300000, 0x100000, CRC(bbc34e51) SHA1(546b1f901a3666aeb721380c8c7f2b4802cf2b32) )
+
+	ROM_REGION( 0x80000, REGION_SOUND1, ROMREGION_SOUNDONLY )
+	ROM_LOAD( "lh534k0k.8", 0x000000, 0x080000, CRC(735e6380) SHA1(bf019815e579ef2393c00869f101a01f746e04d6) )
 ROM_END
 
 ROM_START( ssoldier )
@@ -2445,6 +2526,7 @@ GAME( 1991, lethalth, 0,        lethalth,  lethalth, lethalth, ROT270, "Irem",  
 GAME( 1991, thndblst, lethalth, lethalth,  lethalth, lethalth, ROT270, "Irem",         "Thunder Blaster (Japan)" )
 GAME( 1992, uccops,   0,        raster,    uccops,   uccops,   ROT0,   "Irem",         "Undercover Cops (World)" )
 GAME( 1992, uccopsj,  uccops,   raster,    uccops,   uccops,   ROT0,   "Irem",         "Undercover Cops (Japan)" )
+GAME( 1992, uccopsk,  uccops,   raster,    uccops,   uccopsj,  ROT0,   "Irem",         "Undercover Cops (Korean Translation)" )
 GAME( 1992, mysticri, 0,        nonraster, mysticri, mysticri, ROT0,   "Irem",         "Mystic Riders (World)" )
 GAME( 1992, gunhohki, mysticri, nonraster, mysticri, mysticri, ROT0,   "Irem",         "Gun Hohki (Japan)" )
 GAMEX(1992, majtitl2, 0,        raster,    majtitl2, majtitl2, ROT0,   "Irem",         "Major Title 2 (World)", GAME_IMPERFECT_GRAPHICS )
@@ -2453,6 +2535,7 @@ GAMEX(1992, skingam2, majtitl2, raster,    majtitl2, majtitl2, ROT0,   "Irem Ame
 GAME( 1992, hook,     0,        nonraster, hook,     hook,     ROT0,   "Irem",         "Hook (World)" )
 GAME( 1992, hooku,    hook,     nonraster, hook,     hook,     ROT0,   "Irem America", "Hook (US)" )
 GAME( 1992, hookj,    hook,     nonraster, hook,     hook,     ROT0,   "Irem", 	"Hook (Japan)" )
+GAME( 1992, hookk,    hook,     nonraster, hook,     hook,     ROT0,   "Irem", 	       "Hook (Korean Translation)" )
 GAME( 1992, rtypeleo, 0,        raster,    rtypeleo, rtypeleo, ROT0,   "Irem",         "R-Type Leo (World rev. C)" )
 GAME( 1992, rtypelej, rtypeleo, raster,    rtypeleo, rtypelej, ROT0,   "Irem",         "R-Type Leo (Japan rev. D)" )
 GAME( 1993, inthunt,  0,        raster,    inthunt,  inthunt,  ROT0,   "Irem",         "In The Hunt (World)" )
@@ -2460,6 +2543,7 @@ GAME( 1993, inthuntu, inthunt,  raster,    inthunt,  inthunt,  ROT0,   "Irem Ame
 GAME( 1993, kaiteids, inthunt,  raster,    inthunt,  inthunt,  ROT0,   "Irem",         "Kaitei Daisensou (Japan)" )
 GAMEX(1993, nbbatman, 0,        raster,    nbbatman, nbbatman, ROT0,   "Irem America", "Ninja Baseball Batman (US)", GAME_IMPERFECT_GRAPHICS )
 GAMEX(1993, leaguemn, nbbatman, raster,    nbbatman, nbbatman, ROT0,   "Irem",         "Yakyuu Kakutou League-Man (Japan)", GAME_IMPERFECT_GRAPHICS )
+GAMEX(1993, leaguemk, nbbatman, raster,    nbbatman, nbbatman, ROT0,   "Irem",         "Yakyuu Kakutou League-Man (Korean Translation)", GAME_IMPERFECT_GRAPHICS )
 GAMEX(1993, ssoldier, 0,  psoldier,  psoldier, ssoldier, ROT0,   "Irem America", "Superior Soldiers (US)", GAME_IMPERFECT_SOUND )
 GAMEX(1993, psoldier, ssoldier, psoldier,  psoldier, psoldier, ROT0,   "Irem",         "Perfect Soldiers (Japan)", GAME_IMPERFECT_SOUND )
 GAME( 1994, dsccr94j, dsoccr94, psoldier,  dsccr94j, dsccr94j, ROT0,   "Irem",         "Dream Soccer '94 (Japan)" )
