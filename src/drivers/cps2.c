@@ -6828,5 +6828,5 @@ GAMEX(2000, 1944j,    1944,    cps2, 19xx,    cps2, ROT0,   "Capcom, supported b
 GAME( 2001, progear,  0,       cps2, sgemf,   cps2, ROT0,   "Cave, distributed by Capcom", "Progear (US 010117)" )
 GAME( 2001, progearj, progear, cps2, sgemf,   cps2, ROT0,   "Cave, distributed by Capcom", "Progear No Arashi (Japan 010117)" )
 
-GAMEX( 1994, ffightaec2, 0,         cps2,     cps2_3p3b,  my_cps2,     ROT0,   "bootleg", "Final Fight Anniversary Edition (CPS2 Hardware) (bootleg)", GAME_IMPERFECT_GRAPHICS)
-GAMEX( 1994, ffightaec2k,ffightaec2,cps2,     cps2_3p3b,  my_cps2,     ROT0,   "bootleg", "Final Fight Anniversary Edition (CPS2 Hardware, Korean Translation) (bootleg)", GAME_IMPERFECT_GRAPHICS)
+GAMEX( 1994, ffightaec2, 0,         cps2,     cps2,  cps2,     ROT0,   "bootleg", "Final Fight Anniversary Edition (CPS2 Hardware) (bootleg)", GAME_IMPERFECT_GRAPHICS)
+GAMEX( 1994, ffightaec2k,ffightaec2,cps2,     cps2,  cps2,     ROT0,   "bootleg", "Final Fight Anniversary Edition (CPS2 Hardware, Korean Translation) (bootleg)", GAME_IMPERFECT_GRAPHICS)
