@@ -2526,7 +2526,7 @@ GAME( 1991, lethalth, 0,        lethalth,  lethalth, lethalth, ROT270, "Irem",  
 GAME( 1991, thndblst, lethalth, lethalth,  lethalth, lethalth, ROT270, "Irem",         "Thunder Blaster (Japan)" )
 GAME( 1992, uccops,   0,        raster,    uccops,   uccops,   ROT0,   "Irem",         "Undercover Cops (World)" )
 GAME( 1992, uccopsj,  uccops,   raster,    uccops,   uccops,   ROT0,   "Irem",         "Undercover Cops (Japan)" )
-GAME( 1992, uccopsk,  uccops,   raster,    uccops,   uccopsj,  ROT0,   "Irem",         "Undercover Cops (Korean Translation)" )
+GAME( 1992, uccopsk,  uccops,   raster,    uccops,   uccops,   ROT0,   "Irem",         "Undercover Cops (Korean Translation)" )
 GAME( 1992, mysticri, 0,        nonraster, mysticri, mysticri, ROT0,   "Irem",         "Mystic Riders (World)" )
 GAME( 1992, gunhohki, mysticri, nonraster, mysticri, mysticri, ROT0,   "Irem",         "Gun Hohki (Japan)" )
 GAMEX(1992, majtitl2, 0,        raster,    majtitl2, majtitl2, ROT0,   "Irem",         "Major Title 2 (World)", GAME_IMPERFECT_GRAPHICS )
